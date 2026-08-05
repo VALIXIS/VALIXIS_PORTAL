@@ -55,6 +55,6 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      # Step 7: Deploy Flutter Web Output to Vercel Production
+      # Step 7: Deploy Flutter Web to Vercel Production
       - name: Deploy to Vercel Production
-        run: vercel deploy build/web --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
+        run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
