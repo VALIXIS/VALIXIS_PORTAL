@@ -72,8 +72,7 @@ jobs:
           vercel pull \
             --yes \
             --environment=production \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            --scope=${{ secrets.VERCEL_ORG_ID }}
+            --token=${{ secrets.VERCEL_TOKEN }}
 
       # Step 9: Build Vercel Deployment Artifacts
       - name: Build Vercel Project
