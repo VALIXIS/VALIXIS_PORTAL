@@ -5,6 +5,7 @@ import '../../app/router/app_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../features/auth/domain/role_service.dart';
 import '../../features/auth/presentation/providers/role_provider.dart';
+import '../../features/notifications/presentation/widgets/notification_bell_button.dart';
 import '../layout/breakpoints.dart';
 import 'valixis_rail.dart';
 
@@ -99,6 +100,23 @@ class AppShell extends ConsumerWidget {
     if (isMobile) {
       return Scaffold(
         backgroundColor: AppColors.surfaceBase,
+        appBar: AppBar(
+          backgroundColor: AppColors.surfaceCard,
+          elevation: 0,
+          title: const Text(
+            'VALIXIS PORTAL',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+            ),
+          ),
+          actions: const [
+            NotificationBellButton(),
+            SizedBox(width: 8),
+          ],
+        ),
         body: DecoratedBox(
           decoration: const BoxDecoration(
             gradient: AppColors.backgroundGradient,

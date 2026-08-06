@@ -3,17 +3,29 @@ import 'package:flutter/services.dart';
 import '../../../../core/constants/app_border_radius.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../shared/components/app_button.dart';
 import '../../../../shared/components/glass_card.dart';
 import '../../../../shared/models/employee.dart';
+import 'edit_profile_dialog.dart';
 
-/// Hero header widget for employee profile displaying avatar, badges, and email.
-class ProfileHeroHeader extends StatelessWidget {
+/// Hero header widget for employee profile displaying avatar, badges, email, and Edit Profile action.
+class ProfileHeroHeader extends StatefulWidget {
   const ProfileHeroHeader({super.key, required this.employee});
 
   final Employee employee;
 
+  @override
+  State<ProfileHeroHeader> createState() => _ProfileHeroHeaderState();
+}
+
+class _ProfileHeroHeaderState extends State<ProfileHeroHeader> {
+  String _bio = 'Senior Software Engineer specializing in Flutter & Cloud Architecture';
+  String _phone = '+1 (555) 019-2834';
+  String _github = 'https://github.com/valixis-dev';
+  String _linkedin = 'https://linkedin.com/in/valixis-dev';
+
   void _copyEmailToClipboard(BuildContext context) {
-    Clipboard.setData(ClipboardData(text: employee.email));
+    Clipboard.setData(ClipboardData(text: widget.employee.email));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         backgroundColor: AppColors.surfaceElevated,
@@ -37,10 +49,37 @@ class ProfileHeroHeader extends StatelessWidget {
     );
   }
 
+  Future<void> _openEditProfileDialog() async {
+    final result = await EditProfileDialog.show(
+      context,
+      bio: _bio,
+      phone: _phone,
+      github: _github,
+      linkedin: _linkedin,
+    );
+
+    if (result != null) {
+      setState(() {
+        _bio = result['bio'] ?? _bio;
+        _phone = result['phone'] ?? _phone;
+        _github = result['github'] ?? _github;
+        _linkedin = result['linkedin'] ?? _linkedin;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile details updated successfully!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final initials = employee.fullName.isNotEmpty
-        ? employee.fullName[0].toUpperCase()
+    final initials = widget.employee.fullName.isNotEmpty
+        ? widget.employee.fullName[0].toUpperCase()
         : 'E';
 
     return GlassCard(
@@ -69,7 +108,7 @@ class ProfileHeroHeader extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            employee.fullName,
+            widget.employee.fullName,
             style: const TextStyle(
               color: AppColors.textPrimary,
               fontSize: 26,
@@ -81,7 +120,7 @@ class ProfileHeroHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              if (employee.role != null) ...[
+              if (widget.employee.role != null) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -95,7 +134,7 @@ class ProfileHeroHeader extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    employee.role!.toUpperCase(),
+                    widget.employee.role!.toUpperCase(),
                     style: const TextStyle(
                       color: AppColors.brandPurple,
                       fontSize: 11,
@@ -106,7 +145,7 @@ class ProfileHeroHeader extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.xs),
               ],
-              if (employee.department != null) ...[
+              if (widget.employee.department != null) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -120,7 +159,7 @@ class ProfileHeroHeader extends StatelessWidget {
                     ),
                   ),
                   child: Text(
-                    employee.department!,
+                    widget.employee.department!,
                     style: const TextStyle(
                       color: AppColors.brandCyan,
                       fontSize: 11,
@@ -132,38 +171,61 @@ class ProfileHeroHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          InkWell(
-            onTap: () => _copyEmailToClipboard(context),
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.glassBorder),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.mail_outline_rounded,
-                      size: 14, color: AppColors.textMuted),
-                  const SizedBox(width: 6),
-                  Text(
-                    employee.email,
-                    style: const TextStyle(
-                      color: AppColors.textSecondary,
-                      fontSize: 13,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  const Icon(Icons.copy_rounded,
-                      size: 12, color: AppColors.brandCyan),
-                ],
-              ),
+          Text(
+            _bio,
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 13,
+              fontStyle: FontStyle.italic,
             ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              InkWell(
+                onTap: () => _copyEmailToClipboard(context),
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.glassBorder),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.mail_outline_rounded,
+                          size: 14, color: AppColors.textMuted),
+                      const SizedBox(width: 6),
+                      Text(
+                        widget.employee.email,
+                        style: const TextStyle(
+                          color: AppColors.textSecondary,
+                          fontSize: 13,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(Icons.copy_rounded,
+                          size: 12, color: AppColors.brandCyan),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              AppButton(
+                label: 'Edit Profile',
+                variant: AppButtonVariant.secondary,
+                size: AppButtonSize.small,
+                prefixIcon: Icons.edit_rounded,
+                onPressed: _openEditProfileDialog,
+              ),
+            ],
           ),
         ],
       ),

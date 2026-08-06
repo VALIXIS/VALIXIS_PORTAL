@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
+import '../../features/notifications/presentation/widgets/notification_bell_button.dart';
 
 class NavItem {
   const NavItem({
@@ -90,15 +91,22 @@ class ValixisRail extends StatelessWidget {
         child: Align(
           alignment: Alignment.bottomCenter,
           child: Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.xl),
-            child: Consumer(
-              builder: (context, ref, _) => IconButton(
-                icon: const Icon(Icons.logout_rounded,
-                    color: AppColors.textMuted),
-                tooltip: 'Sign Out',
-                onPressed: () =>
-                    ref.read(authNotifierProvider.notifier).signOut(),
-              ),
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const NotificationBellButton(),
+                const SizedBox(height: AppSpacing.xs),
+                Consumer(
+                  builder: (context, ref, _) => IconButton(
+                    icon: const Icon(Icons.logout_rounded,
+                        color: AppColors.textMuted),
+                    tooltip: 'Sign Out',
+                    onPressed: () =>
+                        ref.read(authNotifierProvider.notifier).signOut(),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

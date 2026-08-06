@@ -12,8 +12,11 @@ import '../../../shared/models/task.dart';
 import 'providers/task_details_provider.dart';
 import 'widgets/ai_prompt_card.dart';
 import 'widgets/pr_submission_card.dart';
+import 'widgets/task_attachments_card.dart';
 import 'widgets/task_badge.dart';
+import 'widgets/task_comments_section.dart';
 import 'widgets/task_details_shimmer.dart';
+import 'widgets/task_history_timeline.dart';
 import 'widgets/task_info_section.dart';
 
 /// Screen displaying comprehensive details and PR submission for a single task.
@@ -150,8 +153,14 @@ class _MobileTaskDetailsLayout extends StatelessWidget {
           const SizedBox(height: AppSpacing.base),
           AiPromptCard(prompt: task.aiPrompt!),
         ],
-        const SizedBox(height: AppSpacing.xl),
+        const SizedBox(height: AppSpacing.base),
         PrSubmissionCard(task: task),
+        const SizedBox(height: AppSpacing.base),
+        const TaskAttachmentsCard(),
+        const SizedBox(height: AppSpacing.base),
+        TaskCommentsSection(taskId: task.id),
+        const SizedBox(height: AppSpacing.base),
+        TaskHistoryTimeline(task: task),
       ],
     );
   }
@@ -177,6 +186,10 @@ class _DesktopTaskDetailsLayout extends StatelessWidget {
                 const SizedBox(height: AppSpacing.base),
                 AiPromptCard(prompt: task.aiPrompt!),
               ],
+              const SizedBox(height: AppSpacing.base),
+              TaskCommentsSection(taskId: task.id),
+              const SizedBox(height: AppSpacing.base),
+              TaskHistoryTimeline(task: task),
             ],
           ),
         ),
@@ -188,6 +201,8 @@ class _DesktopTaskDetailsLayout extends StatelessWidget {
               _StatusMetaCard(task: task),
               const SizedBox(height: AppSpacing.base),
               PrSubmissionCard(task: task),
+              const SizedBox(height: AppSpacing.base),
+              const TaskAttachmentsCard(),
             ],
           ),
         ),

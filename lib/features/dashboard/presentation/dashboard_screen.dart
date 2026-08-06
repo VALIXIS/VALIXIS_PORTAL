@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../shared/components/app_button.dart';
 import '../../../shared/components/empty_state.dart';
+import '../../activity/presentation/widgets/activity_timeline.dart';
+import '../../activity/presentation/widgets/recent_activity_feed.dart';
 import 'providers/dashboard_provider.dart';
 import 'widgets/dashboard_hero_banner.dart';
 import 'widgets/dashboard_metrics_grid.dart';
@@ -10,7 +12,7 @@ import 'widgets/dashboard_quick_actions.dart';
 import 'widgets/dashboard_recent_tasks.dart';
 import 'widgets/dashboard_shimmer.dart';
 
-/// Dashboard screen rendering employee hero greeting, quick actions, metric cards, and recent tasks.
+/// Dashboard screen rendering employee hero greeting, quick actions, metric cards, timeline & recent tasks.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -55,6 +57,10 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     DashboardRecentTasks(tasks: recentTasks),
+                    const SizedBox(height: AppSpacing.xl),
+                    const ActivityTimeline(),
+                    const SizedBox(height: AppSpacing.xl),
+                    const RecentActivityFeed(),
                   ]),
                 ),
               ),
