@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_border_radius.dart';
 import '../../../../shared/models/task.dart';
 
-/// Priority badge component.
+/// Priority badge component with indicator dot and glowing outline.
 class PriorityBadge extends StatelessWidget {
   const PriorityBadge({super.key, required this.priority});
 
@@ -13,9 +13,9 @@ class PriorityBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: priority.color.withAlpha(38),
+        color: priority.color.withAlpha(25),
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: priority.color.withAlpha(76), width: 1),
+        border: Border.all(color: priority.color.withAlpha(65), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -26,6 +26,13 @@ class PriorityBadge extends StatelessWidget {
             decoration: BoxDecoration(
               color: priority.color,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: priority.color.withAlpha(150),
+                  blurRadius: 4,
+                  spreadRadius: 1,
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 6),
@@ -44,7 +51,7 @@ class PriorityBadge extends StatelessWidget {
   }
 }
 
-/// Status badge component.
+/// Status badge component with soft translucent fill.
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.status});
 
@@ -55,9 +62,9 @@ class StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: status.color.withAlpha(38),
+        color: status.color.withAlpha(25),
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: status.color.withAlpha(76), width: 1),
+        border: Border.all(color: status.color.withAlpha(65), width: 1),
       ),
       child: Text(
         status.label,

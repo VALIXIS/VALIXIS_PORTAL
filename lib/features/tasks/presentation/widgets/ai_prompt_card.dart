@@ -6,7 +6,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/components/app_button.dart';
 import '../../../../shared/components/glass_card.dart';
 
-/// Card component displaying AI Prompt with one-click clipboard copying.
+/// Code-style panel component displaying AI Prompt with one-click clipboard copying.
 class AiPromptCard extends StatelessWidget {
   const AiPromptCard({super.key, required this.prompt});
 
@@ -40,6 +40,7 @@ class AiPromptCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
+      showGlow: true,
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,11 +49,21 @@ class AiPromptCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                children: const [
-                  Icon(Icons.auto_awesome_rounded,
-                      color: AppColors.brandCyan, size: 20),
-                  SizedBox(width: AppSpacing.sm),
-                  Text(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.brandCyan.withAlpha(25),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.auto_awesome_rounded,
+                      color: AppColors.brandCyan,
+                      size: 18,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  const Text(
                     'AI Prompt',
                     style: TextStyle(
                       color: AppColors.textPrimary,
@@ -76,18 +87,40 @@ class AiPromptCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(AppSpacing.base),
             decoration: BoxDecoration(
-              color: AppColors.surfaceBase.withAlpha(180),
+              color: AppColors.surfaceBase.withAlpha(220),
               borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: AppColors.glassBorder),
             ),
-            child: SelectableText(
-              prompt,
-              style: const TextStyle(
-                color: AppColors.textSecondary,
-                fontFamily: 'monospace',
-                fontSize: 13,
-                height: 1.5,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: const [
+                    Icon(Icons.terminal_rounded,
+                        size: 14, color: AppColors.brandCyan),
+                    SizedBox(width: 6),
+                    Text(
+                      'AI_PROMPT_SPECIFICATION.MD',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                  ],
+                ),
+                const Divider(color: AppColors.border, height: 20),
+                SelectableText(
+                  prompt,
+                  style: const TextStyle(
+                    color: AppColors.textSecondary,
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    height: 1.5,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

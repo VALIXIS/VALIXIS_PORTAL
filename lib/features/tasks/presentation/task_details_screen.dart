@@ -83,6 +83,7 @@ class _StatusMetaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
+      showGlow: true,
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,7 +114,7 @@ class _StatusMetaCard extends StatelessWidget {
               Row(
                 children: [
                   const Icon(Icons.calendar_month_rounded,
-                      size: 14, color: AppColors.textSecondary),
+                      size: 14, color: AppColors.brandCyan),
                   const SizedBox(width: 6),
                   Text(
                     DateFormatter.formatShortDate(task.deadline),

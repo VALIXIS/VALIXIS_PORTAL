@@ -91,17 +91,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             const LoginBackgroundOrbs(),
             SafeArea(
               child: ResponsiveLayout(
-                mobile: (_) => SingleChildScrollView(
-                  padding: const EdgeInsets.all(AppSpacing.base),
-                  child: LoginCard(
-                    formKey: _formKey,
-                    emailController: _emailController,
-                    passwordController: _passwordController,
-                    obscurePassword: _obscurePassword,
-                    isLoading: isLoading,
-                    onTogglePassword: () =>
-                        setState(() => _obscurePassword = !_obscurePassword),
-                    onSignIn: _onSignIn,
+                mobile: (_) => Center(
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.base,
+                      vertical: AppSpacing.xl2,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 460),
+                      child: LoginCard(
+                        formKey: _formKey,
+                        emailController: _emailController,
+                        passwordController: _passwordController,
+                        obscurePassword: _obscurePassword,
+                        isLoading: isLoading,
+                        onTogglePassword: () => setState(
+                          () => _obscurePassword = !_obscurePassword,
+                        ),
+                        onSignIn: _onSignIn,
+                      ),
+                    ),
                   ),
                 ),
                 desktop: (_) => LoginDesktopLayout(

@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../app/router/app_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
-import '../../../shared/components/app_button.dart';
 import '../../../shared/components/empty_state.dart';
-import '../../../shared/components/glass_card.dart';
 import 'providers/manager_dashboard_provider.dart';
 import 'providers/review_provider.dart';
 import 'widgets/feedback_dialog.dart';
+import 'widgets/submission_review_card.dart';
 
 /// Screen for reviewing employee Pull Request submissions.
 class ReviewSubmissionsScreen extends ConsumerWidget {
@@ -36,20 +34,39 @@ class ReviewSubmissionsScreen extends ConsumerWidget {
                   icon: const Icon(Icons.arrow_back_rounded),
                   onPressed: () => context.go(AppRoutes.managerDashboard),
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                const Text(
-                  'Review Submissions',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w700,
-                  ),
+                const SizedBox(width: AppSpacing.xs),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'PR Submission Review Queue',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Audit submitted GitHub pull requests and record feedback',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xl),
             metricsAsync.when(
-              loading: () => const Center(child: CircularProgressIndicator()),
+              loading: () => const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(AppSpacing.xl4),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
               error: (err, _) => EmptyState(
                 icon: Icons.error_outline_rounded,
                 title: 'Error loading submissions',
@@ -62,7 +79,8 @@ class ReviewSubmissionsScreen extends ConsumerWidget {
                   return const EmptyState(
                     icon: Icons.rate_review_rounded,
                     title: 'No Pending PR Submissions',
-                    description: 'All submitted pull requests have been reviewed.',
+                    description:
+                        'All submitted pull requests have been audited and reviewed.',
                   );
                 }
 
@@ -70,93 +88,60 @@ class ReviewSubmissionsScreen extends ConsumerWidget {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: submissions.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.md),
+                  separatorBuilder: (context, index) =>
+                      const SizedBox(height: AppSpacing.md),
                   itemBuilder: (context, index) {
                     final sub = submissions[index];
                     final taskId = sub['task_id'] as String? ?? '';
                     final prUrl = sub['pr_url'] as String? ?? '';
+                    final status = sub['status'] as String? ?? 'submitted';
 
-                    return GlassCard(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Task #$taskId',
-                                style: const TextStyle(
-                                  color: AppColors.textPrimary,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              InkWell(
-                                onTap: () {
-                                  final uri = Uri.tryParse(prUrl);
-                                  if (uri != null) launchUrl(uri);
-                                },
-                                child: Text(
-                                  prUrl,
-                                  style: const TextStyle(
-                                    color: AppColors.brandCyan,
-                                    decoration: TextDecoration.underline,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ],
+                    return TweenAnimationBuilder<double>(
+                      duration: Duration(milliseconds: 300 + (index * 80)),
+                      curve: Curves.easeOutCubic,
+                      tween: Tween(begin: 0.0, end: 1.0),
+                      builder: (context, value, child) {
+                        return Opacity(
+                          opacity: value,
+                          child: Transform.translate(
+                            offset: Offset(0, (1 - value) * 16),
+                            child: child,
                           ),
-                          const SizedBox(height: AppSpacing.md),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              AppButton(
-                                label: 'Reject',
-                                variant: AppButtonVariant.danger,
-                                size: AppButtonSize.small,
-                                onPressed: isLoading
-                                    ? null
-                                    : () async {
-                                        final feedback = await FeedbackDialog.show(
-                                          context,
-                                          title: 'Reject Submission',
-                                          actionLabel: 'Confirm Rejection',
-                                          isApprove: false,
-                                        );
-                                        if (feedback != null) {
-                                          await ref
-                                              .read(reviewNotifierProvider.notifier)
-                                              .reject(taskId: taskId, feedback: feedback);
-                                          ref.invalidate(managerDashboardProvider);
-                                        }
-                                      },
-                              ),
-                              const SizedBox(width: AppSpacing.sm),
-                              AppButton(
-                                label: 'Approve',
-                                size: AppButtonSize.small,
-                                onPressed: isLoading
-                                    ? null
-                                    : () async {
-                                        final feedback = await FeedbackDialog.show(
-                                          context,
-                                          title: 'Approve Submission',
-                                          actionLabel: 'Confirm Approval',
-                                          isApprove: true,
-                                        );
-                                        if (feedback != null) {
-                                          await ref
-                                              .read(reviewNotifierProvider.notifier)
-                                              .approve(taskId: taskId, feedback: feedback);
-                                          ref.invalidate(managerDashboardProvider);
-                                        }
-                                      },
-                              ),
-                            ],
-                          ),
-                        ],
+                        );
+                      },
+                      child: SubmissionReviewCard(
+                        taskId: taskId,
+                        prUrl: prUrl,
+                        status: status,
+                        isLoading: isLoading,
+                        onReject: () async {
+                          final feedback = await FeedbackDialog.show(
+                            context,
+                            title: 'Reject Submission',
+                            actionLabel: 'Confirm Rejection',
+                            isApprove: false,
+                          );
+                          if (feedback != null) {
+                            await ref
+                                .read(reviewNotifierProvider.notifier)
+                                .reject(taskId: taskId, feedback: feedback);
+                            ref.invalidate(managerDashboardProvider);
+                          }
+                        },
+                        onApprove: () async {
+                          final feedback = await FeedbackDialog.show(
+                            context,
+                            title: 'Approve Submission',
+                            actionLabel: 'Confirm Approval',
+                            isApprove: true,
+                          );
+                          if (feedback != null) {
+                            await ref
+                                .read(reviewNotifierProvider.notifier)
+                                .approve(taskId: taskId, feedback: feedback);
+                            ref.invalidate(managerDashboardProvider);
+                          }
+                        },
                       ),
                     );
                   },

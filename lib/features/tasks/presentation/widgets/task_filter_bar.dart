@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_border_radius.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/components/app_text_field.dart';
@@ -13,7 +12,7 @@ enum TaskSortOption {
   final String label;
 }
 
-/// Header filter bar with search input and sort selection.
+/// Header filter bar with search input and segmented sort controls.
 class TaskFilterBar extends StatelessWidget {
   const TaskFilterBar({
     super.key,
@@ -38,65 +37,71 @@ class TaskFilterBar extends StatelessWidget {
             children: [
               Expanded(child: _buildSearchField()),
               const SizedBox(width: AppSpacing.base),
-              _buildSortDropdown(),
+              _buildSegmentedSort(),
             ],
           )
         : Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSearchField(),
-              const SizedBox(height: AppSpacing.sm),
-              Align(
-                alignment: Alignment.centerRight,
-                child: _buildSortDropdown(),
-              ),
+              const SizedBox(height: AppSpacing.md),
+              _buildSegmentedSort(),
             ],
           );
   }
 
   Widget _buildSearchField() {
     return AppTextField(
-      hint: 'Search tasks by title...',
+      hint: 'Search tasks by title or description...',
       prefixIcon: Icons.search_rounded,
       onChanged: onSearchChanged,
     );
   }
 
-  Widget _buildSortDropdown() {
+  Widget _buildSegmentedSort() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: AppColors.surfaceElevated,
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.glassBorder, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.sort_rounded, size: 16, color: AppColors.brandCyan),
-          const SizedBox(width: 8),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<TaskSortOption>(
-              value: selectedSort,
-              dropdownColor: AppColors.surfaceElevated,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
+        children: TaskSortOption.values.map((opt) {
+          final isSelected = selectedSort == opt;
+          return GestureDetector(
+            onTap: () => onSortChanged(opt),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? AppColors.brandBlue.withAlpha(45)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.brandBlue.withAlpha(90)
+                      : Colors.transparent,
+                  width: 1,
+                ),
               ),
-              items: TaskSortOption.values
-                  .map(
-                    (opt) => DropdownMenuItem(
-                      value: opt,
-                      child: Text('Sort by: ${opt.label}'),
-                    ),
-                  )
-                  .toList(),
-              onChanged: (val) {
-                if (val != null) onSortChanged(val);
-              },
+              child: Text(
+                opt.label,
+                style: TextStyle(
+                  color: isSelected
+                      ? AppColors.brandCyan
+                      : AppColors.textSecondary,
+                  fontSize: 13,
+                  fontWeight:
+                      isSelected ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
             ),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }

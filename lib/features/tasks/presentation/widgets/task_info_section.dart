@@ -23,7 +23,6 @@ class TaskInfoSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Overview card
         GlassCard(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
@@ -36,6 +35,7 @@ class TaskInfoSection extends StatelessWidget {
                   fontSize: 24,
                   fontWeight: FontWeight.w800,
                   height: 1.3,
+                  letterSpacing: -0.4,
                 ),
               ),
               if (task.description != null && task.description!.isNotEmpty) ...[
@@ -53,8 +53,6 @@ class TaskInfoSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: AppSpacing.base),
-
-        // Objective
         if (task.objective != null && task.objective!.isNotEmpty) ...[
           _DetailBlock(
             icon: Icons.flag_outlined,
@@ -63,8 +61,6 @@ class TaskInfoSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.base),
         ],
-
-        // Expected Output
         if (task.expectedOutput != null && task.expectedOutput!.isNotEmpty) ...[
           _DetailBlock(
             icon: Icons.verified_outlined,
@@ -73,8 +69,6 @@ class TaskInfoSection extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.base),
         ],
-
-        // Branch & Repo details
         GlassCard(
           padding: const EdgeInsets.all(AppSpacing.xl),
           child: Column(
@@ -109,6 +103,7 @@ class TaskInfoSection extends StatelessWidget {
                             color: AppColors.brandBlue,
                             decoration: TextDecoration.underline,
                             fontSize: 14,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                         const SizedBox(width: 4),

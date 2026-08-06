@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../shared/components/app_button.dart';
-import '../../../shared/components/app_section_title.dart';
 import '../../../shared/components/app_shimmer.dart';
 import '../../../shared/components/empty_state.dart';
 import '../../../shared/layout/responsive_layout.dart';
@@ -11,7 +11,7 @@ import 'providers/tasks_provider.dart';
 import 'widgets/task_card.dart';
 import 'widgets/task_filter_bar.dart';
 
-/// My Tasks screen displaying search, sort, shimmer, and list animations.
+/// My Tasks screen displaying search, sort, shimmer, and staggered list animations.
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
@@ -54,11 +54,58 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const AppSectionTitle(
-              title: 'My Tasks',
-              subtitle: 'Task assignments allocated to your profile',
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: const [
+                    Text(
+                      'My Tasks',
+                      style: TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.5,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Manage and track your active enterprise assignments',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                tasksAsync.maybeWhen(
+                  data: (tasks) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.brandBlue.withAlpha(30),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppColors.brandBlue.withAlpha(60),
+                      ),
+                    ),
+                    child: Text(
+                      '${tasks.length} Tasks',
+                      style: const TextStyle(
+                        color: AppColors.brandCyan,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  orElse: () => const SizedBox.shrink(),
+                ),
+              ],
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xl),
             TaskFilterBar(
               searchQuery: _searchQuery,
               selectedSort: _sortOption,
@@ -76,10 +123,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                 data: (rawTasks) {
                   if (rawTasks.isEmpty) {
                     return const EmptyState(
-                      icon: Icons.assignment_late_outlined,
+                      icon: Icons.assignment_turned_in_outlined,
                       title: 'No tasks assigned',
                       description:
-                          'You currently have no active task assignments in your queue.',
+                          'Your task queue is completely clear.',
                     );
                   }
 
@@ -90,7 +137,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                       icon: Icons.search_off_rounded,
                       title: 'No matching tasks',
                       description:
-                          'No tasks matched "$_searchQuery". Try a different keyword.',
+                          'No tasks matched "$_searchQuery". Try refining your search.',
                       action: AppButton(
                         label: 'Clear Search',
                         variant: AppButtonVariant.secondary,
@@ -143,7 +190,7 @@ class _ResponsiveTaskGrid extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         itemCount: tasks.length,
         separatorBuilder: (context, index) =>
-            const SizedBox(height: AppSpacing.base),
+            const SizedBox(height: AppSpacing.md),
         itemBuilder: (context, index) => AnimatedTaskItem(
           index: index,
           child: TaskCard(task: tasks[index]),
@@ -153,9 +200,9 @@ class _ResponsiveTaskGrid extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          crossAxisSpacing: AppSpacing.base,
-          mainAxisSpacing: AppSpacing.base,
-          mainAxisExtent: 150,
+          crossAxisSpacing: AppSpacing.md,
+          mainAxisSpacing: AppSpacing.md,
+          mainAxisExtent: 160,
         ),
         itemCount: tasks.length,
         itemBuilder: (context, index) => AnimatedTaskItem(
@@ -200,7 +247,7 @@ class _TasksShimmerList extends StatelessWidget {
     return ListView.separated(
       itemCount: 4,
       separatorBuilder: (context, index) =>
-          const SizedBox(height: AppSpacing.base),
+          const SizedBox(height: AppSpacing.md),
       itemBuilder: (context, index) => const AppShimmer(
         width: double.infinity,
         height: 140,

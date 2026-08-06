@@ -111,11 +111,21 @@ class _PrSubmissionCardState extends ConsumerState<PrSubmissionCard> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              children: const [
-                Icon(Icons.merge_type_rounded,
-                    color: AppColors.brandBlue, size: 22),
-                SizedBox(width: AppSpacing.sm),
-                Text(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandBlue.withAlpha(25),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.merge_type_rounded,
+                    color: AppColors.brandBlue,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                const Text(
                   'PR Submission',
                   style: TextStyle(
                     color: AppColors.textPrimary,

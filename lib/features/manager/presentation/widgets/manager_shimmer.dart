@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/components/app_shimmer.dart';
 
+/// Shimmer loader skeleton for ManagerDashboardScreen.
 class ManagerShimmer extends StatelessWidget {
   const ManagerShimmer({super.key});
 
@@ -12,19 +13,21 @@ class ManagerShimmer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppShimmer(width: 220, height: 28),
+          const AppShimmer(width: double.infinity, height: 100),
           const SizedBox(height: AppSpacing.lg),
+          const AppShimmer(width: 140, height: 20),
+          const SizedBox(height: AppSpacing.sm),
           Row(
             children: const [
-              Expanded(child: AppShimmer(width: double.infinity, height: 100)),
-              SizedBox(width: AppSpacing.md),
-              Expanded(child: AppShimmer(width: double.infinity, height: 100)),
-              SizedBox(width: AppSpacing.md),
-              Expanded(child: AppShimmer(width: double.infinity, height: 100)),
+              Expanded(child: AppShimmer(width: double.infinity, height: 36)),
+              SizedBox(width: AppSpacing.sm),
+              Expanded(child: AppShimmer(width: double.infinity, height: 36)),
             ],
           ),
           const SizedBox(height: AppSpacing.xl),
-          const AppShimmer(width: double.infinity, height: 250),
+          const AppShimmer(width: double.infinity, height: 220),
+          const SizedBox(height: AppSpacing.xl),
+          const AppShimmer(width: double.infinity, height: 160),
         ],
       ),
     );

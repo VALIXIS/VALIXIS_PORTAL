@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_colors.dart';
 
-/// Background decorative glow orbs for auth screens.
+/// Ambient glowing gradient background orbs for authentication screens.
 class LoginBackgroundOrbs extends StatelessWidget {
   const LoginBackgroundOrbs({super.key});
 
@@ -12,19 +11,36 @@ class LoginBackgroundOrbs extends StatelessWidget {
         child: Stack(
           children: [
             Positioned(
-              top: -80,
-              right: -60,
-              child: _Orb(color: AppColors.brandBlue.withAlpha(40), size: 300),
+              top: -120,
+              right: -100,
+              child: const _GradientOrb(
+                colors: [Color(0x403D5AFE), Color(0x003D5AFE)],
+                size: 480,
+              ),
             ),
             Positioned(
-              bottom: -100,
+              bottom: -140,
+              left: -120,
+              child: const _GradientOrb(
+                colors: [Color(0x35651FFF), Color(0x00651FFF)],
+                size: 520,
+              ),
+            ),
+            Positioned(
+              top: 240,
               left: -80,
-              child: _Orb(color: AppColors.brandPurple.withAlpha(35), size: 350),
+              child: const _GradientOrb(
+                colors: [Color(0x2500E5FF), Color(0x0000E5FF)],
+                size: 340,
+              ),
             ),
             Positioned(
-              top: 200,
-              left: -40,
-              child: _Orb(color: AppColors.brandCyan.withAlpha(20), size: 200),
+              bottom: 120,
+              right: -60,
+              child: const _GradientOrb(
+                colors: [Color(0x203D5AFE), Color(0x003D5AFE)],
+                size: 300,
+              ),
             ),
           ],
         ),
@@ -33,9 +49,10 @@ class LoginBackgroundOrbs extends StatelessWidget {
   }
 }
 
-class _Orb extends StatelessWidget {
-  const _Orb({required this.color, required this.size});
-  final Color color;
+class _GradientOrb extends StatelessWidget {
+  const _GradientOrb({required this.colors, required this.size});
+
+  final List<Color> colors;
   final double size;
 
   @override
@@ -45,7 +62,10 @@ class _Orb extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: color,
+        gradient: RadialGradient(
+          colors: colors,
+          stops: const [0.0, 1.0],
+        ),
       ),
     );
   }
