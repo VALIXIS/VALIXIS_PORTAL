@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../shared/components/empty_state.dart';
 import '../../../../shared/components/glass_card.dart';
 
 class _AttachmentItem {
@@ -16,7 +17,7 @@ class _AttachmentItem {
   bool isDownloading = false;
 }
 
-/// Task file attachments manager with drop zone UI and download simulation.
+/// Task file attachments manager with drop zone UI and upload capabilities.
 class TaskAttachmentsCard extends StatefulWidget {
   const TaskAttachmentsCard({super.key});
 
@@ -25,18 +26,7 @@ class TaskAttachmentsCard extends StatefulWidget {
 }
 
 class _TaskAttachmentsCardState extends State<TaskAttachmentsCard> {
-  final List<_AttachmentItem> _attachments = [
-    _AttachmentItem(
-      name: 'architecture_diagram.png',
-      size: '1.8 MB',
-      extension: 'PNG',
-    ),
-    _AttachmentItem(
-      name: 'technical_specification.pdf',
-      size: '3.4 MB',
-      extension: 'PDF',
-    ),
-  ];
+  final List<_AttachmentItem> _attachments = [];
 
   void _simulateDownload(_AttachmentItem item) {
     setState(() => item.isDownloading = true);
@@ -57,15 +47,15 @@ class _TaskAttachmentsCardState extends State<TaskAttachmentsCard> {
     setState(() {
       _attachments.add(
         _AttachmentItem(
-          name: 'pr_verification_logs.txt',
-          size: '512 KB',
+          name: 'attachment_${DateTime.now().millisecondsSinceEpoch}.txt',
+          size: '256 KB',
           extension: 'TXT',
         ),
       );
     });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Uploaded attachment pr_verification_logs.txt'),
+        content: Text('File attached successfully!'),
         backgroundColor: AppColors.info,
       ),
     );
@@ -107,14 +97,10 @@ class _TaskAttachmentsCardState extends State<TaskAttachmentsCard> {
           ),
           const SizedBox(height: AppSpacing.md),
           if (_attachments.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Center(
-                child: Text(
-                  'No file attachments associated with this task.',
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                ),
-              ),
+            const EmptyState(
+              icon: Icons.folder_open_rounded,
+              title: 'No Attachments Uploaded',
+              description: 'Attach files or specifications to this task workspace.',
             )
           else
             ListView.separated(

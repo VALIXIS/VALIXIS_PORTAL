@@ -9,6 +9,7 @@ import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/manager/presentation/assign_task_screen.dart';
 import '../../features/manager/presentation/create_task_screen.dart';
 import '../../features/manager/presentation/employee_management_screen.dart';
+import '../../features/manager/presentation/manager_audit_logs_screen.dart';
 import '../../features/manager/presentation/manager_dashboard_screen.dart';
 import '../../features/manager/presentation/review_submissions_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
@@ -31,6 +32,7 @@ abstract final class AppRoutes {
   static const String managerAssignments = '/manager/assignments';
   static const String managerReviews = '/manager/reviews';
   static const String managerEmployees = '/manager/employees';
+  static const String managerAuditLogs = '/manager/audit-logs';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -170,6 +172,14 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
               pageBuilder: (context, state) => _fadePage(
                 key: state.pageKey,
                 child: const EmployeeManagementScreen(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.managerAuditLogs,
+              name: 'managerAuditLogs',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const ManagerAuditLogsScreen(),
               ),
             ),
           ],

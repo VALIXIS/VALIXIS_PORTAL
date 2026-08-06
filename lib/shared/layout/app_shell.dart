@@ -6,6 +6,10 @@ import '../../core/constants/app_colors.dart';
 import '../../features/auth/domain/role_service.dart';
 import '../../features/auth/presentation/providers/role_provider.dart';
 import '../../features/notifications/presentation/widgets/notification_bell_button.dart';
+import '../components/export_center_dialog.dart';
+import '../components/global_keyboard_listener.dart';
+import '../components/global_search_dialog.dart';
+import '../components/user_preferences_dialog.dart';
 import '../layout/breakpoints.dart';
 import 'valixis_rail.dart';
 
@@ -58,6 +62,13 @@ const _allNavItems = [
     isManagerOnly: true,
   ),
   NavItem(
+    route: AppRoutes.managerAuditLogs,
+    label: 'Audit Logs',
+    icon: Icons.fact_check_outlined,
+    selectedIcon: Icons.fact_check_rounded,
+    isManagerOnly: true,
+  ),
+  NavItem(
     route: AppRoutes.profile,
     label: 'Profile',
     icon: Icons.person_outline_rounded,
@@ -65,7 +76,7 @@ const _allNavItems = [
   ),
 ];
 
-/// Shell layout that wraps main-app screens with role-aware navigation.
+/// Shell layout that wraps main-app screens with role-aware navigation and keyboard shortcuts.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
 
@@ -97,78 +108,90 @@ class AppShell extends ConsumerWidget {
     final items = _visibleItems(userRole);
     final selectedIndex = _selectedIndex(context, items);
 
-    if (isMobile) {
-      return Scaffold(
-        backgroundColor: AppColors.surfaceBase,
-        appBar: AppBar(
-          backgroundColor: AppColors.surfaceCard,
-          elevation: 0,
-          title: const Text(
-            'VALIXIS PORTAL',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 1.2,
-            ),
-          ),
-          actions: const [
-            NotificationBellButton(),
-            SizedBox(width: 8),
-          ],
-        ),
-        body: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: AppColors.backgroundGradient,
-          ),
-          child: child,
-        ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: selectedIndex,
-          onDestinationSelected: (i) => context.go(items[i].route),
-          backgroundColor: AppColors.surfaceCard,
-          indicatorColor: AppColors.brandBlue.withAlpha(40),
-          destinations: items
-              .map(
-                (item) => NavigationDestination(
-                  icon: Icon(item.icon, size: 20),
-                  selectedIcon: Icon(
-                    item.selectedIcon,
-                    size: 20,
-                    color: AppColors.brandCyan,
+    return GlobalKeyboardListener(
+      child: isMobile
+          ? Scaffold(
+              backgroundColor: AppColors.surfaceBase,
+              appBar: AppBar(
+                backgroundColor: AppColors.surfaceCard,
+                elevation: 0,
+                title: const Text(
+                  'VALIXIS PORTAL',
+                  style: TextStyle(
+                    color: AppColors.textPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
                   ),
-                  label: item.label,
                 ),
-              )
-              .toList(),
-        ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: AppColors.surfaceBase,
-      body: Row(
-        children: [
-          ValixisRail(
-            items: items,
-            selectedIndex: selectedIndex,
-            extended: extended,
-            onDestinationSelected: (i) => context.go(items[i].route),
-          ),
-          const VerticalDivider(
-            width: 1,
-            color: AppColors.divider,
-          ),
-          Expanded(
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: AppColors.backgroundGradient,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.search_rounded, color: AppColors.brandCyan),
+                    onPressed: () => GlobalSearchDialog.show(context),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.tune_rounded, color: AppColors.textMuted),
+                    onPressed: () => UserPreferencesDialog.show(context),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.download_rounded, color: AppColors.textMuted),
+                    onPressed: () => ExportCenterDialog.show(context),
+                  ),
+                  const NotificationBellButton(),
+                  const SizedBox(width: 4),
+                ],
               ),
-              child: child,
+              body: DecoratedBox(
+                decoration: const BoxDecoration(
+                  gradient: AppColors.backgroundGradient,
+                ),
+                child: child,
+              ),
+              bottomNavigationBar: NavigationBar(
+                selectedIndex: selectedIndex,
+                onDestinationSelected: (i) => context.go(items[i].route),
+                backgroundColor: AppColors.surfaceCard,
+                indicatorColor: AppColors.brandBlue.withAlpha(40),
+                destinations: items
+                    .map(
+                      (item) => NavigationDestination(
+                        icon: Icon(item.icon, size: 20),
+                        selectedIcon: Icon(
+                          item.selectedIcon,
+                          size: 20,
+                          color: AppColors.brandCyan,
+                        ),
+                        label: item.label,
+                      ),
+                    )
+                    .toList(),
+              ),
+            )
+          : Scaffold(
+              backgroundColor: AppColors.surfaceBase,
+              body: Row(
+                children: [
+                  ValixisRail(
+                    items: items,
+                    selectedIndex: selectedIndex,
+                    extended: extended,
+                    onDestinationSelected: (i) => context.go(items[i].route),
+                  ),
+                  const VerticalDivider(
+                    width: 1,
+                    color: AppColors.divider,
+                  ),
+                  Expanded(
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.backgroundGradient,
+                      ),
+                      child: child,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
-      ),
     );
   }
 }

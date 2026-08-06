@@ -25,50 +25,15 @@ class NotificationsState {
 
 class NotificationsNotifier extends StateNotifier<NotificationsState> {
   NotificationsNotifier()
-      : super(NotificationsState(
-          notifications: _initialNotifications,
+      : super(const NotificationsState(
+          notifications: [],
         ));
 
-  static final _initialNotifications = [
-    AppNotification(
-      id: 'notif-1',
-      title: 'New Task Assigned',
-      message: 'You have been assigned to "Implement Auth Flow & JWT State".',
-      category: NotificationCategory.taskAssigned,
-      createdAt: DateTime.now().subtract(const Duration(minutes: 25)),
-    ),
-    AppNotification(
-      id: 'notif-2',
-      title: 'Pull Request Approved',
-      message: 'PR #104 "Refactor Manager Dashboard" was approved by Lead.',
-      category: NotificationCategory.prApproved,
-      createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-    ),
-    AppNotification(
-      id: 'notif-3',
-      title: 'PR Submission Received',
-      message: 'Employee Alex submitted PR for "Database Migration Setup".',
-      category: NotificationCategory.prSubmitted,
-      createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-      isRead: true,
-    ),
-    AppNotification(
-      id: 'notif-4',
-      title: 'PR Revision Requested',
-      message: 'PR #98 "Profile UI" needs code cleanup & unit test coverage.',
-      category: NotificationCategory.prRejected,
-      createdAt: DateTime.now().subtract(const Duration(days: 1)),
-      isRead: true,
-    ),
-    AppNotification(
-      id: 'notif-5',
-      title: 'System Announcement',
-      message: 'VALIXIS Portal v2.5 update deployed with enhanced security.',
-      category: NotificationCategory.announcement,
-      createdAt: DateTime.now().subtract(const Duration(days: 2)),
-      isRead: true,
-    ),
-  ];
+  void addNotification(AppNotification notification) {
+    state = state.copyWith(
+      notifications: [notification, ...state.notifications],
+    );
+  }
 
   void markAsRead(String id) {
     state = state.copyWith(
@@ -81,7 +46,8 @@ class NotificationsNotifier extends StateNotifier<NotificationsState> {
 
   void markAllAsRead() {
     state = state.copyWith(
-      notifications: state.notifications.map((n) => n.copyWith(isRead: true)).toList(),
+      notifications:
+          state.notifications.map((n) => n.copyWith(isRead: true)).toList(),
     );
   }
 }

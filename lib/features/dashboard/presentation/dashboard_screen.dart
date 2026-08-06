@@ -5,6 +5,7 @@ import '../../../shared/components/app_button.dart';
 import '../../../shared/components/empty_state.dart';
 import '../../activity/presentation/widgets/activity_timeline.dart';
 import '../../activity/presentation/widgets/recent_activity_feed.dart';
+import '../../announcements/presentation/widgets/announcements_banner.dart';
 import 'providers/dashboard_provider.dart';
 import 'widgets/dashboard_hero_banner.dart';
 import 'widgets/dashboard_metrics_grid.dart';
@@ -12,7 +13,7 @@ import 'widgets/dashboard_quick_actions.dart';
 import 'widgets/dashboard_recent_tasks.dart';
 import 'widgets/dashboard_shimmer.dart';
 
-/// Dashboard screen rendering employee hero greeting, quick actions, metric cards, timeline & recent tasks.
+/// Dashboard screen rendering employee hero greeting, announcements, metrics, timeline & recent tasks.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
@@ -48,6 +49,8 @@ class DashboardScreen extends ConsumerWidget {
                 sliver: SliverList(
                   delegate: SliverChildListDelegate([
                     DashboardHeroBanner(employee: employee),
+                    const SizedBox(height: AppSpacing.xl),
+                    const AnnouncementsBanner(),
                     const SizedBox(height: AppSpacing.xl),
                     const DashboardQuickActions(),
                     const SizedBox(height: AppSpacing.xl),

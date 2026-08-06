@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/components/app_button.dart';
 import '../../../../shared/components/app_text_field.dart';
+import '../../../../shared/components/empty_state.dart';
 import '../../../../shared/components/glass_card.dart';
 import 'markdown_content_view.dart';
 
@@ -34,23 +35,7 @@ class TaskCommentsSection extends StatefulWidget {
 
 class _TaskCommentsSectionState extends State<TaskCommentsSection> {
   final _commentController = TextEditingController();
-  final List<_CommentItem> _comments = [
-    _CommentItem(
-      id: 'c1',
-      authorName: 'Alex Rivera (Lead)',
-      content:
-          'Please ensure unit tests cover state transitions for @Sarah and @Employee.',
-      createdAt: DateTime.now().subtract(const Duration(hours: 3)),
-    ),
-    _CommentItem(
-      id: 'c2',
-      authorName: 'You',
-      content:
-          'Working on this now! Added ````flutter test```` verification script.',
-      createdAt: DateTime.now().subtract(const Duration(minutes: 40)),
-      isOwn: true,
-    ),
-  ];
+  final List<_CommentItem> _comments = [];
 
   void _addComment() {
     final text = _commentController.text.trim();
@@ -112,66 +97,74 @@ class _TaskCommentsSectionState extends State<TaskCommentsSection> {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: _comments.length,
-            separatorBuilder: (context, index) =>
-                const Divider(color: AppColors.border, height: 16),
-            itemBuilder: (context, index) {
-              final c = _comments[index];
-              final initials =
-                  c.authorName.isNotEmpty ? c.authorName[0].toUpperCase() : 'U';
+          if (_comments.isEmpty)
+            const EmptyState(
+              icon: Icons.chat_bubble_outline_rounded,
+              title: 'No Discussion Comments Yet',
+              description: 'Start the conversation or mention a team member.',
+            )
+          else
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _comments.length,
+              separatorBuilder: (context, index) =>
+                  const Divider(color: AppColors.border, height: 16),
+              itemBuilder: (context, index) {
+                final c = _comments[index];
+                final initials = c.authorName.isNotEmpty
+                    ? c.authorName[0].toUpperCase()
+                    : 'U';
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 12,
-                            backgroundColor: c.isOwn
-                                ? AppColors.brandCyan.withAlpha(40)
-                                : AppColors.brandPurple.withAlpha(40),
-                            child: Text(
-                              initials,
-                              style: TextStyle(
-                                color: c.isOwn
-                                    ? AppColors.brandCyan
-                                    : AppColors.brandPurple,
-                                fontSize: 11,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 12,
+                              backgroundColor: c.isOwn
+                                  ? AppColors.brandCyan.withAlpha(40)
+                                  : AppColors.brandPurple.withAlpha(40),
+                              child: Text(
+                                initials,
+                                style: TextStyle(
+                                  color: c.isOwn
+                                      ? AppColors.brandCyan
+                                      : AppColors.brandPurple,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
+                            Text(
+                              c.authorName,
+                              style: const TextStyle(
+                                color: AppColors.textPrimary,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Text(
-                            c.authorName,
-                            style: const TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-                      if (c.isOwn)
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline_rounded,
-                              size: 16, color: AppColors.error),
-                          onPressed: () => _deleteComment(c.id),
+                          ],
                         ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  MarkdownContentView(content: c.content),
-                ],
-              );
-            },
-          ),
+                        if (c.isOwn)
+                          IconButton(
+                            icon: const Icon(Icons.delete_outline_rounded,
+                                size: 16, color: AppColors.error),
+                            onPressed: () => _deleteComment(c.id),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    MarkdownContentView(content: c.content),
+                  ],
+                );
+              },
+            ),
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
