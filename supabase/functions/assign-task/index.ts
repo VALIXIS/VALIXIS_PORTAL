@@ -34,10 +34,19 @@ Deno.serve(async (req: Request) => {
     }
 
     const supabaseAdmin = getSupabaseAdmin();
+    const taskId = body.task_id.trim();
+    const employeeId = body.employee_id.trim();
 
+    // 1. Delete previous task assignment if present
+    await supabaseAdmin
+      .from('task_assignments')
+      .delete()
+      .eq('task_id', taskId);
+
+    // 2. Insert fresh assignment
     const assignmentData = {
-      task_id: body.task_id.trim(),
-      employee_id: body.employee_id.trim(),
+      task_id: taskId,
+      employee_id: employeeId,
       status: 'assigned',
       assigned_at: new Date().toISOString(),
     };

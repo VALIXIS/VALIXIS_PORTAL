@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../shared/models/task.dart';
 import '../../tasks/data/mappers/task_mapper.dart';
@@ -43,13 +44,16 @@ class ManagerDashboardMetrics {
     final rawEmployees = liveEmployees ??
         (json['employees'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ??
         [];
+    final rawAssignments = liveAssignments ??
+        (json['assignments'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ??
+        [];
 
     final employeeNameMap = <String, String>{};
     final employeeAvatarMap = <String, String>{};
     for (final emp in rawEmployees) {
       final idStr = emp['id']?.toString() ?? '';
       final authId = emp['auth_id']?.toString() ?? '';
-      final name = emp['name'] as String? ?? emp['full_name'] as String? ?? 'Employee';
+      final name = emp['name'] as String? ?? emp['full_name'] as String? ?? emp['email'] as String? ?? 'Employee';
       final avatar = emp['avatar_url'] as String? ?? '';
       if (idStr.isNotEmpty) {
         employeeNameMap[idStr] = name;
@@ -62,12 +66,10 @@ class ManagerDashboardMetrics {
     }
 
     final taskAssignmentMap = <String, Map<String, dynamic>>{};
-    if (liveAssignments != null) {
-      for (final a in liveAssignments) {
-        final tId = a['task_id']?.toString();
-        if (tId != null) {
-          taskAssignmentMap[tId] = a;
-        }
+    for (final a in rawAssignments) {
+      final tId = a['task_id']?.toString();
+      if (tId != null) {
+        taskAssignmentMap[tId] = a;
       }
     }
 
@@ -126,21 +128,8 @@ class ManagerRepository {
       throw FunctionException(status: response.status, details: response.data);
     }
 
-    List<Map<String, dynamic>>? liveAssignments;
-    List<Map<String, dynamic>>? liveEmployees;
-
-    try {
-      final assignRes = await _client.from('task_assignments').select('task_id, employee_id, status, assigned_at');
-      liveAssignments = (assignRes as List<dynamic>).cast<Map<String, dynamic>>();
-
-      final empRes = await _client.from('employees').select('id, auth_id, name, email, avatar_url, role, department');
-      liveEmployees = (empRes as List<dynamic>).cast<Map<String, dynamic>>();
-    } catch (_) {}
-
     return ManagerDashboardMetrics.fromJson(
       response.data as Map<String, dynamic>,
-      liveAssignments: liveAssignments,
-      liveEmployees: liveEmployees,
     );
   }
 
@@ -181,7 +170,6 @@ class ManagerRepository {
 
   /// Assigns or reassigns a task to an employee.
   Future<bool> assignTask({required String taskId, required String employeeId}) async {
-    await _client.from('task_assignments').delete().eq('task_id', taskId);
     final response = await _client.functions.invoke(
       'assign-task',
       body: {'task_id': taskId, 'employee_id': employeeId},
@@ -194,19 +182,31 @@ class ManagerRepository {
     try {
       await _client.from('task_assignments').delete().eq('task_id', taskId);
       return true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Unassign task error: $e');
       return false;
     }
   }
 
-  /// Deletes a task and all related assignments and submissions.
+  /// Deletes a task and all related assignments and submissions using admin Edge Function.
   Future<bool> deleteTask(String taskId) async {
+    try {
+      final response = await _client.functions.invoke(
+        'delete-task',
+        body: {'task_id': taskId},
+      );
+      if (response.status < 400) return true;
+    } catch (e) {
+      debugPrint('Delete task Edge Function notice: $e');
+    }
+
     try {
       await _client.from('submissions').delete().eq('task_id', taskId);
       await _client.from('task_assignments').delete().eq('task_id', taskId);
       await _client.from('tasks').delete().eq('id', taskId);
       return true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('Delete task client fallback error: $e');
       return false;
     }
   }

@@ -24,7 +24,7 @@ Deno.serve(async (req: Request) => {
       supabaseAdmin.from('tasks').select('*'),
       supabaseAdmin.from('task_assignments').select('*'),
       supabaseAdmin.from('submissions').select('*').order('submitted_at', { ascending: false }),
-      supabaseAdmin.from('employees').select('id, name, email, role, department'),
+      supabaseAdmin.from('employees').select('id, auth_id, name, email, role, department, avatar_url'),
     ]);
 
     if (tasksRes.error) {
@@ -64,9 +64,10 @@ Deno.serve(async (req: Request) => {
     return jsonResponse({
       success: true,
       metrics,
-      recent_submissions: submissions.slice(0, 10),
+      recent_submissions: submissions.slice(0, 50),
       employees,
-      tasks: tasks.slice(0, 20),
+      tasks,
+      assignments,
     });
   } catch (err: any) {
     return errorResponse(err?.message || String(err), 500);
