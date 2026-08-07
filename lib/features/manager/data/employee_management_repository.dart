@@ -24,62 +24,72 @@ class EmployeeManagementRepository {
 
   /// Fetches employees excluding manager/admin roles and inactive records.
   Future<List<EmployeeManagementData>> getEmployeeList() async {
+    List<dynamic> list = [];
+
     try {
       final response = await _client.from('employees').select();
-      final list = response as List<dynamic>;
-
-      final employees = list
-          .map((e) => EmployeeMapper.fromJson(e as Map<String, dynamic>))
-          .where((emp) {
-            final role = emp.role?.toLowerCase().trim();
-            if (role != null && role.isNotEmpty) {
-              if (role.contains('manager') ||
-                  role.contains('admin') ||
-                  role.contains('supervisor')) {
-                return false;
-              }
-            }
-            return true;
-          })
-          .where((emp) {
-            final raw = list.firstWhere(
-              (item) => (item as Map<String, dynamic>)['id'] == emp.id,
-              orElse: () => <String, dynamic>{},
-            ) as Map<String, dynamic>;
-            final isActive = raw['is_active'] as bool? ?? true;
-            final status = (raw['status'] as String?)?.toLowerCase();
-            return isActive && status != 'inactive' && status != 'disabled';
-          })
-          .toList();
-
-      List<dynamic> assignments = [];
-      try {
-        final assignmentsResponse =
-            await _client.from('task_assignments').select();
-        assignments = assignmentsResponse as List<dynamic>;
-      } catch (_) {}
-
-      return employees.map((emp) {
-        final empAssignments = assignments.where(
-            (a) => a['employee_id'] == emp.id || a['user_id'] == emp.id);
-
-        final assignedCount = empAssignments.length;
-        final completedCount = empAssignments
-            .where((a) =>
-                a['status'] == 'approved' || a['status'] == 'completed')
-            .length;
-
-        final isBusy = empAssignments.any((a) => a['status'] == 'in_progress');
-
-        return EmployeeManagementData(
-          employee: emp,
-          tasksAssigned: assignedCount,
-          tasksCompleted: completedCount,
-          status: isBusy ? 'Busy' : 'Available',
-        );
-      }).toList();
+      list = response as List<dynamic>;
     } catch (_) {
-      return [];
+      try {
+        final response = await _client.functions.invoke('manager-dashboard');
+        if (response.status < 400 && response.data != null) {
+          final data = response.data as Map<String, dynamic>;
+          list = (data['employees'] as List<dynamic>?) ?? [];
+        }
+      } catch (_) {}
     }
+
+    final employeeMap = <String, Employee>{};
+    for (final item in list) {
+      if (item is Map<String, dynamic>) {
+        final emp = EmployeeMapper.fromJson(item);
+        if (emp.id.isEmpty) continue;
+
+        final role = emp.role?.toLowerCase().trim();
+        if (role != null && role.isNotEmpty) {
+          if (role.contains('manager') ||
+              role.contains('admin') ||
+              role.contains('supervisor')) {
+            continue;
+          }
+        }
+
+        final isActive = item['is_active'] as bool? ?? true;
+        final status = (item['status'] as String?)?.toLowerCase();
+        if (!isActive || status == 'inactive' || status == 'disabled') {
+          continue;
+        }
+
+        employeeMap[emp.id] = emp;
+      }
+    }
+
+    final employees = employeeMap.values.toList();
+
+    List<dynamic> assignments = [];
+    try {
+      final assignmentsResponse =
+          await _client.from('task_assignments').select();
+      assignments = (assignmentsResponse as List<dynamic>?) ?? [];
+    } catch (_) {}
+
+    return employees.map((emp) {
+      final empAssignments = assignments.where(
+          (a) => a['employee_id'] == emp.id || a['user_id'] == emp.id);
+
+      final assignedCount = empAssignments.length;
+      final completedCount = empAssignments
+          .where((a) => a['status'] == 'approved' || a['status'] == 'completed')
+          .length;
+
+      final isBusy = empAssignments.any((a) => a['status'] == 'in_progress');
+
+      return EmployeeManagementData(
+        employee: emp,
+        tasksAssigned: assignedCount,
+        tasksCompleted: completedCount,
+        status: isBusy ? 'Busy' : 'Available',
+      );
+    }).toList();
   }
 }

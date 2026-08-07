@@ -13,7 +13,6 @@ import 'providers/employee_management_provider.dart';
 import 'providers/manager_dashboard_provider.dart';
 import 'widgets/assignment_summary_card.dart';
 
-/// Screen for assigning engineering tasks to team employees.
 class AssignTaskScreen extends ConsumerStatefulWidget {
   const AssignTaskScreen({super.key});
 
@@ -28,10 +27,7 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
   Future<void> _assign() async {
     if (_selectedEmployeeId == null || _selectedTaskId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select both an Employee and a Task'),
-          backgroundColor: AppColors.warning,
-        ),
+        const SnackBar(content: Text('Please select both an Employee and a Task'), backgroundColor: AppColors.warning),
       );
       return;
     }
@@ -42,10 +38,7 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(success ? 'Task assigned successfully!' : 'Failed to assign task.'),
-          backgroundColor: success ? AppColors.success : AppColors.error,
-        ),
+        SnackBar(content: Text(success ? 'Task assigned successfully!' : 'Failed to assign task.'), backgroundColor: success ? AppColors.success : AppColors.error),
       );
       if (success) {
         ref.invalidate(managerDashboardProvider);
@@ -61,6 +54,7 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
     final metricsAsync = ref.watch(managerDashboardProvider);
     final isLoading = ref.watch(assignmentNotifierProvider).isLoading;
     final isEmployeesLoading = employeesAsync.isLoading;
+    final hasEmployeesError = employeesAsync.hasError;
 
     final rawEmployees = employeesAsync.valueOrNull ?? [];
     final employees = rawEmployees.where((e) {
@@ -104,19 +98,14 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
               children: [
                 Row(
                   children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_rounded),
-                      onPressed: () => context.go(AppRoutes.managerDashboard),
-                    ),
+                    IconButton(icon: const Icon(Icons.arrow_back_rounded), onPressed: () => context.go(AppRoutes.managerDashboard)),
                     const SizedBox(width: AppSpacing.xs),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
-                        Text('Task Allocation & Assignment',
-                            style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
+                        Text('Task Allocation & Assignment', style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.w800, letterSpacing: -0.5)),
                         SizedBox(height: 2),
-                        Text('Allocate task specifications to enterprise team members',
-                            style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                        Text('Allocate task specifications to enterprise team members', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
                       ],
                     ),
                   ],
@@ -132,68 +121,39 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
                         children: const [
                           Icon(Icons.person_search_rounded, color: AppColors.brandCyan, size: 20),
                           SizedBox(width: AppSpacing.sm),
-                          Text('1. Select Employee',
-                              style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
+                          Text('1. Select Employee', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.md),
                       if (isEmployeesLoading)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceElevated,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.glassBorder),
-                          ),
-                          child: Row(
-                            children: const [
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brandCyan),
-                              ),
-                              SizedBox(width: AppSpacing.sm),
-                              Text('Loading employee roster...',
-                                  style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                            ],
-                          ),
-                        )
+                        _buildStatusBox(child: Row(children: const [
+                          SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brandCyan)),
+                          SizedBox(width: AppSpacing.sm),
+                          Text('Loading employee roster...', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                        ]))
+                      else if (hasEmployeesError)
+                        _buildStatusBox(child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                          Row(children: const [
+                            Icon(Icons.error_outline_rounded, color: AppColors.error, size: 18),
+                            SizedBox(width: AppSpacing.sm),
+                            Text('Unable to fetch employee roster.', style: TextStyle(color: AppColors.textPrimary, fontSize: 13)),
+                          ]),
+                          TextButton(onPressed: () => ref.refresh(employeeManagementProvider), child: const Text('Retry', style: TextStyle(color: AppColors.brandCyan, fontWeight: FontWeight.w700))),
+                        ]))
                       else if (employees.isEmpty)
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceElevated,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: AppColors.warning.withAlpha(80)),
-                          ),
-                          child: Row(
-                            children: const [
-                              Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 18),
-                              SizedBox(width: AppSpacing.sm),
-                              Text('No employees available for assignment.',
-                                  style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
-                            ],
-                          ),
-                        )
+                        _buildStatusBox(child: Row(children: const [
+                          Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 18),
+                          SizedBox(width: AppSpacing.sm),
+                          Text('No employees available for assignment.', style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                        ]))
                       else
                         DropdownButtonFormField<String>(
                           initialValue: _selectedEmployeeId,
                           dropdownColor: AppColors.surfaceElevated,
                           style: const TextStyle(color: AppColors.textPrimary),
                           hint: const Text('Choose an employee from team roster', style: TextStyle(color: AppColors.textMuted)),
-                          decoration: const InputDecoration(
-                            prefixIcon: Icon(Icons.person_outline_rounded, color: AppColors.textMuted),
-                            filled: true,
-                            fillColor: AppColors.surfaceElevated,
-                          ),
-                          items: employees
-                              .map((e) => DropdownMenuItem(
-                                    value: e.employee.id,
-                                    child: Text('${e.employee.fullName} (${e.employee.email})', overflow: TextOverflow.ellipsis),
-                                  ))
-                              .toList(),
+                          decoration: const InputDecoration(prefixIcon: Icon(Icons.person_outline_rounded, color: AppColors.textMuted), filled: true, fillColor: AppColors.surfaceElevated),
+                          items: employees.map((e) => DropdownMenuItem(value: e.employee.id, child: Text('${e.employee.fullName} (${e.employee.email})', overflow: TextOverflow.ellipsis))).toList(),
                           onChanged: (val) => setState(() => _selectedEmployeeId = val),
                         ),
                       const SizedBox(height: AppSpacing.xl),
@@ -201,8 +161,7 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
                         children: const [
                           Icon(Icons.assignment_late_rounded, color: AppColors.brandBlue, size: 20),
                           SizedBox(width: AppSpacing.sm),
-                          Text('2. Select Task Specification',
-                              style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
+                          Text('2. Select Task Specification', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
                         ],
                       ),
                       const SizedBox(height: AppSpacing.md),
@@ -211,30 +170,14 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
                         dropdownColor: AppColors.surfaceElevated,
                         style: const TextStyle(color: AppColors.textPrimary),
                         hint: const Text('Choose an unassigned task', style: TextStyle(color: AppColors.textMuted)),
-                        decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.task_alt_rounded, color: AppColors.textMuted),
-                          filled: true,
-                          fillColor: AppColors.surfaceElevated,
-                        ),
-                        items: tasks
-                            .map((t) => DropdownMenuItem(
-                                  value: t.id,
-                                  child: Text(t.title, overflow: TextOverflow.ellipsis),
-                                ))
-                            .toList(),
+                        decoration: const InputDecoration(prefixIcon: Icon(Icons.task_alt_rounded, color: AppColors.textMuted), filled: true, fillColor: AppColors.surfaceElevated),
+                        items: tasks.map((t) => DropdownMenuItem(value: t.id, child: Text(t.title, overflow: TextOverflow.ellipsis))).toList(),
                         onChanged: (val) => setState(() => _selectedTaskId = val),
                       ),
                       const SizedBox(height: AppSpacing.xl),
                       AssignmentSummaryCard(selectedEmployee: selectedEmployee, selectedTask: selectedTask),
                       const SizedBox(height: AppSpacing.xl),
-                      AppButton(
-                        label: 'Assign Task Now',
-                        prefixIcon: Icons.send_rounded,
-                        onPressed: isLoading ? null : _assign,
-                        isLoading: isLoading,
-                        isFullWidth: true,
-                        size: AppButtonSize.large,
-                      ),
+                      AppButton(label: 'Assign Task Now', prefixIcon: Icons.send_rounded, onPressed: isLoading ? null : _assign, isLoading: isLoading, isFullWidth: true, size: AppButtonSize.large),
                     ],
                   ),
                 ),
@@ -244,5 +187,9 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildStatusBox({required Widget child}) {
+    return Container(width: double.infinity, padding: const EdgeInsets.all(AppSpacing.md), decoration: BoxDecoration(color: AppColors.surfaceElevated, borderRadius: BorderRadius.circular(12), border: Border.all(color: AppColors.glassBorder)), child: child);
   }
 }
