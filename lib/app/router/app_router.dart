@@ -11,6 +11,7 @@ import '../../features/manager/presentation/create_task_screen.dart';
 import '../../features/manager/presentation/employee_management_screen.dart';
 import '../../features/manager/presentation/manager_audit_logs_screen.dart';
 import '../../features/manager/presentation/manager_dashboard_screen.dart';
+import '../../features/manager/presentation/manager_tasks_screen.dart';
 import '../../features/manager/presentation/review_submissions_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
@@ -28,6 +29,7 @@ abstract final class AppRoutes {
 
   // Manager Routes
   static const String managerDashboard = '/manager';
+  static const String managerTasks = '/manager/all-tasks';
   static const String managerCreateTask = '/manager/tasks/create';
   static const String managerAssignments = '/manager/assignments';
   static const String managerReviews = '/manager/reviews';
@@ -62,14 +64,11 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
         if (isSplash) return null;
 
         if (!isAuthenticated && !isLogin) {
-          debugPrint('[4. GoRouter redirect] authState: unauthenticated, destination: /login');
           return AppRoutes.login;
         }
 
         if (isAuthenticated) {
           final roleAsync = ref.read(roleProvider);
-          debugPrint('[4. GoRouter redirect] authState: authenticated, roleProvider state: $roleAsync, location: ${state.matchedLocation}');
-
           if (roleAsync.isLoading) return null;
 
           final userRole = roleAsync.valueOrNull ?? UserRole.employee;
@@ -77,13 +76,10 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
           final isManagerRoute = state.matchedLocation.startsWith('/manager');
 
           if (isLogin) {
-            final dest = isManager ? AppRoutes.managerDashboard : AppRoutes.dashboard;
-            debugPrint('[4. GoRouter redirect] login redirect -> destination: $dest');
-            return dest;
+            return isManager ? AppRoutes.managerDashboard : AppRoutes.dashboard;
           }
 
           if (isManagerRoute && !isManager) {
-            debugPrint('[4. GoRouter redirect] unauthorized manager route -> redirecting to /dashboard');
             return AppRoutes.dashboard;
           }
         }
@@ -152,6 +148,17 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
                 key: state.pageKey,
                 child: const ManagerDashboardScreen(),
               ),
+            ),
+            GoRoute(
+              path: AppRoutes.managerTasks,
+              name: 'managerTasks',
+              pageBuilder: (context, state) {
+                final status = state.uri.queryParameters['status'];
+                return _fadePage(
+                  key: state.pageKey,
+                  child: ManagerTasksScreen(initialStatusFilter: status),
+                );
+              },
             ),
             GoRoute(
               path: AppRoutes.managerCreateTask,

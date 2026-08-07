@@ -1,0 +1,221 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_router.dart';
+import '../../../core/constants/app_colors.dart';
+import '../../../core/constants/app_spacing.dart';
+import '../../../shared/components/app_button.dart';
+import '../../../shared/components/empty_state.dart';
+import '../../../shared/components/glass_card.dart';
+import '../../../shared/layout/responsive_layout.dart';
+import '../../../shared/models/task.dart';
+import 'providers/manager_dashboard_provider.dart';
+import 'widgets/manager_shimmer.dart';
+import 'widgets/manager_tasks_filter_bar.dart';
+import 'widgets/manager_tasks_table.dart';
+
+/// Dedicated Manager Tasks Screen displaying every task in the system with search, filtering, and management actions.
+class ManagerTasksScreen extends ConsumerStatefulWidget {
+  const ManagerTasksScreen({super.key, this.initialStatusFilter});
+
+  final String? initialStatusFilter;
+
+  @override
+  ConsumerState<ManagerTasksScreen> createState() => _ManagerTasksScreenState();
+}
+
+class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
+  String _searchQuery = '';
+  late String _selectedStatus;
+  String _selectedRepo = 'all';
+  bool _sortAscending = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedStatus = widget.initialStatusFilter ?? 'all';
+  }
+
+  List<Task> _filterTasks(List<Task> rawTasks) {
+    return rawTasks.where((task) {
+      // 1. Search Query
+      if (_searchQuery.isNotEmpty) {
+        final q = _searchQuery.toLowerCase();
+        final matchTitle = task.title.toLowerCase().contains(q);
+        final matchRepo = (task.githubRepo ?? '').toLowerCase().contains(q);
+        final matchBranch = (task.branchName ?? '').toLowerCase().contains(q);
+        if (!matchTitle && !matchRepo && !matchBranch) return false;
+      }
+
+      // 2. Status Filter
+      if (_selectedStatus != 'all') {
+        final now = DateTime.now();
+        if (_selectedStatus == 'active') {
+          if (task.status.isCompleted) return false;
+        } else if (_selectedStatus == 'overdue') {
+          if (!task.deadline.isBefore(now) || task.status.isCompleted) return false;
+        } else if (_selectedStatus == 'assigned') {
+          if (task.status != TaskStatus.assigned) return false;
+        } else if (_selectedStatus == 'in_progress') {
+          if (task.status != TaskStatus.inProgress) return false;
+        } else if (_selectedStatus == 'submitted') {
+          if (task.status != TaskStatus.submitted) return false;
+        } else if (_selectedStatus == 'approved') {
+          if (task.status != TaskStatus.approved) return false;
+        } else if (_selectedStatus == 'rejected') {
+          if (task.status != TaskStatus.rejected) return false;
+        }
+      }
+
+      // 3. Repo Filter
+      if (_selectedRepo != 'all') {
+        final repo = task.githubRepo ?? 'VALIXIS_PORTAL';
+        if (repo != _selectedRepo) return false;
+      }
+
+      return true;
+    }).toList()
+      ..sort((a, b) {
+        return _sortAscending ? a.deadline.compareTo(b.deadline) : b.deadline.compareTo(a.deadline);
+      });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final metricsAsync = ref.watch(managerDashboardProvider);
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: metricsAsync.when(
+        loading: () => const ManagerShimmer(),
+        error: (err, _) => Center(
+          child: EmptyState(
+            icon: Icons.error_outline_rounded,
+            title: 'Failed to load manager tasks',
+            description: err.toString(),
+            action: AppButton(
+              label: 'Retry',
+              prefixIcon: Icons.refresh_rounded,
+              onPressed: () => ref.refresh(managerDashboardProvider),
+            ),
+          ),
+        ),
+        data: (metrics) {
+          final allTasks = metrics.recentTasks;
+          final filteredTasks = _filterTasks(allTasks);
+
+          final repos = allTasks
+              .map((t) => t.githubRepo ?? 'VALIXIS_PORTAL')
+              .toSet()
+              .toList();
+
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.all(AppSpacing.xl),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Manager Tasks Overview',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Manage, reassign, filter, and track all engineering task specifications',
+                          style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                        ),
+                      ],
+                    ),
+                    AppButton(
+                      label: 'Create New Task',
+                      prefixIcon: Icons.add_rounded,
+                      onPressed: () => context.go(AppRoutes.managerCreateTask),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                ManagerTasksFilterBar(
+                  searchQuery: _searchQuery,
+                  selectedStatus: _selectedStatus,
+                  selectedRepo: _selectedRepo,
+                  sortAscending: _sortAscending,
+                  repositories: repos,
+                  onSearchChanged: (q) => setState(() => _searchQuery = q),
+                  onStatusChanged: (s) => setState(() => _selectedStatus = s),
+                  onRepoChanged: (r) => setState(() => _selectedRepo = r),
+                  onSortToggle: () => setState(() => _sortAscending = !_sortAscending),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+                if (filteredTasks.isEmpty)
+                  const GlassCard(
+                    padding: EdgeInsets.all(AppSpacing.xl),
+                    child: Center(
+                      child: Text('No tasks match the selected filters.', style: TextStyle(color: AppColors.textMuted)),
+                    ),
+                  )
+                else
+                  ResponsiveLayout(
+                    mobile: (context) => _MobileTasksList(tasks: filteredTasks),
+                    desktop: (context) => ManagerTasksTable(tasks: filteredTasks),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _MobileTasksList extends StatelessWidget {
+  const _MobileTasksList({required this.tasks});
+
+  final List<Task> tasks;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: tasks
+          .map(
+            (t) => Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.md),
+              child: GlassCard(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(t.title, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(t.githubRepo ?? 'VALIXIS_PORTAL', style: const TextStyle(color: AppColors.brandBlue, fontSize: 12)),
+                    const SizedBox(height: AppSpacing.sm),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Assigned to: ${t.assignedTo.isNotEmpty ? t.assignedTo : "Unassigned"}', style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                        AppButton(
+                          label: 'View',
+                          size: AppButtonSize.small,
+                          onPressed: () => context.go('/tasks/${t.id}'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+          .toList(),
+    );
+  }
+}

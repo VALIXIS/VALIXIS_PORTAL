@@ -34,6 +34,13 @@ const _allNavItems = [
     isManagerOnly: true,
   ),
   NavItem(
+    route: AppRoutes.managerTasks,
+    label: 'Manager Tasks',
+    icon: Icons.assignment_rounded,
+    selectedIcon: Icons.assignment_rounded,
+    isManagerOnly: true,
+  ),
+  NavItem(
     route: AppRoutes.managerCreateTask,
     label: 'Create Task',
     icon: Icons.add_task_rounded,
@@ -102,7 +109,6 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final roleAsync = ref.watch(roleProvider);
-    debugPrint('[5. AppShell] roleAsync state: $roleAsync');
 
     if (roleAsync.isLoading) {
       return const Scaffold(
@@ -118,8 +124,6 @@ class AppShell extends ConsumerWidget {
     final isMobile = width < Breakpoints.mobile;
     final extended = width >= Breakpoints.navRailExtended;
     final items = _visibleItems(userRole);
-    debugPrint('[5. AppShell] current role: $userRole, navigation items: ${items.map((i) => i.label).toList()}');
-
     final selectedIndex = _selectedIndex(context, items);
 
     return GlobalKeyboardListener(
