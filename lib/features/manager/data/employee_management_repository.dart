@@ -22,22 +22,10 @@ class EmployeeManagementRepository {
 
   final SupabaseClient _client;
 
-  /// Fetches employees excluding manager/admin roles and inactive records.
+  /// Fetches employees from Supabase excluding only manager/admin roles.
   Future<List<EmployeeManagementData>> getEmployeeList() async {
-    List<dynamic> list = [];
-
-    try {
-      final response = await _client.from('employees').select();
-      list = response as List<dynamic>;
-    } catch (_) {
-      try {
-        final response = await _client.functions.invoke('manager-dashboard');
-        if (response.status < 400 && response.data != null) {
-          final data = response.data as Map<String, dynamic>;
-          list = (data['employees'] as List<dynamic>?) ?? [];
-        }
-      } catch (_) {}
-    }
+    final response = await _client.from('employees').select();
+    final list = response as List<dynamic>;
 
     final employeeMap = <String, Employee>{};
     for (final item in list) {
@@ -52,12 +40,6 @@ class EmployeeManagementRepository {
               role.contains('supervisor')) {
             continue;
           }
-        }
-
-        final isActive = item['is_active'] as bool? ?? true;
-        final status = (item['status'] as String?)?.toLowerCase();
-        if (!isActive || status == 'inactive' || status == 'disabled') {
-          continue;
         }
 
         employeeMap[emp.id] = emp;
@@ -75,7 +57,7 @@ class EmployeeManagementRepository {
 
     return employees.map((emp) {
       final empAssignments = assignments.where(
-          (a) => a['employee_id'] == emp.id || a['user_id'] == emp.id);
+          (a) => a['employee_id']?.toString() == emp.id || a['user_id']?.toString() == emp.id);
 
       final assignedCount = empAssignments.length;
       final completedCount = empAssignments

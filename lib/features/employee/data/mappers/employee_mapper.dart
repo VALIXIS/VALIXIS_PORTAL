@@ -3,25 +3,31 @@ import '../../../../shared/models/employee.dart';
 /// Data mapper converting raw Supabase JSON responses to [Employee] domain models.
 abstract final class EmployeeMapper {
   static Employee fromJson(Map<String, dynamic> json) {
-    final rawId = json['id'] as String? ??
-        json['employee_id'] as String? ??
-        json['user_id'] as String? ??
-        json['auth_id'] as String? ??
-        '';
+    final rawId = (json['id'] ??
+            json['employee_id'] ??
+            json['user_id'] ??
+            json['auth_id'] ??
+            '')
+        .toString();
 
-    final rawName = json['name'] as String? ??
-        json['full_name'] as String? ??
-        json['display_name'] as String? ??
-        (json['email'] as String?)?.split('@').first ??
+    final rawName = json['name']?.toString() ??
+        json['full_name']?.toString() ??
+        json['display_name']?.toString() ??
+        (json['email']?.toString())?.split('@').first ??
         'Employee';
+
+    final rawEmail = json['email']?.toString() ?? '';
+    final rawRole = (json['role'] ?? json['user_role'])?.toString();
+    final rawDept = json['department']?.toString();
+    final rawAvatar = json['avatar_url']?.toString();
 
     return Employee(
       id: rawId,
       fullName: rawName,
-      email: json['email'] as String? ?? '',
-      role: json['role'] as String? ?? json['user_role'] as String?,
-      department: json['department'] as String?,
-      avatarUrl: json['avatar_url'] as String?,
+      email: rawEmail,
+      role: rawRole,
+      department: rawDept,
+      avatarUrl: rawAvatar,
     );
   }
 }
