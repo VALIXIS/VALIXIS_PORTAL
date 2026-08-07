@@ -2,6 +2,10 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../data/auth_repository.dart';
+import 'role_provider.dart';
+import '../../../dashboard/presentation/providers/dashboard_provider.dart';
+import '../../../manager/presentation/providers/employee_management_provider.dart';
+import '../../../manager/presentation/providers/manager_dashboard_provider.dart';
 
 /// Stream provider listening to raw Supabase auth state changes.
 final authStateStreamProvider = StreamProvider<AuthState>((ref) {
@@ -11,24 +15,35 @@ final authStateStreamProvider = StreamProvider<AuthState>((ref) {
 /// Notifier managing current user state, login, and logout execution.
 final authNotifierProvider =
     StateNotifierProvider<AuthNotifier, AsyncValue<User?>>((ref) {
-  return AuthNotifier(ref.watch(authRepositoryProvider));
+  return AuthNotifier(ref, ref.watch(authRepositoryProvider));
 });
 
 class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
-  AuthNotifier(this._repository)
+  AuthNotifier(this._ref, this._repository)
       : super(AsyncValue.data(_repository.currentUser)) {
     _authSubscription = _repository.onAuthStateChange.listen((data) {
       if (data.event == AuthChangeEvent.signedIn ||
-          data.event == AuthChangeEvent.tokenRefreshed) {
+          data.event == AuthChangeEvent.tokenRefreshed ||
+          data.event == AuthChangeEvent.userUpdated) {
         state = AsyncValue.data(data.session?.user);
+        _invalidateUserProviders();
       } else if (data.event == AuthChangeEvent.signedOut) {
         state = const AsyncValue.data(null);
+        _invalidateUserProviders();
       }
     });
   }
 
+  final Ref _ref;
   final AuthRepository _repository;
   StreamSubscription<AuthState>? _authSubscription;
+
+  void _invalidateUserProviders() {
+    _ref.invalidate(roleProvider);
+    _ref.invalidate(managerDashboardProvider);
+    _ref.invalidate(employeeManagementProvider);
+    _ref.invalidate(dashboardProvider);
+  }
 
   /// Executes user sign in with email and password.
   Future<void> signIn({
@@ -41,6 +56,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         email: email,
         password: password,
       );
+      _invalidateUserProviders();
       return response.user;
     });
   }
@@ -50,6 +66,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       await _repository.signOut();
+      _invalidateUserProviders();
       return null;
     });
   }
