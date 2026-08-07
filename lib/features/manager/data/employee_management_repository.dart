@@ -22,32 +22,24 @@ class EmployeeManagementRepository {
 
   final SupabaseClient _client;
 
-  /// Fetches employees with role == 'employee' and active status.
+  /// Fetches employees excluding manager/admin roles and inactive records.
   Future<List<EmployeeManagementData>> getEmployeeList() async {
     try {
-      List<dynamic> list;
-      try {
-        final response = await _client
-            .from('employees')
-            .select()
-            .eq('role', 'employee');
-        list = response as List<dynamic>;
-      } catch (_) {
-        final response = await _client.from('employees').select();
-        list = response as List<dynamic>;
-      }
+      final response = await _client.from('employees').select();
+      final list = response as List<dynamic>;
 
       final employees = list
           .map((e) => EmployeeMapper.fromJson(e as Map<String, dynamic>))
           .where((emp) {
             final role = emp.role?.toLowerCase().trim();
-            if (role == 'manager' ||
-                role == 'admin' ||
-                role == 'supervisor' ||
-                role == 'lead') {
-              return false;
+            if (role != null && role.isNotEmpty) {
+              if (role.contains('manager') ||
+                  role.contains('admin') ||
+                  role.contains('supervisor')) {
+                return false;
+              }
             }
-            return role == 'employee' || role == null || role.isEmpty;
+            return true;
           })
           .where((emp) {
             final raw = list.firstWhere(
@@ -55,14 +47,17 @@ class EmployeeManagementRepository {
               orElse: () => <String, dynamic>{},
             ) as Map<String, dynamic>;
             final isActive = raw['is_active'] as bool? ?? true;
-            final status = raw['status'] as String? ?? 'active';
-            return isActive && status.toLowerCase() != 'inactive';
+            final status = (raw['status'] as String?)?.toLowerCase();
+            return isActive && status != 'inactive' && status != 'disabled';
           })
           .toList();
 
-      final assignmentsResponse =
-          await _client.from('task_assignments').select();
-      final assignments = assignmentsResponse as List<dynamic>;
+      List<dynamic> assignments = [];
+      try {
+        final assignmentsResponse =
+            await _client.from('task_assignments').select();
+        assignments = assignmentsResponse as List<dynamic>;
+      } catch (_) {}
 
       return employees.map((emp) {
         final empAssignments = assignments.where(

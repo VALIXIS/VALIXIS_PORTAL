@@ -60,11 +60,13 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
     final employeesAsync = ref.watch(employeeManagementProvider);
     final metricsAsync = ref.watch(managerDashboardProvider);
     final isLoading = ref.watch(assignmentNotifierProvider).isLoading;
+    final isEmployeesLoading = employeesAsync.isLoading;
 
     final rawEmployees = employeesAsync.valueOrNull ?? [];
     final employees = rawEmployees.where((e) {
       final r = e.employee.role?.toLowerCase().trim();
-      return r != 'manager' && r != 'admin' && r != 'supervisor' && r != 'lead';
+      if (r == null || r.isEmpty) return true;
+      return !r.contains('manager') && !r.contains('admin') && !r.contains('supervisor');
     }).toList();
 
     final tasks = metricsAsync.valueOrNull?.recentTasks ?? [];
@@ -135,7 +137,29 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
                         ],
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      if (employees.isEmpty)
+                      if (isEmployeesLoading)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceElevated,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.glassBorder),
+                          ),
+                          child: Row(
+                            children: const [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brandCyan),
+                              ),
+                              SizedBox(width: AppSpacing.sm),
+                              Text('Loading employee roster...',
+                                  style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                            ],
+                          ),
+                        )
+                      else if (employees.isEmpty)
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(AppSpacing.md),
