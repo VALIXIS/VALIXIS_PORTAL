@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../shared/components/app_button.dart';
 import '../../../shared/components/empty_state.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
+import '../../auth/presentation/providers/role_provider.dart';
 import 'providers/manager_dashboard_provider.dart';
 import 'widgets/manager_hero_header.dart';
 import 'widgets/manager_metrics_grid.dart';
@@ -16,6 +18,10 @@ class ManagerDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final roleAsync = ref.watch(roleProvider);
+    final user = ref.watch(authNotifierProvider).valueOrNull;
+    debugPrint('[6. Manager Dashboard] current role: ${roleAsync.valueOrNull}, current user id: ${user?.id}');
+
     final metricsAsync = ref.watch(managerDashboardProvider);
 
     return Scaffold(

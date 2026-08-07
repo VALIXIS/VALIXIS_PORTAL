@@ -62,11 +62,14 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
         if (isSplash) return null;
 
         if (!isAuthenticated && !isLogin) {
+          debugPrint('[4. GoRouter redirect] authState: unauthenticated, destination: /login');
           return AppRoutes.login;
         }
 
         if (isAuthenticated) {
           final roleAsync = ref.read(roleProvider);
+          debugPrint('[4. GoRouter redirect] authState: authenticated, roleProvider state: $roleAsync, location: ${state.matchedLocation}');
+
           if (roleAsync.isLoading) return null;
 
           final userRole = roleAsync.valueOrNull ?? UserRole.employee;
@@ -74,10 +77,13 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
           final isManagerRoute = state.matchedLocation.startsWith('/manager');
 
           if (isLogin) {
-            return isManager ? AppRoutes.managerDashboard : AppRoutes.dashboard;
+            final dest = isManager ? AppRoutes.managerDashboard : AppRoutes.dashboard;
+            debugPrint('[4. GoRouter redirect] login redirect -> destination: $dest');
+            return dest;
           }
 
           if (isManagerRoute && !isManager) {
+            debugPrint('[4. GoRouter redirect] unauthorized manager route -> redirecting to /dashboard');
             return AppRoutes.dashboard;
           }
         }
