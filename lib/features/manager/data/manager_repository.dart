@@ -180,7 +180,12 @@ class ManagerRepository {
   /// Unassigns a task by removing its assignment relationship.
   Future<bool> unassignTask(String taskId) async {
     try {
-      await _client.from('task_assignments').delete().eq('task_id', taskId);
+      final numericId = int.tryParse(taskId);
+      if (numericId != null) {
+        await _client.from('task_assignments').delete().or('task_id.eq.$taskId,task_id.eq.$numericId');
+      } else {
+        await _client.from('task_assignments').delete().eq('task_id', taskId);
+      }
       return true;
     } catch (e) {
       debugPrint('Unassign task error: $e');
@@ -188,7 +193,7 @@ class ManagerRepository {
     }
   }
 
-  /// Deletes a task and all related assignments and submissions using admin Edge Function.
+  /// Deletes a task and all related assignments and submissions using admin Edge Function and client fallback.
   Future<bool> deleteTask(String taskId) async {
     try {
       final response = await _client.functions.invoke(
@@ -201,9 +206,16 @@ class ManagerRepository {
     }
 
     try {
-      await _client.from('submissions').delete().eq('task_id', taskId);
-      await _client.from('task_assignments').delete().eq('task_id', taskId);
-      await _client.from('tasks').delete().eq('id', taskId);
+      final numericId = int.tryParse(taskId);
+      if (numericId != null) {
+        await _client.from('submissions').delete().or('task_id.eq.$taskId,task_id.eq.$numericId');
+        await _client.from('task_assignments').delete().or('task_id.eq.$taskId,task_id.eq.$numericId');
+        await _client.from('tasks').delete().eq('id', numericId);
+      } else {
+        await _client.from('submissions').delete().eq('task_id', taskId);
+        await _client.from('task_assignments').delete().eq('task_id', taskId);
+        await _client.from('tasks').delete().eq('id', taskId);
+      }
       return true;
     } catch (e) {
       debugPrint('Delete task client fallback error: $e');
