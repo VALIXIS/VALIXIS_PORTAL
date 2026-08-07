@@ -65,16 +65,21 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
           return AppRoutes.login;
         }
 
-        final userRole = ref.read(roleProvider).valueOrNull ?? UserRole.employee;
-        final isManager = userRole.isManager;
-        final isManagerRoute = state.matchedLocation.startsWith('/manager');
+        if (isAuthenticated) {
+          final roleAsync = ref.read(roleProvider);
+          if (roleAsync.isLoading) return null;
 
-        if (isAuthenticated && isLogin) {
-          return isManager ? AppRoutes.managerDashboard : AppRoutes.dashboard;
-        }
+          final userRole = roleAsync.valueOrNull ?? UserRole.employee;
+          final isManager = userRole.isManager;
+          final isManagerRoute = state.matchedLocation.startsWith('/manager');
 
-        if (isManagerRoute && !isManager) {
-          return AppRoutes.dashboard;
+          if (isLogin) {
+            return isManager ? AppRoutes.managerDashboard : AppRoutes.dashboard;
+          }
+
+          if (isManagerRoute && !isManager) {
+            return AppRoutes.dashboard;
+          }
         }
 
         return null;

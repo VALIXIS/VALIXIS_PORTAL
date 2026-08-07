@@ -101,10 +101,21 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final roleAsync = ref.watch(roleProvider);
+
+    if (roleAsync.isLoading) {
+      return const Scaffold(
+        backgroundColor: AppColors.surfaceBase,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.brandCyan),
+        ),
+      );
+    }
+
+    final userRole = roleAsync.valueOrNull ?? UserRole.employee;
     final width = MediaQuery.sizeOf(context).width;
     final isMobile = width < Breakpoints.mobile;
     final extended = width >= Breakpoints.navRailExtended;
-    final userRole = ref.watch(roleProvider).valueOrNull ?? UserRole.employee;
     final items = _visibleItems(userRole);
     final selectedIndex = _selectedIndex(context, items);
 

@@ -35,7 +35,7 @@ export async function requireManager(req: Request): Promise<ManagerAuthResult> {
     const { data: employee, error: empError } = await supabaseAdmin
       .from('employees')
       .select('role')
-      .or(`auth_id.eq.${user.id},id.eq.${user.id}`)
+      .eq('auth_id', user.id)
       .maybeSingle();
 
     if (empError || !employee || !employee.role) {

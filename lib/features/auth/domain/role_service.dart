@@ -31,7 +31,7 @@ class RoleService {
       final data = await _client
           .from('employees')
           .select('role')
-          .or('auth_id.eq.$userId,id.eq.$userId')
+          .eq('auth_id', userId)
           .maybeSingle();
 
       if (data != null && data['role'] != null) {

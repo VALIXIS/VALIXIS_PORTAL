@@ -8,13 +8,13 @@ class EmployeeRepository {
 
   final SupabaseClient _client;
 
-  /// Fetches the profile of the specified employee by `auth_id == currentUser.id`.
+  /// Fetches the profile of the specified employee by `auth_id == userId`.
   Future<Employee> getEmployeeProfile(String userId) async {
     try {
       final data = await _client
           .from('employees')
           .select()
-          .or('auth_id.eq.$userId,id.eq.$userId')
+          .eq('auth_id', userId)
           .maybeSingle();
 
       if (data != null) {
