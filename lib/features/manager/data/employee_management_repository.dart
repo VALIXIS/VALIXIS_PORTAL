@@ -22,10 +22,31 @@ class EmployeeManagementRepository {
 
   final SupabaseClient _client;
 
-  /// Fetches employees from Supabase excluding only manager/admin roles.
+  /// Fetches employees excluding manager/admin roles.
+  /// Bypasses client RLS policy `(auth.uid() = auth_id)` via manager Edge Function.
   Future<List<EmployeeManagementData>> getEmployeeList() async {
-    final response = await _client.from('employees').select();
-    final list = response as List<dynamic>;
+    List<dynamic> list = [];
+
+    try {
+      final response = await _client.functions.invoke('manager-dashboard');
+      if (response.status < 400 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        final raw = data['employees'] ??
+            data['employee_list'] ??
+            data['team'] ??
+            data['workforce'];
+        if (raw is List<dynamic> && raw.isNotEmpty) {
+          list = raw;
+        }
+      }
+    } catch (_) {}
+
+    if (list.isEmpty) {
+      try {
+        final response = await _client.from('employees').select();
+        list = response as List<dynamic>;
+      } catch (_) {}
+    }
 
     final employeeMap = <String, Employee>{};
     for (final item in list) {
