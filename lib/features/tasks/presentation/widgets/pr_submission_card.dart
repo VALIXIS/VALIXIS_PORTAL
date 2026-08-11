@@ -39,6 +39,8 @@ class _PrSubmissionCardState extends ConsumerState<PrSubmissionCard> {
   }
 
   Future<void> _submitPr() async {
+    if (ref.read(submissionNotifierProvider).isLoading) return;
+
     if (_formKey.currentState?.validate() ?? false) {
       final success = await ref.read(submissionNotifierProvider.notifier).submitPr(
             taskId: widget.task.id,
