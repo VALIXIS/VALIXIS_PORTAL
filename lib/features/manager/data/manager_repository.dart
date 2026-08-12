@@ -65,6 +65,15 @@ class ManagerDashboardMetrics {
       }
     }
 
+    final taskTitleMap = <String, String>{};
+    for (final t in rawTasks) {
+      final tId = t['id']?.toString();
+      final title = t['title'] as String? ?? '';
+      if (tId != null && tId.isNotEmpty) {
+        taskTitleMap[tId] = title;
+      }
+    }
+
     final taskAssignmentMap = <String, Map<String, dynamic>>{};
     final assignmentByIdMap = <String, Map<String, dynamic>>{};
     for (final a in rawAssignments) {
@@ -112,11 +121,13 @@ class ManagerDashboardMetrics {
       final taskId = sub['task_id']?.toString() ?? assignment?['task_id']?.toString() ?? '';
       final empId = sub['employee_id']?.toString() ?? assignment?['employee_id']?.toString() ?? '';
       final empName = employeeNameMap[empId] ?? '';
+      final taskTitle = taskTitleMap[taskId] ?? (taskId.isNotEmpty ? 'Task #$taskId' : '');
       final status = sub['review_status']?.toString() ?? sub['status']?.toString() ?? assignment?['status']?.toString() ?? 'pending';
       final feedback = sub['manager_feedback']?.toString() ?? sub['feedback']?.toString() ?? '';
 
       mSub['assignment_id'] = assignmentId;
       mSub['task_id'] = taskId;
+      mSub['task_title'] = taskTitle;
       mSub['employee_id'] = empId;
       mSub['employee_name'] = empName;
       mSub['status'] = status;

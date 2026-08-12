@@ -73,9 +73,13 @@ class ReviewSubmissionsScreen extends ConsumerWidget {
                 description: err.toString(),
               ),
               data: (metrics) {
-                final submissions = metrics.recentSubmissions;
+                final allSubmissions = metrics.recentSubmissions;
+                final pendingSubmissions = allSubmissions.where((sub) {
+                  final status = (sub['review_status']?.toString() ?? sub['status']?.toString() ?? '').toLowerCase().trim();
+                  return status == 'pending' || status == 'submitted' || status == 'under_review';
+                }).toList();
 
-                if (submissions.isEmpty) {
+                if (pendingSubmissions.isEmpty) {
                   return const EmptyState(
                     icon: Icons.rate_review_rounded,
                     title: 'No Pending PR Submissions',
@@ -87,14 +91,20 @@ class ReviewSubmissionsScreen extends ConsumerWidget {
                 return ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: submissions.length,
+                  itemCount: pendingSubmissions.length,
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: AppSpacing.md),
                   itemBuilder: (context, index) {
-                    final sub = submissions[index];
+                    final sub = pendingSubmissions[index];
                     final taskId = sub['task_id'] as String? ?? '';
                     final prUrl = sub['pr_url'] as String? ?? '';
-                    final status = sub['status'] as String? ?? 'submitted';
+                    final status = sub['status'] as String? ?? 'pending';
+                    final taskTitle = sub['task_title'] as String? ?? '';
+                    final employeeName = sub['employee_name'] as String? ?? '';
+                    final submittedAtRaw = sub['submitted_at'] as String? ?? '';
+                    final submittedAt = submittedAtRaw.length > 10
+                        ? submittedAtRaw.substring(0, 10)
+                        : submittedAtRaw;
 
                     return TweenAnimationBuilder<double>(
                       duration: Duration(milliseconds: 300 + (index * 80)),
@@ -111,6 +121,9 @@ class ReviewSubmissionsScreen extends ConsumerWidget {
                       },
                       child: SubmissionReviewCard(
                         taskId: taskId,
+                        taskTitle: taskTitle,
+                        employeeName: employeeName,
+                        submittedAt: submittedAt,
                         prUrl: prUrl,
                         status: status,
                         isLoading: isLoading,
