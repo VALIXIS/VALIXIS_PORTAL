@@ -47,7 +47,7 @@ Deno.serve(async (req: Request) => {
         .eq('id', submissionId);
 
       if (subErr) {
-        return errorResponse('Failed to update submission status', 500, subErr.message);
+        return errorResponse('Failed to update submission status: ' + subErr.message, 500);
       }
     }
 
@@ -61,7 +61,7 @@ Deno.serve(async (req: Request) => {
         .eq('task_id', taskId);
 
       if (assignErr) {
-        return errorResponse('Failed to update task assignment', 500, assignErr.message);
+        return errorResponse('Failed to update task assignment: ' + assignErr.message, 500);
       }
 
       const { error: subErr } = await supabaseAdmin
@@ -74,7 +74,7 @@ Deno.serve(async (req: Request) => {
         .eq('task_id', taskId);
 
       if (subErr) {
-        return errorResponse('Failed to update submission status', 500, subErr.message);
+        return errorResponse('Failed to update submission status: ' + subErr.message, 500);
       }
     }
 

@@ -45,37 +45,38 @@ Deno.serve(async (req: Request) => {
     const supabaseAdmin = getSupabaseAdmin();
     const now = new Date().toISOString();
 
-    // Look up employee id
+    // Look up authenticated employee record
     const { data: employee, error: empError } = await supabaseAdmin
       .from('employees')
-      .select('id')
+      .select('id, auth_id')
       .eq('auth_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (empError || !employee) {
       return errorResponse('Employee profile not found', 403);
     }
 
-    const employeeId = employee.id;
+    const empIdStr = employee.id.toString();
+    const authIdStr = user.id.toString();
 
-    // Verify task assignment
+    // Verify task assignment using matching employee identifier conventions
     const { data: assignment, error: assignVerifyError } = await supabaseAdmin
       .from('task_assignments')
       .select('*')
       .eq('task_id', taskId)
-      .eq('employee_id', employeeId)
-      .single();
+      .or(`employee_id.eq.${empIdStr},employee_id.eq.${authIdStr}`)
+      .limit(1)
+      .maybeSingle();
 
     if (assignVerifyError || !assignment) {
       return errorResponse('You are not assigned to this task', 403);
     }
 
-    // 1. Insert record into submissions table
+    // 1. Insert record into submissions table (matching exact existing production schema)
     const { data: subData, error: subError } = await supabaseAdmin
       .from('submissions')
       .insert({
         task_id: taskId,
-        employee_id: employeeId,
         pr_url: prUrl,
         status: 'submitted',
         submitted_at: now,
@@ -94,8 +95,7 @@ Deno.serve(async (req: Request) => {
         status: 'submitted',
         updated_at: now,
       })
-      .eq('task_id', taskId)
-      .eq('employee_id', employeeId);
+      .eq('task_id', taskId);
 
     if (assignError) {
       return errorResponse('Failed to update task assignment: ' + assignError.message, 500);
