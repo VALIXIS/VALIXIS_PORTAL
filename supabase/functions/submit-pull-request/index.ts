@@ -70,20 +70,62 @@ Deno.serve(async (req: Request) => {
 
     const assignmentId = assignment.id;
 
-    // 3. Insert record into submissions table using assignment_id (matching exact production schema)
-    const { data: subData, error: subError } = await supabaseAdmin
+    // 3. Query existing submission for this assignment_id to respect unique_assignment_submission constraint
+    const { data: existingSub, error: subQueryError } = await supabaseAdmin
       .from('submissions')
-      .insert({
-        assignment_id: assignmentId,
-        pr_url: prUrl,
-        review_status: 'pending',
-        submitted_at: now,
-      })
-      .select()
-      .single();
+      .select('id, assignment_id, review_status')
+      .eq('assignment_id', assignmentId)
+      .maybeSingle();
 
-    if (subError) {
-      return errorResponse('Failed to create submission: ' + subError.message, 500);
+    if (subQueryError) {
+      return errorResponse('Database query error: ' + subQueryError.message, 500);
+    }
+
+    let subData: any;
+
+    if (!existingSub) {
+      // INSERT new submission
+      const { data: insertedData, error: subInsertError } = await supabaseAdmin
+        .from('submissions')
+        .insert({
+          assignment_id: assignmentId,
+          pr_url: prUrl,
+          review_status: 'pending',
+          submitted_at: now,
+          reviewed_at: null,
+          manager_feedback: null,
+        })
+        .select()
+        .single();
+
+      if (subInsertError) {
+        return errorResponse('Failed to create submission: ' + subInsertError.message, 500);
+      }
+      subData = insertedData;
+    } else {
+      // Reject re-submission if already approved
+      if (existingSub.review_status === 'approved') {
+        return errorResponse('This task has already been approved.', 409);
+      }
+
+      // UPDATE existing submission (for rejected or pending re-submissions)
+      const { data: updatedData, error: subUpdateError } = await supabaseAdmin
+        .from('submissions')
+        .update({
+          pr_url: prUrl,
+          review_status: 'pending',
+          submitted_at: now,
+          reviewed_at: null,
+          manager_feedback: null,
+        })
+        .eq('id', existingSub.id)
+        .select()
+        .single();
+
+      if (subUpdateError) {
+        return errorResponse('Failed to update submission: ' + subUpdateError.message, 500);
+      }
+      subData = updatedData;
     }
 
     // 4. Update task_assignments.status to 'submitted'
