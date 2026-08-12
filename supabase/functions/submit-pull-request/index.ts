@@ -128,12 +128,11 @@ Deno.serve(async (req: Request) => {
       subData = updatedData;
     }
 
-    // 4. Update task_assignments.status to 'submitted'
+    // 4. Update task_assignments.status to 'submitted' (omitting non-existent updated_at column)
     const { error: assignUpdateError } = await supabaseAdmin
       .from('task_assignments')
       .update({
         status: 'submitted',
-        updated_at: now,
       })
       .eq('id', assignmentId);
 

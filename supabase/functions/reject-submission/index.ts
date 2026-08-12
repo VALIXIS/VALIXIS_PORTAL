@@ -77,12 +77,11 @@ Deno.serve(async (req: Request) => {
       return errorResponse('Failed to update submission: ' + subUpdateErr.message, 500);
     }
 
-    // 2. Update task_assignments table (exact production columns: status, updated_at)
+    // 2. Update task_assignments table (exact production column: status)
     const { error: assignUpdateErr } = await supabaseAdmin
       .from('task_assignments')
       .update({
         status: 'rejected',
-        updated_at: now,
       })
       .eq('id', assignmentId);
 
