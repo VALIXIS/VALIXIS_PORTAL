@@ -45,34 +45,30 @@ Deno.serve(async (req: Request) => {
     const supabaseAdmin = getSupabaseAdmin();
     const now = new Date().toISOString();
 
-    // Look up authenticated employee record
+    // 1. Look up employee primary key (numeric id) from auth_id UUID
     const { data: employee, error: empError } = await supabaseAdmin
       .from('employees')
-      .select('id, auth_id')
+      .select('id')
       .eq('auth_id', user.id)
-      .maybeSingle();
+      .single();
 
     if (empError || !employee) {
       return errorResponse('Employee profile not found', 403);
     }
 
-    const empIdStr = employee.id.toString();
-    const authIdStr = user.id.toString();
-
-    // Verify task assignment using matching employee identifier conventions
+    // 2. Verify assignment using single correctly typed equality query (employees.id -> task_assignments.employee_id)
     const { data: assignment, error: assignVerifyError } = await supabaseAdmin
       .from('task_assignments')
       .select('*')
       .eq('task_id', taskId)
-      .or(`employee_id.eq.${empIdStr},employee_id.eq.${authIdStr}`)
-      .limit(1)
-      .maybeSingle();
+      .eq('employee_id', employee.id)
+      .single();
 
     if (assignVerifyError || !assignment) {
       return errorResponse('You are not assigned to this task', 403);
     }
 
-    // 1. Insert record into submissions table (matching exact existing production schema)
+    // 3. Insert record into submissions table (matching exact production schema)
     const { data: subData, error: subError } = await supabaseAdmin
       .from('submissions')
       .insert({
@@ -88,14 +84,15 @@ Deno.serve(async (req: Request) => {
       return errorResponse('Failed to create submission: ' + subError.message, 500);
     }
 
-    // 2. Update task_assignments status to 'submitted'
+    // 4. Update task_assignments status to 'submitted'
     const { error: assignError } = await supabaseAdmin
       .from('task_assignments')
       .update({
         status: 'submitted',
         updated_at: now,
       })
-      .eq('task_id', taskId);
+      .eq('task_id', taskId)
+      .eq('employee_id', employee.id);
 
     if (assignError) {
       return errorResponse('Failed to update task assignment: ' + assignError.message, 500);
