@@ -45,7 +45,7 @@ Deno.serve(async (req: Request) => {
     const supabaseAdmin = getSupabaseAdmin();
     const now = new Date().toISOString();
 
-    // 1. Look up employee primary key (numeric id) from auth_id UUID
+    // 1. Resolve employee primary key (numeric id) from auth_id UUID
     const { data: employee, error: empError } = await supabaseAdmin
       .from('employees')
       .select('id')
@@ -56,24 +56,27 @@ Deno.serve(async (req: Request) => {
       return errorResponse('Employee profile not found', 403);
     }
 
-    // 2. Verify assignment using single correctly typed equality query (employees.id -> task_assignments.employee_id)
-    const { data: assignment, error: assignVerifyError } = await supabaseAdmin
+    // 2. Resolve task_assignments record matching employee.id and taskId
+    const { data: assignment, error: assignError } = await supabaseAdmin
       .from('task_assignments')
-      .select('*')
+      .select('id, task_id, employee_id')
       .eq('task_id', taskId)
       .eq('employee_id', employee.id)
       .single();
 
-    if (assignVerifyError || !assignment) {
+    if (assignError || !assignment) {
       return errorResponse('You are not assigned to this task', 403);
     }
 
-    // 3. Insert record into submissions table (matching exact production columns: task_id, pr_url, submitted_at)
+    const assignmentId = assignment.id;
+
+    // 3. Insert record into submissions table using assignment_id (matching exact production schema)
     const { data: subData, error: subError } = await supabaseAdmin
       .from('submissions')
       .insert({
-        task_id: taskId,
+        assignment_id: assignmentId,
         pr_url: prUrl,
+        review_status: 'pending',
         submitted_at: now,
       })
       .select()
@@ -83,18 +86,17 @@ Deno.serve(async (req: Request) => {
       return errorResponse('Failed to create submission: ' + subError.message, 500);
     }
 
-    // 4. Update task_assignments status to 'submitted'
-    const { error: assignError } = await supabaseAdmin
+    // 4. Update task_assignments.status to 'submitted'
+    const { error: assignUpdateError } = await supabaseAdmin
       .from('task_assignments')
       .update({
         status: 'submitted',
         updated_at: now,
       })
-      .eq('task_id', taskId)
-      .eq('employee_id', employee.id);
+      .eq('id', assignmentId);
 
-    if (assignError) {
-      return errorResponse('Failed to update task assignment: ' + assignError.message, 500);
+    if (assignUpdateError) {
+      return errorResponse('Failed to update task assignment: ' + assignUpdateError.message, 500);
     }
 
     return jsonResponse(

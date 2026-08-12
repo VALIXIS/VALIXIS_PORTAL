@@ -31,8 +31,17 @@ Deno.serve(async (req: Request) => {
     const taskId = body.task_id.trim();
     const supabaseAdmin = getSupabaseAdmin();
 
-    // Cascading delete using service admin credentials
-    await supabaseAdmin.from('submissions').delete().eq('task_id', taskId);
+    // Cascading delete using assignment_id mapping
+    const { data: assignments } = await supabaseAdmin
+      .from('task_assignments')
+      .select('id')
+      .eq('task_id', taskId);
+
+    if (assignments && assignments.length > 0) {
+      const assignmentIds = assignments.map((a: { id: string }) => a.id);
+      await supabaseAdmin.from('submissions').delete().in('assignment_id', assignmentIds);
+    }
+
     await supabaseAdmin.from('task_assignments').delete().eq('task_id', taskId);
     const { error: taskErr } = await supabaseAdmin.from('tasks').delete().eq('id', taskId);
 

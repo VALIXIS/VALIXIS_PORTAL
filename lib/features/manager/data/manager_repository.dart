@@ -66,10 +66,15 @@ class ManagerDashboardMetrics {
     }
 
     final taskAssignmentMap = <String, Map<String, dynamic>>{};
+    final assignmentByIdMap = <String, Map<String, dynamic>>{};
     for (final a in rawAssignments) {
       final tId = a['task_id']?.toString();
+      final aId = a['id']?.toString();
       if (tId != null) {
         taskAssignmentMap[tId] = a;
+      }
+      if (aId != null && aId.isNotEmpty) {
+        assignmentByIdMap[aId] = a;
       }
     }
 
@@ -99,6 +104,28 @@ class ManagerDashboardMetrics {
       return TaskMapper.fromJson(mergedJson);
     }).toList();
 
+    final enrichedSubmissions = rawSubmissions.map((sub) {
+      final mSub = Map<String, dynamic>.from(sub);
+      final assignmentId = sub['assignment_id']?.toString() ?? sub['assignmentId']?.toString() ?? '';
+      final assignment = assignmentByIdMap[assignmentId];
+
+      final taskId = sub['task_id']?.toString() ?? assignment?['task_id']?.toString() ?? '';
+      final empId = sub['employee_id']?.toString() ?? assignment?['employee_id']?.toString() ?? '';
+      final empName = employeeNameMap[empId] ?? '';
+      final status = sub['review_status']?.toString() ?? sub['status']?.toString() ?? assignment?['status']?.toString() ?? 'pending';
+      final feedback = sub['manager_feedback']?.toString() ?? sub['feedback']?.toString() ?? '';
+
+      mSub['assignment_id'] = assignmentId;
+      mSub['task_id'] = taskId;
+      mSub['employee_id'] = empId;
+      mSub['employee_name'] = empName;
+      mSub['status'] = status;
+      mSub['review_status'] = status;
+      mSub['feedback'] = feedback;
+      mSub['manager_feedback'] = feedback;
+      return mSub;
+    }).toList();
+
     return ManagerDashboardMetrics(
       totalEmployees: rawEmployees.isNotEmpty ? rawEmployees.length : (metrics['total_employees'] as int? ?? 0),
       totalTasks: enrichedTasks.isNotEmpty ? enrichedTasks.length : (metrics['total_tasks'] as int? ?? 0),
@@ -107,7 +134,7 @@ class ManagerDashboardMetrics {
       submittedCount: metrics['submitted_tasks'] as int? ?? 0,
       approvedCount: metrics['approved_tasks'] as int? ?? 0,
       rejectedCount: metrics['rejected_tasks'] as int? ?? 0,
-      recentSubmissions: rawSubmissions,
+      recentSubmissions: enrichedSubmissions,
       recentTasks: enrichedTasks,
       allEmployees: rawEmployees,
     );
@@ -128,8 +155,25 @@ class ManagerRepository {
       throw FunctionException(status: response.status, details: response.data);
     }
 
+    final data = response.data as Map<String, dynamic>;
+
+    List<Map<String, dynamic>>? liveAssignments;
+    List<Map<String, dynamic>>? liveEmployees;
+
+    try {
+      final assignRes = await _client.from('task_assignments').select('*');
+      liveAssignments = (assignRes as List<dynamic>).cast<Map<String, dynamic>>();
+    } catch (_) {}
+
+    try {
+      final empRes = await _client.from('employees').select('id, auth_id, name, email, role, department, avatar_url');
+      liveEmployees = (empRes as List<dynamic>).cast<Map<String, dynamic>>();
+    } catch (_) {}
+
     return ManagerDashboardMetrics.fromJson(
-      response.data as Map<String, dynamic>,
+      data,
+      liveAssignments: liveAssignments,
+      liveEmployees: liveEmployees,
     );
   }
 
@@ -208,11 +252,9 @@ class ManagerRepository {
     try {
       final numericId = int.tryParse(taskId);
       if (numericId != null) {
-        await _client.from('submissions').delete().or('task_id.eq.$taskId,task_id.eq.$numericId');
         await _client.from('task_assignments').delete().or('task_id.eq.$taskId,task_id.eq.$numericId');
         await _client.from('tasks').delete().eq('id', numericId);
       } else {
-        await _client.from('submissions').delete().eq('task_id', taskId);
         await _client.from('task_assignments').delete().eq('task_id', taskId);
         await _client.from('tasks').delete().eq('id', taskId);
       }
