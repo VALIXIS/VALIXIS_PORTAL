@@ -68,13 +68,12 @@ Deno.serve(async (req: Request) => {
       return errorResponse('You are not assigned to this task', 403);
     }
 
-    // 3. Insert record into submissions table (matching exact production schema)
+    // 3. Insert record into submissions table (matching exact production columns: task_id, pr_url, submitted_at)
     const { data: subData, error: subError } = await supabaseAdmin
       .from('submissions')
       .insert({
         task_id: taskId,
         pr_url: prUrl,
-        status: 'submitted',
         submitted_at: now,
       })
       .select()

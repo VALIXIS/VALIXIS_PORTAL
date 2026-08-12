@@ -40,7 +40,6 @@ Deno.serve(async (req: Request) => {
       const { error: subErr } = await supabaseAdmin
         .from('submissions')
         .update({
-          status: 'approved',
           feedback: body.feedback || null,
           reviewed_at: now,
         })
@@ -67,7 +66,6 @@ Deno.serve(async (req: Request) => {
       const { error: subErr } = await supabaseAdmin
         .from('submissions')
         .update({
-          status: 'approved',
           feedback: body.feedback || null,
           reviewed_at: now,
         })
