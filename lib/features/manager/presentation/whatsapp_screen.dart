@@ -186,11 +186,7 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen> {
     final hasEmployeesError = employeesAsync.hasError;
 
     final rawEmployees = employeesAsync.valueOrNull ?? [];
-    final employees = rawEmployees.where((e) {
-      final r = e.employee.role?.toLowerCase().trim();
-      if (r == null || r.isEmpty) return true;
-      return !r.contains('manager') && !r.contains('admin') && !r.contains('supervisor');
-    }).toList();
+    final employees = rawEmployees;
 
     Employee? selectedEmployee;
     if (_selectedEmployeeId != null) {
