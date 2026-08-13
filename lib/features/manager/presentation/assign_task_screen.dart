@@ -37,13 +37,26 @@ class _AssignTaskScreenState extends ConsumerState<AssignTaskScreen> {
         .assignTask(taskId: _selectedTaskId!, employeeId: _selectedEmployeeId!);
 
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(success ? 'Task assigned successfully!' : 'Failed to assign task.'), backgroundColor: success ? AppColors.success : AppColors.error),
-      );
       if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Task assigned successfully!'), backgroundColor: AppColors.success),
+        );
         ref.invalidate(managerDashboardProvider);
         ref.invalidate(employeeManagementProvider);
         context.go(AppRoutes.managerDashboard);
+      } else {
+        // Surface the actual backend error message from the provider state
+        final error = ref.read(assignmentNotifierProvider).error;
+        final errorMessage = error is Exception
+            ? error.toString().replaceFirst('Exception: ', '')
+            : error?.toString() ?? 'Failed to assign task.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: AppColors.error,
+            duration: const Duration(seconds: 5),
+          ),
+        );
       }
     }
   }

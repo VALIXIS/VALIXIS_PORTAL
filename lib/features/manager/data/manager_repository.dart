@@ -224,12 +224,28 @@ class ManagerRepository {
   }
 
   /// Assigns or reassigns a task to an employee.
+  /// Throws an [Exception] with the backend error message on failure.
   Future<bool> assignTask({required String taskId, required String employeeId}) async {
     final response = await _client.functions.invoke(
       'assign-task',
       body: {'task_id': taskId, 'employee_id': employeeId},
     );
-    return response.status < 400;
+
+    if (response.status >= 400) {
+      // Extract the backend error message for a meaningful UI error
+      String message = 'Failed to assign task.';
+      try {
+        final data = response.data as Map<String, dynamic>?;
+        final rawError = data?['error']?.toString() ??
+            data?['message']?.toString() ??
+            data?['details']?.toString();
+        if (rawError != null && rawError.isNotEmpty) {
+          message = rawError;
+        }
+      } catch (_) {}
+      throw Exception(message);
+    }
+    return true;
   }
 
   /// Unassigns a task by removing its assignment relationship.

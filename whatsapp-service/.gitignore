@@ -1,0 +1,15 @@
+# ── Node.js ───────────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Environment secrets ───────────────────────────────────────────────────────
+.env
+
+# ── WhatsApp session data (contains auth tokens — never commit) ───────────────
+.wwebjs_auth/
+
+# ── Chromium cache used by Puppeteer ─────────────────────────────────────────
+.wwebjs_cache/
+
+# ── OS artefacts ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db

@@ -46,3 +46,8 @@ app.*.map.json
 /android/app/release
 .vercel
 .env*.local
+
+# Archive files — too large for GitHub
+*.zip
+*.tar.gz
+*.rar
