@@ -177,7 +177,7 @@ class ManagerRepository {
     } catch (_) {}
 
     try {
-      final empRes = await _client.from('employees').select('id, auth_id, name, email, role, department, avatar_url');
+      final empRes = await _client.from('employees').select('id, auth_id, name, email, role, department');
       liveEmployees = (empRes as List<dynamic>).cast<Map<String, dynamic>>();
     } catch (_) {}
 

@@ -106089,7 +106089,7 @@ case 4:s=2
 break
 case 7:p=10
 s=13
-return A.o(f.i_("employees").pJ("id, auth_id, name, email, role, department, avatar_url"),$async$rl)
+return A.o(f.i_("employees").pJ("id, auth_id, name, email, role, department"),$async$rl)
 case 13:j=b
 l=J.kg(j,e)
 p=2
