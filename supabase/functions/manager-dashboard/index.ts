@@ -24,7 +24,7 @@ Deno.serve(async (req: Request) => {
       supabaseAdmin.from('tasks').select('*'),
       supabaseAdmin.from('task_assignments').select('*'),
       supabaseAdmin.from('submissions').select('*').order('submitted_at', { ascending: false }),
-      supabaseAdmin.from('employees').select('id, auth_id, name, email, role, department'),
+      supabaseAdmin.from('employees').select('id, auth_id, name, email, role, department, phone'),
     ]);
 
     if (tasksRes.error) {

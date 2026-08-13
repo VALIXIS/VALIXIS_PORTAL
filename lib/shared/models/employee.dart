@@ -6,6 +6,7 @@ class Employee {
     this.role,
     this.department,
     this.avatarUrl,
+    this.phone,
   });
 
   final String id;
@@ -14,6 +15,7 @@ class Employee {
   final String? role;
   final String? department;
   final String? avatarUrl;
+  final String? phone;
 
   factory Employee.fromJson(Map<String, dynamic> json) {
     return Employee(
@@ -25,6 +27,7 @@ class Employee {
       role: json['role'] as String?,
       department: json['department'] as String?,
       avatarUrl: json['avatar_url'] as String?,
+      phone: json['phone'] as String?,
     );
   }
 
@@ -35,5 +38,6 @@ class Employee {
         if (role != null) 'role': role,
         if (department != null) 'department': department,
         if (avatarUrl != null) 'avatar_url': avatarUrl,
+        if (phone != null) 'phone': phone,
       };
 }

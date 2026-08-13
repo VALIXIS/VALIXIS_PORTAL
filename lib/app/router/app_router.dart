@@ -13,6 +13,7 @@ import '../../features/manager/presentation/manager_audit_logs_screen.dart';
 import '../../features/manager/presentation/manager_dashboard_screen.dart';
 import '../../features/manager/presentation/manager_tasks_screen.dart';
 import '../../features/manager/presentation/review_submissions_screen.dart';
+import '../../features/manager/presentation/whatsapp_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/tasks/presentation/task_details_screen.dart';
@@ -35,6 +36,7 @@ abstract final class AppRoutes {
   static const String managerReviews = '/manager/reviews';
   static const String managerEmployees = '/manager/employees';
   static const String managerAuditLogs = '/manager/audit-logs';
+  static const String managerWhatsApp = '/manager/whatsapp';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -198,6 +200,14 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
               pageBuilder: (context, state) => _fadePage(
                 key: state.pageKey,
                 child: const ManagerAuditLogsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.managerWhatsApp,
+              name: 'managerWhatsApp',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const WhatsAppScreen(),
               ),
             ),
           ],

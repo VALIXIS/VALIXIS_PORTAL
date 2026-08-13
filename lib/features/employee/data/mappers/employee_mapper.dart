@@ -20,6 +20,7 @@ abstract final class EmployeeMapper {
     final rawRole = (json['role'] ?? json['user_role'])?.toString();
     final rawDept = json['department']?.toString();
     final rawAvatar = json['avatar_url']?.toString();
+    final rawPhone = json['phone']?.toString();
 
     return Employee(
       id: rawId,
@@ -28,6 +29,7 @@ abstract final class EmployeeMapper {
       role: rawRole,
       department: rawDept,
       avatarUrl: rawAvatar,
+      phone: rawPhone,
     );
   }
 }

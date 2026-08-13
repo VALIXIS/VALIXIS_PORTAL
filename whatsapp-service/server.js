@@ -23,7 +23,7 @@
 require('dotenv').config();                              // Load .env before anything else
 
 const express       = require('express');
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const qrcodeTerminal = require('qrcode-terminal');
 
 // ─── Configuration ───────────────────────────────────────────────────────────
@@ -120,6 +120,10 @@ const client = new Client({
       '--disable-accelerated-2d-canvas',
       '--no-first-run',
       '--no-zygote',
+      '--disable-gpu',
+      '--disable-software-rasterizer',
+      '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+      '--disable-features=IsolateOrigins,site-per-process',
     ],
   },
 });
@@ -225,7 +229,7 @@ app.get('/status', (_req, res) => {
  * Failure  → 500 { success: false, error:  "<underlying error message>" }
  */
 app.post('/send-task-alert', async (req, res) => {
-  const { recipient, message } = req.body;
+  const { recipient, message, file } = req.body;
 
   // ── Validation ────────────────────────────────────────────────────────────
 
@@ -257,10 +261,16 @@ app.post('/send-task-alert', async (req, res) => {
   const sanitizedRecipient = recipient.trim();
   const sanitizedMessage   = message.trim();
 
-  console.log(`📤  Sending WhatsApp alert → ${sanitizedRecipient}`);
+  console.log(`📤  Sending WhatsApp alert → ${sanitizedRecipient} (Has file: ${!!file})`);
 
   try {
-    await client.sendMessage(sanitizedRecipient, sanitizedMessage);
+    if (file && file.mimetype && file.base64) {
+      const filename = file.filename || 'file';
+      const media = new MessageMedia(file.mimetype, file.base64, filename);
+      await client.sendMessage(sanitizedRecipient, media, { caption: sanitizedMessage });
+    } else {
+      await client.sendMessage(sanitizedRecipient, sanitizedMessage);
+    }
 
     console.log(`    ✅ Message delivered to ${sanitizedRecipient}`);
 

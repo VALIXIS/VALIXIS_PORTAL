@@ -76,6 +76,13 @@ const _allNavItems = [
     isManagerOnly: true,
   ),
   NavItem(
+    route: AppRoutes.managerWhatsApp,
+    label: 'Direct WhatsApp',
+    icon: Icons.chat_bubble_outline_rounded,
+    selectedIcon: Icons.chat_bubble_rounded,
+    isManagerOnly: true,
+  ),
+  NavItem(
     route: AppRoutes.profile,
     label: 'Profile',
     icon: Icons.person_outline_rounded,
