@@ -105,6 +105,11 @@ async function sendWhatsAppNotification(
   employee: { name: string; phone?: string }
 ) {
   try {
+    const rawDeadline = task.deadline || '';
+    const dateOnly = rawDeadline
+      ? (rawDeadline.includes('T') ? rawDeadline.split('T')[0] : rawDeadline.split(' ')[0])
+      : 'Not specified';
+
     const messageStr = `🔔 *VALIXIS — New Task Assigned*
 
 Hi ${employee.name},
@@ -112,7 +117,7 @@ Hi ${employee.name},
 You have been assigned a new task:
 
 *Task:* ${task.title}
-*Deadline:* ${task.deadline || 'Not specified'}
+*Deadline:* ${dateOnly}
 
 Please complete the task before the deadline.
 
