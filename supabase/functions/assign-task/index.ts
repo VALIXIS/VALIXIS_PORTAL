@@ -24,7 +24,7 @@ interface AssignTaskPayload {
 async function resolveEmployee(
   supabaseAdmin: ReturnType<typeof import('../_shared/supabase.ts').getSupabaseAdmin>,
   raw: string
-): Promise<{ id: number; name: string; email: string } | null> {
+): Promise<{ id: number; name: string; email: string; phone?: string } | null> {
 
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -35,7 +35,7 @@ async function resolveEmployee(
     console.log(`[assign-task] Lookup by numeric id: ${numericId}`);
     const { data, error } = await supabaseAdmin
       .from('employees')
-      .select('id, name, email')
+      .select('id, name, email, phone')
       .eq('id', numericId)
       .maybeSingle();
 
@@ -52,7 +52,7 @@ async function resolveEmployee(
     console.log(`[assign-task] Lookup by auth_id UUID: ${raw}`);
     const { data, error } = await supabaseAdmin
       .from('employees')
-      .select('id, name, email')
+      .select('id, name, email, phone')
       .eq('auth_id', raw)
       .maybeSingle();
 
@@ -67,7 +67,7 @@ async function resolveEmployee(
     console.log(`[assign-task] Lookup by employees.id as UUID: ${raw}`);
     const { data: d2, error: e2 } = await supabaseAdmin
       .from('employees')
-      .select('id, name, email')
+      .select('id, name, email, phone')
       .eq('id', raw)
       .maybeSingle();
 
@@ -84,7 +84,7 @@ async function resolveEmployee(
     console.log(`[assign-task] Lookup by email: ${raw}`);
     const { data, error } = await supabaseAdmin
       .from('employees')
-      .select('id, name, email')
+      .select('id, name, email, phone')
       .eq('email', raw)
       .maybeSingle();
 
@@ -98,6 +98,40 @@ async function resolveEmployee(
 
   console.error(`[assign-task] All lookup strategies exhausted for identifier: "${raw}"`);
   return null;
+}
+
+async function sendWhatsAppNotification(
+  task: { title: string; branch_name?: string },
+  employee: { name: string; phone?: string }
+) {
+  try {
+    const payload = {
+      type: 'INSERT',
+      table: 'task_assignments',
+      record: {
+        title: task.title,
+        assigned_to: employee.name,
+        branch_name: task.branch_name || 'Not specified',
+        phone: employee.phone || ''
+      }
+    };
+    
+    console.log(`[assign-task] Sending WhatsApp notification for task "${task.title}" to ${employee.name}`);
+    
+    const response = await fetch('https://every-banks-flash.loca.lt/supabase-webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (response.ok) {
+      console.log(`[assign-task] WhatsApp notification sent successfully`);
+    } else {
+      console.error(`[assign-task] WhatsApp notification failed with status: ${response.status}`);
+    }
+  } catch (err: any) {
+    console.error('[assign-task] WhatsApp notification fetch error:', err?.message || String(err));
+  }
 }
 
 Deno.serve(async (req: Request) => {
@@ -211,6 +245,8 @@ Deno.serve(async (req: Request) => {
         return errorResponse('Failed to reassign task: ' + updateError.message, 500);
       }
 
+      await sendWhatsAppNotification(task, employee);
+
       return jsonResponse(
         {
           success    : true,
@@ -247,6 +283,8 @@ Deno.serve(async (req: Request) => {
     }
 
     console.log(`[assign-task] Assignment created id=${created.id}`);
+
+    await sendWhatsAppNotification(task, employee);
 
     return jsonResponse(
       {
