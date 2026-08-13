@@ -101,24 +101,20 @@ async function resolveEmployee(
 }
 
 async function sendWhatsAppNotification(
-  task: { title: string; branch_name?: string },
+  task: { title: string; deadline?: string },
   employee: { name: string; phone?: string }
 ) {
   try {
+    const messageStr = `Task: ${task.title}\nAssigned to: ${employee.name}\nDeadline: ${task.deadline || 'Not specified'}`;
+    
     const payload = {
-      type: 'INSERT',
-      table: 'task_assignments',
-      record: {
-        title: task.title,
-        assigned_to: employee.name,
-        branch_name: task.branch_name || 'Not specified',
-        phone: employee.phone || ''
-      }
+      recipient: employee.phone ? `${employee.phone.replace(/\D/g, '')}@c.us` : '919603416707@c.us',
+      message: messageStr
     };
     
     console.log(`[assign-task] Sending WhatsApp notification for task "${task.title}" to ${employee.name}`);
     
-    const response = await fetch('https://every-banks-flash.loca.lt/supabase-webhook', {
+    const response = await fetch('https://every-banks-flash.loca.lt/send-task-alert', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -185,10 +181,10 @@ Deno.serve(async (req: Request) => {
 
     const resolvedEmployeeId = employee.id;
 
-    // 3. Verify task exists and fetch branch_name for the WhatsApp notification
+    // 3. Verify task exists and fetch deadline for the WhatsApp notification
     const { data: task, error: taskError } = await supabaseAdmin
       .from('tasks')
-      .select('id, title, branch_name')
+      .select('id, title, deadline')
       .eq('id', taskId)
       .maybeSingle();
 
