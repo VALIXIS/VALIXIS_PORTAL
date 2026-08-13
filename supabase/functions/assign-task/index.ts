@@ -105,7 +105,18 @@ async function sendWhatsAppNotification(
   employee: { name: string; phone?: string }
 ) {
   try {
-    const messageStr = `Task: ${task.title}\nAssigned to: ${employee.name}\nDeadline: ${task.deadline || 'Not specified'}`;
+    const messageStr = `🔔 *VALIXIS — New Task Assigned*
+
+Hi ${employee.name},
+
+You have been assigned a new task:
+
+*Task:* ${task.title}
+*Deadline:* ${task.deadline || 'Not specified'}
+
+Please complete the task before the deadline.
+
+— *VALIXIS*`;
     
     const payload = {
       recipient: employee.phone ? `${employee.phone.replace(/\D/g, '')}@c.us` : '919603416707@c.us',
