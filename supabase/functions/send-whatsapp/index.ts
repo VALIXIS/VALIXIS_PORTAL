@@ -60,7 +60,7 @@ Deno.serve(async (req: Request) => {
     console.log(`[send-whatsapp] Forwarding request to Cloudflare tunnel, recipient=${payload.recipient}`);
 
     // 3. Forward to WhatsApp Service on Cloudflare Tunnel
-    const response = await fetch('https://consequently-forth-devoted-oaks.trycloudflare.com/send-task-alert', {
+    const response = await fetch('https://highland-laptop-former-developers.trycloudflare.com/send-task-alert', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
