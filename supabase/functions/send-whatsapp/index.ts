@@ -51,8 +51,14 @@ Deno.serve(async (req: Request) => {
       }
     }
 
+    let recipientId = body.recipient.trim();
+    if (!recipientId.endsWith('@c.us') && !recipientId.endsWith('@g.us')) {
+      const cleanPhone = recipientId.replace(/\D/g, '');
+      recipientId = `${cleanPhone}@c.us`;
+    }
+
     const payload = {
-      recipient: body.recipient.trim(),
+      recipient: recipientId,
       message: body.message.trim(),
       file: body.file
     };
