@@ -64,7 +64,20 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       if (response.user != null) {
         try {
           final supabase = _ref.read(supabaseClientProvider);
+          String? empId;
+          try {
+            final empRes = await supabase
+                .from('employees')
+                .select('id')
+                .eq('auth_id', response.user!.id)
+                .maybeSingle();
+            if (empRes != null) {
+              empId = empRes['id']?.toString();
+            }
+          } catch (_) {}
+
           final res = await supabase.from('audit_logs').insert({
+            if (empId != null && empId.isNotEmpty) 'actor_id': empId,
             'action': 'Login',
             'category': 'Authentication',
             'status': 'Success',
@@ -76,7 +89,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
             _ref.read(heartbeatProvider).startNewSession(logId);
           }
         } catch (e) {
-          // Log insertion error silently so authentication flow is not interrupted
+          debugPrint('[Audit Log] Failed to insert login audit record: $e');
         }
       }
 

@@ -21,46 +21,6 @@ class ManagerTasksTable extends StatelessWidget {
   final ValueChanged<Task> onUnassign;
   final ValueChanged<Task> onDelete;
 
-  Widget _buildEmployeeCell(String assignedTo) {
-    if (assignedTo.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-          color: AppColors.textMuted.withAlpha(20),
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: const Text(
-          'Unassigned',
-          style: TextStyle(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w600),
-        ),
-      );
-    }
-
-    final initials = assignedTo.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join().toUpperCase();
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircleAvatar(
-          radius: 12,
-          backgroundColor: AppColors.brandCyan.withAlpha(40),
-          child: Text(
-            initials.isNotEmpty ? initials : 'E',
-            style: const TextStyle(color: AppColors.brandCyan, fontSize: 10, fontWeight: FontWeight.w800),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Flexible(
-          child: Text(
-            assignedTo,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return GlassCard(
@@ -72,7 +32,6 @@ class ManagerTasksTable extends StatelessWidget {
           dataRowMaxHeight: 64,
           columns: const [
             DataColumn(label: Text('Task Title', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
-            DataColumn(label: Text('Assigned Employee', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
             DataColumn(label: Text('Repository', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
             DataColumn(label: Text('Priority', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
             DataColumn(label: Text('Assignment', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
@@ -97,22 +56,47 @@ class ManagerTasksTable extends StatelessWidget {
                     ],
                   ),
                 ),
-                DataCell(_buildEmployeeCell(isAssigned ? task.assignedTo : '')),
                 DataCell(Text(task.githubRepo ?? 'VALIXIS_PORTAL', style: const TextStyle(color: AppColors.brandBlue, fontSize: 12, fontWeight: FontWeight.w600))),
                 DataCell(Text(task.priority.label, style: TextStyle(color: task.priority.color, fontWeight: FontWeight.w700, fontSize: 12))),
                 DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: (isAssigned ? AppColors.brandPurple : AppColors.textMuted).withAlpha(25),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: (isAssigned ? AppColors.brandPurple : AppColors.textMuted).withAlpha(80)),
-                    ),
-                    child: Text(
-                      isAssigned ? 'Assigned' : 'Unassigned',
-                      style: TextStyle(color: isAssigned ? AppColors.brandPurple : AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w700),
-                    ),
-                  ),
+                  isAssigned
+                      ? Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: AppColors.brandPurple.withAlpha(25),
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: AppColors.brandPurple.withAlpha(80)),
+                              ),
+                              child: const Text(
+                                'Assigned',
+                                style: TextStyle(color: AppColors.brandPurple, fontSize: 11, fontWeight: FontWeight.w700),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                task.assignedTo,
+                                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.textMuted.withAlpha(25),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: AppColors.textMuted.withAlpha(80)),
+                          ),
+                          child: const Text(
+                            'Unassigned',
+                            style: TextStyle(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w700),
+                          ),
+                        ),
                 ),
                 DataCell(Text(DateFormatter.formatShortDate(task.deadline), style: const TextStyle(color: AppColors.textSecondary, fontSize: 12))),
                 DataCell(
