@@ -108859,7 +108859,6 @@ if(s!=null&&s.length!==0){d=A.Tk(s)
 r=d==null?g:d.GT()}else r=g
 q="Duration: Less than 1m"
 if(r!=null){p=B.h.cT(r.fa(c).a,1e6)
-if(p>=19740&&p<=19860)p-=19800
 o=B.h.cT(p<0?0:p,60)
 n=B.h.cT(o,60)
 m=B.h.bx(o,60)

@@ -25,11 +25,6 @@ final auditLogsProvider = FutureProvider<List<AuditLogItem>>((ref) async {
     if (lastSeenUtc != null) {
       var diffSeconds = lastSeenUtc.difference(timestampUtc).inSeconds;
 
-      // Handle historical database records saved with local offset (+5h 30m = 19800s)
-      if (diffSeconds >= 19740 && diffSeconds <= 19860) {
-        diffSeconds = diffSeconds - 19800;
-      }
-
       if (diffSeconds < 0) {
         diffSeconds = 0;
       }
