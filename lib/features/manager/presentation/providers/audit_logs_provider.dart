@@ -12,20 +12,38 @@ final auditLogsProvider = FutureProvider<List<AuditLogItem>>((ref) async {
   final list = response as List<dynamic>;
   return list.map((item) {
     final timestampStr = item['timestamp'] as String? ?? '';
-    final timestamp = DateTime.tryParse(timestampStr) ?? DateTime.now();
+    final timestampUtc = DateTime.tryParse(timestampStr)?.toUtc() ?? DateTime.now().toUtc();
 
     final lastSeenStr = item['last_seen'] as String?;
-    String? details;
-    if (lastSeenStr != null) {
-      final lastSeen = DateTime.tryParse(lastSeenStr);
-      if (lastSeen != null) {
-        final diff = lastSeen.difference(timestamp);
-        final minutes = diff.inMinutes;
-        final hours = diff.inHours;
-        final durationText = hours > 0
-            ? '${hours}h ${minutes % 60}m'
-            : '${minutes}m';
-        details = 'Approx. Duration: $durationText';
+    DateTime? lastSeenUtc;
+    if (lastSeenStr != null && lastSeenStr.isNotEmpty) {
+      lastSeenUtc = DateTime.tryParse(lastSeenStr)?.toUtc();
+    }
+
+    String details = 'Duration: Less than 1m';
+
+    if (lastSeenUtc != null) {
+      var diffSeconds = lastSeenUtc.difference(timestampUtc).inSeconds;
+
+      // Handle historical database records saved with local offset (+5h 30m = 19800s)
+      if (diffSeconds >= 19740 && diffSeconds <= 19860) {
+        diffSeconds = diffSeconds - 19800;
+      }
+
+      if (diffSeconds < 0) {
+        diffSeconds = 0;
+      }
+
+      final totalMinutes = diffSeconds ~/ 60;
+      final hours = totalMinutes ~/ 60;
+      final remMinutes = totalMinutes % 60;
+
+      if (totalMinutes < 1) {
+        details = 'Duration: Less than 1m';
+      } else if (hours < 1) {
+        details = 'Duration: ${totalMinutes}m';
+      } else {
+        details = 'Duration: ${hours}h ${remMinutes}m';
       }
     }
 
@@ -34,7 +52,7 @@ final auditLogsProvider = FutureProvider<List<AuditLogItem>>((ref) async {
       actor: item['actor']?.toString() ?? 'Unknown User',
       action: item['action']?.toString() ?? '',
       category: item['category']?.toString() ?? 'Authentication',
-      timestamp: timestamp,
+      timestamp: timestampUtc.toLocal(),
       ipAddress: item['ip_address']?.toString() ?? 'N/A',
       status: item['status']?.toString() ?? 'Success',
       details: details,

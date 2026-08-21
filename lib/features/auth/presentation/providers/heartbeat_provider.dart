@@ -61,7 +61,7 @@ class HeartbeatController {
 
     try {
       await _client.from('audit_logs').update({
-        'last_seen': DateTime.now().toIso8601String(),
+        'last_seen': DateTime.now().toUtc().toIso8601String(),
       }).eq('id', _activeLogId!);
       debugPrint('[Heartbeat] Updated last_seen for log $_activeLogId');
     } catch (e) {
