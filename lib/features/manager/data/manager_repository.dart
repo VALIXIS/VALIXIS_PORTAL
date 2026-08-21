@@ -53,14 +53,16 @@ class ManagerDashboardMetrics {
     for (final emp in rawEmployees) {
       final idStr = emp['id']?.toString() ?? '';
       final authId = emp['auth_id']?.toString() ?? '';
-      final name = emp['name'] as String? ?? emp['full_name'] as String? ?? emp['email'] as String? ?? 'Employee';
+      final rawName = emp['name'] as String? ?? emp['full_name'] as String? ?? 'Employee';
+      final email = emp['email'] as String? ?? '';
+      final displayName = email.isNotEmpty ? '$rawName ($email)' : rawName;
       final avatar = emp['avatar_url'] as String? ?? '';
       if (idStr.isNotEmpty) {
-        employeeNameMap[idStr] = name;
+        employeeNameMap[idStr] = displayName;
         employeeAvatarMap[idStr] = avatar;
       }
       if (authId.isNotEmpty) {
-        employeeNameMap[authId] = name;
+        employeeNameMap[authId] = displayName;
         employeeAvatarMap[authId] = avatar;
       }
     }
@@ -87,27 +89,38 @@ class ManagerDashboardMetrics {
       }
     }
 
+    final submissionByAssignmentMap = <String, Map<String, dynamic>>{};
+    for (final s in rawSubmissions) {
+      final aId = s['assignment_id']?.toString();
+      if (aId != null && aId.isNotEmpty) {
+        submissionByAssignmentMap[aId] = s;
+      }
+    }
+
     final enrichedTasks = rawTasks.map((tJson) {
       final taskId = tJson['id']?.toString() ?? '';
       final assignment = taskAssignmentMap[taskId];
-      final empId = assignment?['employee_id']?.toString() ??
-          tJson['assigned_to']?.toString() ??
-          tJson['employee_id']?.toString() ??
-          '';
+      final empId = assignment != null ? assignment['employee_id']?.toString() ?? '' : '';
 
-      final empName = employeeNameMap[empId] ?? (empId.isNotEmpty ? empId : '');
-      final latestStatus = assignment?['status']?.toString() ?? tJson['status']?.toString();
+      final empName = empId.isNotEmpty ? (employeeNameMap[empId] ?? empId) : '';
+      final latestStatus = assignment != null ? assignment['status']?.toString() : 'unassigned';
 
       final mergedJson = Map<String, dynamic>.from(tJson);
-      if (empName.isNotEmpty) {
+      if (assignment != null && empName.isNotEmpty) {
         mergedJson['assigned_to'] = empName;
         mergedJson['employee_id'] = empId;
       } else {
-        mergedJson['assigned_to'] = '';
+        mergedJson['assigned_to'] = 'Unassigned';
         mergedJson['employee_id'] = '';
       }
-      if (latestStatus != null) {
-        mergedJson['status'] = latestStatus;
+      mergedJson['status'] = latestStatus ?? 'unassigned';
+
+      // Check if a submission exists for this task's assignment
+      if (assignment != null && assignment['id'] != null) {
+        final sub = submissionByAssignmentMap[assignment['id'].toString()];
+        if (sub != null && sub['pr_url'] != null) {
+          mergedJson['pr_url'] = sub['pr_url'];
+        }
       }
 
       return TaskMapper.fromJson(mergedJson);
@@ -277,14 +290,19 @@ class ManagerRepository {
     }
 
     try {
-      final numericId = int.tryParse(taskId);
-      if (numericId != null) {
-        await _client.from('task_assignments').delete().or('task_id.eq.$taskId,task_id.eq.$numericId');
-        await _client.from('tasks').delete().eq('id', numericId);
-      } else {
-        await _client.from('task_assignments').delete().eq('task_id', taskId);
-        await _client.from('tasks').delete().eq('id', taskId);
+      // 1. Query task_assignments for this task_id
+      final assignments = await _client.from('task_assignments').select('id').eq('task_id', taskId);
+      final assignmentList = assignments as List<dynamic>? ?? [];
+      for (final a in assignmentList) {
+        final aId = a['id'];
+        if (aId != null) {
+          await _client.from('submissions').delete().eq('assignment_id', aId);
+        }
       }
+      // 2. Delete task_assignments
+      await _client.from('task_assignments').delete().eq('task_id', taskId);
+      // 3. Delete task
+      await _client.from('tasks').delete().eq('id', taskId);
       return true;
     } catch (e) {
       debugPrint('Delete task client fallback error: $e');

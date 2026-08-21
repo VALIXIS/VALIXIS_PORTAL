@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../../../../core/network/supabase_client_provider.dart';
 import '../../data/auth_repository.dart';
+import 'heartbeat_provider.dart';
 import 'role_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
 import '../../../manager/presentation/providers/employee_management_provider.dart';
@@ -57,6 +60,26 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
         password: password,
       );
       _invalidateUserProviders();
+
+      if (response.user != null) {
+        try {
+          final supabase = _ref.read(supabaseClientProvider);
+          final res = await supabase.from('audit_logs').insert({
+            'action': 'Login',
+            'category': 'Authentication',
+            'status': 'Success',
+            'ip_address': kIsWeb ? 'Web Client' : 'Mobile Client',
+          }).select('id').single();
+
+          final logId = res['id']?.toString();
+          if (logId != null && logId.isNotEmpty) {
+            _ref.read(heartbeatProvider).startNewSession(logId);
+          }
+        } catch (e) {
+          // Log insertion error silently so authentication flow is not interrupted
+        }
+      }
+
       return response.user;
     });
   }
@@ -65,6 +88,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   Future<void> signOut() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
+      _ref.read(heartbeatProvider).stop();
       await _repository.signOut();
       _invalidateUserProviders();
       return null;

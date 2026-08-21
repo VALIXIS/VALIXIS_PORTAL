@@ -22,8 +22,9 @@ abstract final class TaskMapper {
       branchName:
           taskData['branch_name'] as String? ?? taskData['branch'] as String?,
       expectedOutput: taskData['expected_output'] as String?,
-      githubRepo:
-          taskData['github_repo'] as String? ?? taskData['repo_url'] as String?,
+      githubRepo: taskData['github_repository'] as String? ??
+          taskData['github_repo'] as String? ??
+          taskData['repo_url'] as String?,
       prUrl: json['pr_url'] as String? ??
           taskData['pr_url'] as String? ??
           json['pull_request_url'] as String?,

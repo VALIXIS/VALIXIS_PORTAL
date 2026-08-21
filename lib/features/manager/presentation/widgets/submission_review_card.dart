@@ -18,6 +18,7 @@ class SubmissionReviewCard extends StatelessWidget {
     this.taskTitle,
     this.employeeName,
     this.submittedAt,
+    this.repository,
   });
 
   final String taskId;
@@ -29,6 +30,7 @@ class SubmissionReviewCard extends StatelessWidget {
   final String? taskTitle;
   final String? employeeName;
   final String? submittedAt;
+  final String? repository;
 
   void _launchPrUrl() {
     final uri = Uri.tryParse(prUrl);
@@ -111,6 +113,24 @@ class SubmissionReviewCard extends StatelessWidget {
                                   style: const TextStyle(
                                     color: AppColors.textMuted,
                                     fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                              if (repository != null && repository!.isNotEmpty) ...[
+                                const SizedBox(width: 8),
+                                const Text('•',
+                                    style: TextStyle(
+                                        color: AppColors.textMuted, fontSize: 12)),
+                                const SizedBox(width: 8),
+                                const Icon(Icons.code_rounded,
+                                    size: 12, color: AppColors.brandBlue),
+                                const SizedBox(width: 4),
+                                Text(
+                                  repository!,
+                                  style: const TextStyle(
+                                    color: AppColors.brandBlue,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],

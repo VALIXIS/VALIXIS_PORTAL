@@ -86,12 +86,10 @@ class BasicInfoFields extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         AppTextField(
           controller: descController,
-          label: 'Description *',
-          hint: 'Brief overview of context and requirements',
+          label: 'Description',
+          hint: 'Brief overview of context and requirements (Optional)',
           prefixIcon: Icons.description_rounded,
           maxLines: 2,
-          validator: (val) =>
-              val == null || val.trim().isEmpty ? 'Description is required' : null,
         ),
       ],
     );
@@ -179,8 +177,8 @@ class AiGitConfigFields extends StatelessWidget {
             Expanded(
               child: AppTextField(
                 controller: repoController,
-                label: 'GitHub Repository URL',
-                hint: 'https://github.com/valixis/portal',
+                label: 'GitHub Repository',
+                hint: 'e.g. VALIXIS/AI_PDF',
                 prefixIcon: Icons.code_rounded,
               ),
             ),

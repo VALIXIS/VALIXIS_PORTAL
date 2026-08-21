@@ -13,7 +13,6 @@ import '../../../shared/components/app_button.dart';
 import '../../../shared/components/glass_card.dart';
 import '../../../shared/components/app_text_field.dart';
 import '../../../shared/models/employee.dart';
-import 'providers/employee_management_provider.dart';
 import 'providers/whatsapp_provider.dart';
 
 class WhatsAppScreen extends ConsumerStatefulWidget {
@@ -121,14 +120,14 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen> {
       return;
     }
 
-    final employeesAsync = ref.read(employeeManagementProvider);
-    final rawEmployees = employeesAsync.valueOrNull ?? [];
-    final employee = rawEmployees.firstWhere((e) => e.employee.id == _selectedEmployeeId).employee;
+    final contactsAsync = ref.read(whatsappContactsProvider);
+    final contacts = contactsAsync.valueOrNull ?? [];
+    final employee = contacts.firstWhere((e) => e.id == _selectedEmployeeId);
 
     final phone = employee.phone;
     if (phone == null || phone.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Selected employee does not have a phone number.'), backgroundColor: AppColors.error),
+        const SnackBar(content: Text('Selected contact does not have a phone number.'), backgroundColor: AppColors.error),
       );
       return;
     }
@@ -181,18 +180,17 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final employeesAsync = ref.watch(employeeManagementProvider);
-    final isEmployeesLoading = employeesAsync.isLoading;
-    final hasEmployeesError = employeesAsync.hasError;
+    final contactsAsync = ref.watch(whatsappContactsProvider);
+    final isEmployeesLoading = contactsAsync.isLoading;
+    final hasEmployeesError = contactsAsync.hasError;
 
-    final rawEmployees = employeesAsync.valueOrNull ?? [];
-    final employees = rawEmployees;
+    final contacts = contactsAsync.valueOrNull ?? [];
 
     Employee? selectedEmployee;
     if (_selectedEmployeeId != null) {
-      for (final e in employees) {
-        if (e.employee.id == _selectedEmployeeId) {
-          selectedEmployee = e.employee;
+      for (final e in contacts) {
+        if (e.id == _selectedEmployeeId) {
+          selectedEmployee = e;
           break;
         }
       }
@@ -284,21 +282,21 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Unable to fetch employee roster.', style: TextStyle(color: AppColors.textPrimary, fontSize: 13)),
+                              const Text('Unable to fetch team roster.', style: TextStyle(color: AppColors.textPrimary, fontSize: 13)),
                               TextButton(
-                                onPressed: () => ref.refresh(employeeManagementProvider),
+                                onPressed: () => ref.refresh(whatsappContactsProvider),
                                 child: const Text('Retry', style: TextStyle(color: AppColors.brandCyan, fontWeight: FontWeight.w700)),
                               ),
                             ],
                           ),
                         )
-                      else if (employees.isEmpty)
+                      else if (contacts.isEmpty)
                         _buildStatusBox(
                           child: Row(
                             children: const [
                               Icon(Icons.warning_amber_rounded, color: AppColors.warning, size: 18),
                               SizedBox(width: AppSpacing.sm),
-                              Text('No employees available.', style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
+                              Text('No team contacts available.', style: TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600)),
                             ],
                           ),
                         )
@@ -307,18 +305,19 @@ class _WhatsAppScreenState extends ConsumerState<WhatsAppScreen> {
                           initialValue: _selectedEmployeeId,
                           dropdownColor: AppColors.surfaceElevated,
                           style: const TextStyle(color: AppColors.textPrimary),
-                          hint: const Text('Choose an employee from team roster', style: TextStyle(color: AppColors.textMuted)),
+                          hint: const Text('Choose a team member (Employee / Manager / Founder)', style: TextStyle(color: AppColors.textMuted)),
                           decoration: const InputDecoration(
                             prefixIcon: Icon(Icons.person_search_rounded, color: AppColors.textMuted),
                             filled: true,
                             fillColor: AppColors.surfaceElevated,
                           ),
-                          items: employees.map((e) {
-                            final hasNoPhoneMarker = (e.employee.phone == null || e.employee.phone!.trim().isEmpty) ? ' (No Phone)' : '';
+                          items: contacts.map((e) {
+                            final roleTag = (e.role != null && e.role!.isNotEmpty) ? ' [${e.role}]' : '';
+                            final hasNoPhoneMarker = (e.phone == null || e.phone!.trim().isEmpty) ? ' (No Phone)' : '';
                             return DropdownMenuItem(
-                              value: e.employee.id,
+                              value: e.id,
                               child: Text(
-                                '${e.employee.fullName} (${e.employee.email})$hasNoPhoneMarker',
+                                '${e.fullName} (${e.email})$roleTag$hasNoPhoneMarker',
                                 overflow: TextOverflow.ellipsis,
                               ),
                             );

@@ -25,6 +25,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
 
   List<Task> _filterAndSort(List<Task> rawTasks) {
     var filtered = rawTasks.where((t) {
+      // Submitted and approved tasks are hidden from active My Tasks list
+      if (t.status == TaskStatus.submitted || t.status == TaskStatus.approved) {
+        return false;
+      }
       if (_searchQuery.isEmpty) return true;
       final q = _searchQuery.toLowerCase();
       return t.title.toLowerCase().contains(q) ||
@@ -80,27 +84,30 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   ],
                 ),
                 tasksAsync.maybeWhen(
-                  data: (tasks) => Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.brandBlue.withAlpha(30),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: AppColors.brandBlue.withAlpha(60),
+                  data: (tasks) {
+                    final activeCount = tasks.where((t) => t.status != TaskStatus.submitted && t.status != TaskStatus.approved).length;
+                    return Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
                       ),
-                    ),
-                    child: Text(
-                      '${tasks.length} Tasks',
-                      style: const TextStyle(
-                        color: AppColors.brandCyan,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
+                      decoration: BoxDecoration(
+                        color: AppColors.brandBlue.withAlpha(30),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: AppColors.brandBlue.withAlpha(60),
+                        ),
                       ),
-                    ),
-                  ),
+                      child: Text(
+                        '$activeCount Active Tasks',
+                        style: const TextStyle(
+                          color: AppColors.brandCyan,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    );
+                  },
                   orElse: () => const SizedBox.shrink(),
                 ),
               ],

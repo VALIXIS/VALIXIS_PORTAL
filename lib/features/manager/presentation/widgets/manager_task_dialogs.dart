@@ -125,8 +125,17 @@ abstract final class ManagerTaskDialogs {
     );
 
     if (confirmed == true) {
-      await managerRepo.deleteTask(task.id);
-      return true;
+      final success = await managerRepo.deleteTask(task.id);
+      if (!success && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to delete task. Please check database permissions or network connection.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        return false;
+      }
+      return success;
     }
     return false;
   }

@@ -10,6 +10,7 @@ class AuditLogItem {
     required this.timestamp,
     required this.ipAddress,
     required this.status,
+    this.details,
   });
 
   final String id;
@@ -19,6 +20,7 @@ class AuditLogItem {
   final DateTime timestamp;
   final String ipAddress;
   final String status;
+  final String? details;
 }
 
 /// Data table component for Manager Audit Logs.
@@ -26,6 +28,15 @@ class AuditLogsTable extends StatelessWidget {
   const AuditLogsTable({super.key, required this.logs});
 
   final List<AuditLogItem> logs;
+
+  String _formatDateTime(DateTime dt) {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final month = months[dt.month - 1];
+    final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
+    final amPm = dt.hour >= 12 ? 'PM' : 'AM';
+    final minuteStr = dt.minute.toString().padLeft(2, '0');
+    return '${dt.day} $month ${dt.year} ${hour.toString().padLeft(2, '0')}:$minuteStr $amPm';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,10 +52,11 @@ class AuditLogsTable extends StatelessWidget {
           DataColumn(label: Text('Category', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
           DataColumn(label: Text('IP Address', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
           DataColumn(label: Text('Status', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
+          DataColumn(label: Text('Details', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
         ],
         rows: logs.map((log) {
           return DataRow(cells: [
-            DataCell(Text('${log.timestamp.hour}:${log.timestamp.minute}:${log.timestamp.second}', style: const TextStyle(color: AppColors.textMuted))),
+            DataCell(Text(_formatDateTime(log.timestamp), style: const TextStyle(color: AppColors.textMuted, fontSize: 12))),
             DataCell(Text(log.actor, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600))),
             DataCell(Text(log.action, style: const TextStyle(color: AppColors.brandCyan, fontWeight: FontWeight.w600))),
             DataCell(
@@ -68,6 +80,7 @@ class AuditLogsTable extends StatelessWidget {
                 child: Text(log.status, style: const TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w700)),
               ),
             ),
+            DataCell(Text(log.details ?? 'N/A', style: const TextStyle(color: AppColors.textMuted, fontSize: 12))),
           ]);
         }).toList(),
       ),

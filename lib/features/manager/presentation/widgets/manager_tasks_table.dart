@@ -21,44 +21,6 @@ class ManagerTasksTable extends StatelessWidget {
   final ValueChanged<Task> onUnassign;
   final ValueChanged<Task> onDelete;
 
-  Widget _buildStatusBadge(TaskStatus status) {
-    final String label;
-    final Color color;
-
-    switch (status) {
-      case TaskStatus.assigned:
-        label = 'Assigned';
-        color = AppColors.brandPurple;
-        break;
-      case TaskStatus.inProgress:
-        label = 'In Progress';
-        color = AppColors.warning;
-        break;
-      case TaskStatus.submitted:
-        label = 'Awaiting Review';
-        color = AppColors.brandCyan;
-        break;
-      case TaskStatus.approved:
-        label = 'Completed';
-        color = AppColors.success;
-        break;
-      case TaskStatus.rejected:
-        label = 'Changes Requested';
-        color = AppColors.error;
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withAlpha(25),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: color.withAlpha(80)),
-      ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w700)),
-    );
-  }
-
   Widget _buildEmployeeCell(String assignedTo) {
     if (assignedTo.isEmpty) {
       return Container(
@@ -113,14 +75,14 @@ class ManagerTasksTable extends StatelessWidget {
             DataColumn(label: Text('Assigned Employee', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
             DataColumn(label: Text('Repository', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
             DataColumn(label: Text('Priority', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
-            DataColumn(label: Text('Status', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
+            DataColumn(label: Text('Assignment', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
             DataColumn(label: Text('Deadline', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
             DataColumn(label: Text('PR Submitted', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
             DataColumn(label: Text('Actions', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700))),
           ],
           rows: tasks.map((task) {
             final hasPr = task.prUrl != null && task.prUrl!.isNotEmpty;
-            final isAssigned = task.assignedTo.isNotEmpty;
+            final isAssigned = task.assignedTo.isNotEmpty && task.assignedTo != 'Unassigned';
 
             return DataRow(
               cells: [
@@ -135,10 +97,23 @@ class ManagerTasksTable extends StatelessWidget {
                     ],
                   ),
                 ),
-                DataCell(_buildEmployeeCell(task.assignedTo)),
+                DataCell(_buildEmployeeCell(isAssigned ? task.assignedTo : '')),
                 DataCell(Text(task.githubRepo ?? 'VALIXIS_PORTAL', style: const TextStyle(color: AppColors.brandBlue, fontSize: 12, fontWeight: FontWeight.w600))),
                 DataCell(Text(task.priority.label, style: TextStyle(color: task.priority.color, fontWeight: FontWeight.w700, fontSize: 12))),
-                DataCell(_buildStatusBadge(task.status)),
+                DataCell(
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: (isAssigned ? AppColors.brandPurple : AppColors.textMuted).withAlpha(25),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: (isAssigned ? AppColors.brandPurple : AppColors.textMuted).withAlpha(80)),
+                    ),
+                    child: Text(
+                      isAssigned ? 'Assigned' : 'Unassigned',
+                      style: TextStyle(color: isAssigned ? AppColors.brandPurple : AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
                 DataCell(Text(DateFormatter.formatShortDate(task.deadline), style: const TextStyle(color: AppColors.textSecondary, fontSize: 12))),
                 DataCell(
                   Container(

@@ -36,9 +36,6 @@ Deno.serve(async (req: Request) => {
     if (!body.title?.trim()) {
       return errorResponse('Task title is required', 400);
     }
-    if (!body.description?.trim()) {
-      return errorResponse('Task description is required', 400);
-    }
     if (!body.ai_prompt?.trim()) {
       return errorResponse('Task ai_prompt is required', 400);
     }
@@ -48,7 +45,7 @@ Deno.serve(async (req: Request) => {
 
     const taskData = {
       title: body.title.trim(),
-      description: body.description.trim(),
+      description: body.description?.trim() || null,
       ai_prompt: body.ai_prompt.trim(),
       objective: body.objective?.trim() || null,
       expected_output: body.expected_output?.trim() || null,

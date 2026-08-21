@@ -7,6 +7,7 @@ import '../../../core/constants/app_spacing.dart';
 import '../../../shared/components/app_text_field.dart';
 import '../../../shared/components/empty_state.dart';
 import '../../../shared/components/glass_card.dart';
+import 'providers/audit_logs_provider.dart';
 import 'widgets/audit_logs_table.dart';
 
 /// Screen for Manager Security Audit Logs & System Activity Timeline.
@@ -23,8 +24,6 @@ class _ManagerAuditLogsScreenState
   final _searchController = TextEditingController();
   String _query = '';
 
-  final List<AuditLogItem> _logs = [];
-
   @override
   void dispose() {
     _searchController.dispose();
@@ -33,13 +32,7 @@ class _ManagerAuditLogsScreenState
 
   @override
   Widget build(BuildContext context) {
-    final filtered = _query.isEmpty
-        ? _logs
-        : _logs
-            .where((l) =>
-                l.action.toLowerCase().contains(_query) ||
-                l.actor.toLowerCase().contains(_query))
-            .toList();
+    final logsAsync = ref.watch(auditLogsProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -84,26 +77,49 @@ class _ManagerAuditLogsScreenState
             GlassCard(
               showGlow: true,
               padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                children: [
-                  AppTextField(
-                    controller: _searchController,
-                    hint: 'Filter audit logs by actor or event action...',
-                    prefixIcon: Icons.search_rounded,
-                    onChanged: (val) =>
-                        setState(() => _query = val.toLowerCase().trim()),
+              child: logsAsync.when(
+                loading: () => const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(AppSpacing.xl4),
+                    child: CircularProgressIndicator(),
                   ),
-                  const SizedBox(height: AppSpacing.lg),
-                  if (filtered.isEmpty)
-                    const EmptyState(
-                      icon: Icons.fact_check_rounded,
-                      title: 'No Security Audit Logs Recorded',
-                      description:
-                          'Real-time audit log events will be recorded here.',
-                    )
-                  else
-                    AuditLogsTable(logs: filtered),
-                ],
+                ),
+                error: (err, _) => EmptyState(
+                  icon: Icons.error_outline_rounded,
+                  title: 'Error loading audit logs',
+                  description: err.toString(),
+                ),
+                data: (logs) {
+                  final filtered = _query.isEmpty
+                      ? logs
+                      : logs
+                          .where((l) =>
+                              l.action.toLowerCase().contains(_query) ||
+                              l.actor.toLowerCase().contains(_query))
+                          .toList();
+
+                  return Column(
+                    children: [
+                      AppTextField(
+                        controller: _searchController,
+                        hint: 'Filter audit logs by actor or event action...',
+                        prefixIcon: Icons.search_rounded,
+                        onChanged: (val) =>
+                            setState(() => _query = val.toLowerCase().trim()),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      if (filtered.isEmpty)
+                        const EmptyState(
+                          icon: Icons.fact_check_rounded,
+                          title: 'No Security Audit Logs Recorded',
+                          description:
+                              'Real-time audit log events will be recorded here upon employee authentication.',
+                        )
+                      else
+                        AuditLogsTable(logs: filtered),
+                    ],
+                  );
+                },
               ),
             ),
           ],

@@ -101,6 +101,7 @@ class ReviewSubmissionsScreen extends ConsumerWidget {
                     final status = sub['status'] as String? ?? 'pending';
                     final taskTitle = sub['task_title'] as String? ?? '';
                     final employeeName = sub['employee_name'] as String? ?? '';
+                    final repo = sub['github_repository'] as String? ?? sub['github_repo'] as String? ?? sub['repo'] as String? ?? '';
                     final submittedAtRaw = sub['submitted_at'] as String? ?? '';
                     final submittedAt = submittedAtRaw.length > 10
                         ? submittedAtRaw.substring(0, 10)
@@ -124,6 +125,7 @@ class ReviewSubmissionsScreen extends ConsumerWidget {
                         taskTitle: taskTitle,
                         employeeName: employeeName,
                         submittedAt: submittedAt,
+                        repository: repo,
                         prUrl: prUrl,
                         status: status,
                         isLoading: isLoading,
