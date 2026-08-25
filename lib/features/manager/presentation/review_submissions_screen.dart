@@ -76,7 +76,7 @@ class ReviewSubmissionsScreen extends ConsumerWidget {
                 final allSubmissions = metrics.recentSubmissions;
                 final pendingSubmissions = allSubmissions.where((sub) {
                   final status = (sub['review_status']?.toString() ?? sub['status']?.toString() ?? '').toLowerCase().trim();
-                  return status == 'pending' || status == 'submitted' || status == 'under_review';
+                  return status == 'pending';
                 }).toList();
 
                 if (pendingSubmissions.isEmpty) {

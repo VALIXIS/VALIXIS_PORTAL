@@ -44,4 +44,36 @@ class CreateTaskNotifier extends StateNotifier<AsyncValue<Task?>> {
 
     return !state.hasError;
   }
+
+  Future<bool> updateTask({
+    required String taskId,
+    required String title,
+    String? description,
+    String? objective,
+    String? aiPrompt,
+    String? branchName,
+    String? expectedOutput,
+    String? githubRepo,
+    String? priority,
+    String? deadline,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await _ref.read(managerRepositoryProvider).updateTask(
+            taskId: taskId,
+            title: title,
+            description: description,
+            objective: objective,
+            aiPrompt: aiPrompt,
+            branchName: branchName,
+            expectedOutput: expectedOutput,
+            githubRepo: githubRepo,
+            priority: priority,
+            deadline: deadline,
+          );
+      return null;
+    });
+
+    return !state.hasError;
+  }
 }

@@ -32,10 +32,12 @@ class ManagerDashboardMetrics {
   factory ManagerDashboardMetrics.fromJson(
     Map<String, dynamic> json, {
     List<Map<String, dynamic>>? liveAssignments,
+    List<Map<String, dynamic>>? liveSubmissions,
     List<Map<String, dynamic>>? liveEmployees,
   }) {
     final metrics = json['metrics'] as Map<String, dynamic>? ?? {};
-    final rawSubmissions = (json['recent_submissions'] as List<dynamic>?)
+    final rawSubmissions = liveSubmissions ??
+        (json['recent_submissions'] as List<dynamic>?)
             ?.cast<Map<String, dynamic>>() ??
         [];
     final rawTasks = (json['tasks'] as List<dynamic>?)
@@ -49,21 +51,20 @@ class ManagerDashboardMetrics {
         [];
 
     final employeeNameMap = <String, String>{};
-    final employeeAvatarMap = <String, String>{};
     for (final emp in rawEmployees) {
-      final idStr = emp['id']?.toString() ?? '';
-      final authId = emp['auth_id']?.toString() ?? '';
-      final rawName = emp['name'] as String? ?? emp['full_name'] as String? ?? 'Employee';
-      final email = emp['email'] as String? ?? '';
-      final displayName = email.isNotEmpty ? '$rawName ($email)' : rawName;
-      final avatar = emp['avatar_url'] as String? ?? '';
+      final idStr = emp['id']?.toString().trim() ?? '';
+      final authId = emp['auth_id']?.toString().trim() ?? '';
+      final rawName = (emp['name'] as String? ?? emp['full_name'] as String? ?? '').trim();
+      final email = (emp['email'] as String? ?? '').trim();
+      final nameToShow = rawName.isNotEmpty ? rawName : (email.isNotEmpty ? email : 'Employee');
+      final displayName = email.isNotEmpty && !nameToShow.contains('(') ? '$nameToShow ($email)' : nameToShow;
       if (idStr.isNotEmpty) {
         employeeNameMap[idStr] = displayName;
-        employeeAvatarMap[idStr] = avatar;
+        employeeNameMap[idStr.toLowerCase()] = displayName;
       }
       if (authId.isNotEmpty) {
         employeeNameMap[authId] = displayName;
-        employeeAvatarMap[authId] = avatar;
+        employeeNameMap[authId.toLowerCase()] = displayName;
       }
     }
 
@@ -100,9 +101,12 @@ class ManagerDashboardMetrics {
     final enrichedTasks = rawTasks.map((tJson) {
       final taskId = tJson['id']?.toString() ?? '';
       final assignment = taskAssignmentMap[taskId];
-      final empId = assignment != null ? assignment['employee_id']?.toString() ?? '' : '';
+      final empId = assignment != null ? assignment['employee_id']?.toString().trim() ?? '' : '';
 
-      final empName = empId.isNotEmpty ? (employeeNameMap[empId] ?? empId) : '';
+      final resolvedName = empId.isNotEmpty
+          ? (employeeNameMap[empId] ?? employeeNameMap[empId.toLowerCase()])
+          : null;
+      final empName = resolvedName ?? (empId.isNotEmpty ? 'Assigned Employee' : '');
       final latestStatus = assignment != null ? assignment['status']?.toString() : 'unassigned';
 
       final mergedJson = Map<String, dynamic>.from(tJson);
@@ -133,7 +137,7 @@ class ManagerDashboardMetrics {
 
       final taskId = sub['task_id']?.toString() ?? assignment?['task_id']?.toString() ?? '';
       final empId = sub['employee_id']?.toString() ?? assignment?['employee_id']?.toString() ?? '';
-      final empName = employeeNameMap[empId] ?? '';
+      final empName = employeeNameMap[empId] ?? employeeNameMap[empId.toLowerCase()] ?? '';
       final taskTitle = taskTitleMap[taskId] ?? (taskId.isNotEmpty ? 'Task #$taskId' : '');
       final status = sub['review_status']?.toString() ?? sub['status']?.toString() ?? assignment?['status']?.toString() ?? 'pending';
       final feedback = sub['manager_feedback']?.toString() ?? sub['feedback']?.toString() ?? '';
@@ -150,12 +154,17 @@ class ManagerDashboardMetrics {
       return mSub;
     }).toList();
 
+    final pendingReviewsCount = rawSubmissions.where((s) {
+      final status = (s['review_status']?.toString() ?? s['status']?.toString() ?? '').toLowerCase().trim();
+      return status == 'pending';
+    }).length;
+
     return ManagerDashboardMetrics(
       totalEmployees: rawEmployees.isNotEmpty ? rawEmployees.length : (metrics['total_employees'] as int? ?? 0),
       totalTasks: enrichedTasks.isNotEmpty ? enrichedTasks.length : (metrics['total_tasks'] as int? ?? 0),
       assignedCount: metrics['assigned_tasks'] as int? ?? 0,
       inProgressCount: metrics['in_progress_tasks'] as int? ?? 0,
-      submittedCount: metrics['submitted_tasks'] as int? ?? 0,
+      submittedCount: pendingReviewsCount,
       approvedCount: metrics['approved_tasks'] as int? ?? 0,
       rejectedCount: metrics['rejected_tasks'] as int? ?? 0,
       recentSubmissions: enrichedSubmissions,
@@ -183,6 +192,7 @@ class ManagerRepository {
 
     List<Map<String, dynamic>>? liveAssignments;
     List<Map<String, dynamic>>? liveEmployees;
+    List<Map<String, dynamic>>? liveSubmissions;
 
     try {
       final assignRes = await _client.from('task_assignments').select('*');
@@ -194,10 +204,16 @@ class ManagerRepository {
       liveEmployees = (empRes as List<dynamic>).cast<Map<String, dynamic>>();
     } catch (_) {}
 
+    try {
+      final subRes = await _client.from('submissions').select('*');
+      liveSubmissions = (subRes as List<dynamic>).cast<Map<String, dynamic>>();
+    } catch (_) {}
+
     return ManagerDashboardMetrics.fromJson(
       data,
       liveAssignments: liveAssignments,
       liveEmployees: liveEmployees,
+      liveSubmissions: liveSubmissions,
     );
   }
 
@@ -234,6 +250,38 @@ class ManagerRepository {
       return TaskMapper.fromJson(response.data['task']);
     }
     return null;
+  }
+
+  /// Updates an existing task specification in the `tasks` table.
+  Future<bool> updateTask({
+    required String taskId,
+    required String title,
+    String? description,
+    String? objective,
+    String? aiPrompt,
+    String? branchName,
+    String? expectedOutput,
+    String? githubRepo,
+    String? priority,
+    String? deadline,
+  }) async {
+    final payload = {
+      'title': title,
+      'description': description ?? '',
+      'ai_prompt': aiPrompt ?? '',
+      if (objective != null && objective.isNotEmpty) 'objective': objective,
+      if (expectedOutput != null && expectedOutput.isNotEmpty)
+        'expected_output': expectedOutput,
+      if (branchName != null && branchName.isNotEmpty) 'branch_name': branchName,
+      if (githubRepo != null && githubRepo.isNotEmpty)
+        'github_repository': githubRepo,
+      'priority': (priority != null && priority.isNotEmpty) ? priority : 'Medium',
+      if (deadline != null && deadline.isNotEmpty) 'deadline': deadline,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    };
+
+    await _client.from('tasks').update(payload).eq('id', taskId);
+    return true;
   }
 
   /// Assigns or reassigns a task to an employee.

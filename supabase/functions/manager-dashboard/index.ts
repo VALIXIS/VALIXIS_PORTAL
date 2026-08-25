@@ -47,7 +47,7 @@ Deno.serve(async (req: Request) => {
 
     const assignedCount = assignments.filter((a) => a.status === 'assigned').length;
     const inProgressCount = assignments.filter((a) => a.status === 'in_progress').length;
-    const submittedCount = assignments.filter((a) => a.status === 'submitted' || a.status === 'under_review').length;
+    const pendingReviewsCount = submissions.filter((s) => s.review_status === 'pending').length;
     const approvedCount = assignments.filter((a) => a.status === 'approved' || a.status === 'completed').length;
     const rejectedCount = assignments.filter((a) => a.status === 'rejected').length;
 
@@ -55,7 +55,7 @@ Deno.serve(async (req: Request) => {
       total_tasks: tasks.length,
       assigned_tasks: assignedCount,
       in_progress_tasks: inProgressCount,
-      submitted_tasks: submittedCount,
+      submitted_tasks: pendingReviewsCount,
       approved_tasks: approvedCount,
       rejected_tasks: rejectedCount,
       total_employees: employees.length,

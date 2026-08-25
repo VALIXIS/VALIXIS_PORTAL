@@ -19,6 +19,7 @@ import '../../features/splash/presentation/splash_screen.dart';
 import '../../features/tasks/presentation/task_details_screen.dart';
 import '../../features/tasks/presentation/tasks_screen.dart';
 import '../../shared/layout/app_shell.dart';
+import '../../shared/models/task.dart';
 
 abstract final class AppRoutes {
   static const String splash = '/';
@@ -165,10 +166,13 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
             GoRoute(
               path: AppRoutes.managerCreateTask,
               name: 'managerCreateTask',
-              pageBuilder: (context, state) => _fadePage(
-                key: state.pageKey,
-                child: const CreateTaskScreen(),
-              ),
+              pageBuilder: (context, state) {
+                final taskToEdit = state.extra is Task ? state.extra as Task : null;
+                return _fadePage(
+                  key: state.pageKey,
+                  child: CreateTaskScreen(taskToEdit: taskToEdit),
+                );
+              },
             ),
             GoRoute(
               path: AppRoutes.managerAssignments,

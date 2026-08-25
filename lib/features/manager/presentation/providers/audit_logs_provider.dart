@@ -48,6 +48,7 @@ final auditLogsProvider = FutureProvider<List<AuditLogItem>>((ref) async {
       action: item['action']?.toString() ?? '',
       category: item['category']?.toString() ?? 'Authentication',
       timestamp: timestampUtc.toLocal(),
+      lastSeen: lastSeenUtc?.toLocal(),
       ipAddress: item['ip_address']?.toString() ?? 'N/A',
       status: item['status']?.toString() ?? 'Success',
       details: details,

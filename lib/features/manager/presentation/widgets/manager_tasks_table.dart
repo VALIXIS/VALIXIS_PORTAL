@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/date_formatter.dart';
@@ -76,7 +77,8 @@ class ManagerTasksTable extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Flexible(
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 240),
                               child: Text(
                                 task.assignedTo,
                                 style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
@@ -100,11 +102,37 @@ class ManagerTasksTable extends StatelessWidget {
                 ),
                 DataCell(Text(DateFormatter.formatShortDate(task.deadline), style: const TextStyle(color: AppColors.textSecondary, fontSize: 12))),
                 DataCell(
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(color: (hasPr ? AppColors.success : AppColors.textMuted).withAlpha(20), borderRadius: BorderRadius.circular(6)),
-                    child: Text(hasPr ? 'Yes' : 'No', style: TextStyle(color: hasPr ? AppColors.success : AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w700)),
-                  ),
+                  hasPr
+                      ? InkWell(
+                          onTap: () async {
+                            final uri = Uri.parse(task.prUrl!);
+                            if (await canLaunchUrl(uri)) {
+                              await launchUrl(uri, mode: LaunchMode.externalApplication);
+                            }
+                          },
+                          borderRadius: BorderRadius.circular(6),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.success.withAlpha(30),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: AppColors.success.withAlpha(90)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: const [
+                                Icon(Icons.open_in_new_rounded, size: 12, color: AppColors.success),
+                                SizedBox(width: 4),
+                                Text('Yes', style: TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w700)),
+                              ],
+                            ),
+                          ),
+                        )
+                      : Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(color: AppColors.textMuted.withAlpha(20), borderRadius: BorderRadius.circular(6)),
+                          child: const Text('No', style: TextStyle(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w700)),
+                        ),
                 ),
                 DataCell(
                   Row(
@@ -117,7 +145,7 @@ class ManagerTasksTable extends StatelessWidget {
                       IconButton(
                         icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.textSecondary),
                         tooltip: 'Edit Task',
-                        onPressed: () => context.go(AppRoutes.managerCreateTask),
+                        onPressed: () => context.go(AppRoutes.managerCreateTask, extra: task),
                       ),
                       IconButton(
                         icon: const Icon(Icons.assignment_ind_outlined, size: 18, color: AppColors.brandBlue),

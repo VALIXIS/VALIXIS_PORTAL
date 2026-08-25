@@ -97,7 +97,9 @@ class AppShell extends ConsumerWidget {
   final Widget child;
 
   List<NavItem> _visibleItems(UserRole role) {
-    if (role.isManager) return _allNavItems;
+    if (role.isManager) {
+      return _allNavItems.where((item) => item.route != AppRoutes.tasks).toList();
+    }
     return _allNavItems.where((item) => !item.isManagerOnly).toList();
   }
 

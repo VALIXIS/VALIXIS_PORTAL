@@ -12,7 +12,7 @@ final heartbeatProvider = Provider<HeartbeatController>((ref) {
   ref.listen<AsyncValue<User?>>(authNotifierProvider, (previous, next) {
     final user = next.valueOrNull;
     if (user != null) {
-      controller.initializeFromSession();
+      controller.initializeFromSession(user.id);
     } else {
       controller.stop();
     }
@@ -29,8 +29,8 @@ class HeartbeatController {
   String? _activeLogId;
 
   /// Initializes the heartbeat timer if an active audit log ID exists in browser session storage.
-  /// Does NOT query the database or guess.
-  void initializeFromSession() {
+  /// If no active ID exists in session storage, creates a session audit record.
+  Future<void> initializeFromSession([String? userId]) async {
     if (_timer != null) return;
 
     final storedId = getSessionItem('active_audit_log_id');
@@ -38,6 +38,39 @@ class HeartbeatController {
       _activeLogId = storedId;
       _startTimer();
       debugPrint('[Heartbeat] Resumed heartbeat for session log $storedId');
+      return;
+    }
+
+    if (userId != null && userId.isNotEmpty) {
+      try {
+        String? empId;
+        try {
+          final empRes = await _client
+              .from('employees')
+              .select('id')
+              .eq('auth_id', userId)
+              .maybeSingle();
+          if (empRes != null) {
+            empId = empRes['id']?.toString();
+          }
+        } catch (_) {}
+
+        final res = await _client.from('audit_logs').insert({
+          if (empId != null && empId.isNotEmpty) 'actor_id': empId,
+          'action': 'Login',
+          'category': 'Authentication',
+          'status': 'Success',
+          'ip_address': kIsWeb ? 'Web Client' : 'Mobile Client',
+          'last_seen': DateTime.now().toUtc().toIso8601String(),
+        }).select('id').single();
+
+        final logId = res['id']?.toString();
+        if (logId != null && logId.isNotEmpty) {
+          startNewSession(logId);
+        }
+      } catch (e) {
+        debugPrint('[Heartbeat] Failed to create session audit record on startup: $e');
+      }
     }
   }
 

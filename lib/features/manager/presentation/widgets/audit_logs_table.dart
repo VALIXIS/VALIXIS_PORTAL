@@ -8,6 +8,7 @@ class AuditLogItem {
     required this.action,
     required this.category,
     required this.timestamp,
+    this.lastSeen,
     required this.ipAddress,
     required this.status,
     this.details,
@@ -18,6 +19,7 @@ class AuditLogItem {
   final String action;
   final String category;
   final DateTime timestamp;
+  final DateTime? lastSeen;
   final String ipAddress;
   final String status;
   final String? details;
@@ -47,6 +49,7 @@ class AuditLogsTable extends StatelessWidget {
         dataRowMaxHeight: 56,
         columns: const [
           DataColumn(label: Text('Timestamp', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
+          DataColumn(label: Text('Last Active', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
           DataColumn(label: Text('Actor', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
           DataColumn(label: Text('Action Event', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
           DataColumn(label: Text('Category', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
@@ -57,6 +60,7 @@ class AuditLogsTable extends StatelessWidget {
         rows: logs.map((log) {
           return DataRow(cells: [
             DataCell(Text(_formatDateTime(log.timestamp), style: const TextStyle(color: AppColors.textMuted, fontSize: 12))),
+            DataCell(Text(log.lastSeen != null ? _formatDateTime(log.lastSeen!) : _formatDateTime(log.timestamp), style: const TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.w600))),
             DataCell(Text(log.actor, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600))),
             DataCell(Text(log.action, style: const TextStyle(color: AppColors.brandCyan, fontWeight: FontWeight.w600))),
             DataCell(
