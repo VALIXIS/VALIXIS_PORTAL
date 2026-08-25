@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../app/router/app_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../features/auth/domain/role_service.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/role_provider.dart';
 import '../../features/notifications/presentation/widgets/notification_bell_button.dart';
 import '../components/export_center_dialog.dart';
@@ -96,8 +97,13 @@ class AppShell extends ConsumerWidget {
 
   final Widget child;
 
-  List<NavItem> _visibleItems(UserRole role) {
+  List<NavItem> _visibleItems(UserRole role, String? userEmail) {
     if (role.isManager) {
+      final email = userEmail?.toLowerCase().trim() ?? '';
+      // Allow My Tasks for co-founder Jyothsna
+      if (email.contains('jyothsna')) {
+        return _allNavItems;
+      }
       return _allNavItems.where((item) => item.route != AppRoutes.tasks).toList();
     }
     return _allNavItems.where((item) => !item.isManagerOnly).toList();
@@ -118,6 +124,7 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final roleAsync = ref.watch(roleProvider);
+    final user = ref.watch(authNotifierProvider).valueOrNull;
 
     if (roleAsync.isLoading) {
       return const Scaffold(
@@ -132,7 +139,7 @@ class AppShell extends ConsumerWidget {
     final width = MediaQuery.sizeOf(context).width;
     final isMobile = width < Breakpoints.mobile;
     final extended = width >= Breakpoints.navRailExtended;
-    final items = _visibleItems(userRole);
+    final items = _visibleItems(userRole, user?.email);
     final selectedIndex = _selectedIndex(context, items);
 
     return GlobalKeyboardListener(
