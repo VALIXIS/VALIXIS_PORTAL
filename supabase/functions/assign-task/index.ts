@@ -130,7 +130,7 @@ Please complete the task before the deadline.
     
     console.log(`[assign-task] Sending WhatsApp notification for task "${task.title}" to ${employee.name}`);
     
-    const response = await fetch('https://detected-great-naples-suit.trycloudflare.com/send-task-alert', {
+    const response = await fetch('https://film-indiana-trek-weed.trycloudflare.com/send-task-alert', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
