@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
+import '../../core/network/supabase_client_provider.dart';
+import '../../core/utils/csv_downloader.dart';
 
-/// Modal dialog for exporting system reports to CSV.
+/// Modal dialog for exporting system reports directly to downloadable CSV files.
 class ExportCenterDialog extends ConsumerStatefulWidget {
   const ExportCenterDialog({super.key});
 
@@ -24,18 +26,128 @@ class _ExportCenterDialogState extends ConsumerState<ExportCenterDialog> {
   Future<void> _exportData(String reportType) async {
     setState(() => _isExporting = true);
 
-    await Future.delayed(const Duration(seconds: 1));
+    try {
+      final client = ref.read(supabaseClientProvider);
+      String csvContent = '';
+      String fileName = '';
+      final todayStr = DateTime.now().toIso8601String().split('T').first;
 
-    if (mounted) {
-      setState(() => _isExporting = false);
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$reportType exported successfully as CSV!'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      if (reportType == 'Task Specifications') {
+        fileName = 'VALIXIS_Task_Specifications_$todayStr.csv';
+        final response = await client
+            .from('tasks')
+            .select('*, task_assignments(*, employees(*))')
+            .order('created_at', ascending: false);
+
+        final rows = response as List<dynamic>;
+        final buffer = StringBuffer();
+        buffer.writeln('Task ID,Title,Priority,Status,Assignee Name,Assignee Email,Deadline,GitHub Repo,Branch,Created At');
+
+        for (final row in rows) {
+          final id = _escapeCsv(row['id']?.toString());
+          final title = _escapeCsv(row['title']?.toString());
+          final priority = _escapeCsv(row['priority']?.toString());
+          final status = _escapeCsv(row['status']?.toString());
+
+          final assignments = row['task_assignments'] as List<dynamic>?;
+          String assigneeName = 'Unassigned';
+          String assigneeEmail = '';
+          if (assignments != null && assignments.isNotEmpty) {
+            final emp = assignments.first['employees'] as Map<String, dynamic>?;
+            if (emp != null) {
+              assigneeName = emp['name']?.toString() ?? 'Unassigned';
+              assigneeEmail = emp['email']?.toString() ?? '';
+            }
+          }
+
+          final deadline = _escapeCsv(row['deadline']?.toString());
+          final repo = _escapeCsv(row['github_repository']?.toString());
+          final branch = _escapeCsv(row['branch_name']?.toString());
+          final createdAt = _escapeCsv(row['created_at']?.toString());
+
+          buffer.writeln('$id,$title,$priority,$status,${_escapeCsv(assigneeName)},${_escapeCsv(assigneeEmail)},$deadline,$repo,$branch,$createdAt');
+        }
+        csvContent = buffer.toString();
+      } else if (reportType == 'Workforce Directory') {
+        fileName = 'VALIXIS_Workforce_Directory_$todayStr.csv';
+        final response = await client
+            .from('employees')
+            .select('*')
+            .order('name', ascending: true);
+
+        final rows = response as List<dynamic>;
+        final buffer = StringBuffer();
+        buffer.writeln('Employee ID,Name,Email,Role,Department,Phone,Created At');
+
+        for (final row in rows) {
+          final id = _escapeCsv(row['id']?.toString());
+          final name = _escapeCsv(row['name']?.toString());
+          final email = _escapeCsv(row['email']?.toString());
+          final role = _escapeCsv(row['role']?.toString());
+          final dept = _escapeCsv(row['department']?.toString());
+          final phone = _escapeCsv(row['phone']?.toString());
+          final createdAt = _escapeCsv(row['created_at']?.toString());
+
+          buffer.writeln('$id,$name,$email,$role,$dept,$phone,$createdAt');
+        }
+        csvContent = buffer.toString();
+      } else {
+        fileName = 'VALIXIS_Executive_Dashboard_$todayStr.csv';
+        final tasksRes = await client.from('tasks').select('status');
+        final empRes = await client.from('employees').select('role');
+
+        final tasks = tasksRes as List<dynamic>;
+        final emps = empRes as List<dynamic>;
+
+        final totalTasks = tasks.length;
+        final completedTasks = tasks.where((t) => (t['status']?.toString().toLowerCase() ?? '').contains('completed')).length;
+        final pendingTasks = totalTasks - completedTasks;
+        final totalEmps = emps.length;
+        final managersCount = emps.where((e) => (e['role']?.toString().toLowerCase() ?? '').contains('manager')).length;
+        final employeesCount = totalEmps - managersCount;
+
+        final buffer = StringBuffer();
+        buffer.writeln('Executive Metric,Value');
+        buffer.writeln('Report Date,$todayStr');
+        buffer.writeln('Total Registered Tasks,$totalTasks');
+        buffer.writeln('Completed Tasks,$completedTasks');
+        buffer.writeln('Pending / Active Tasks,$pendingTasks');
+        buffer.writeln('Total Team Members,$totalEmps');
+        buffer.writeln('Managers Count,$managersCount');
+        buffer.writeln('Engineers Count,$employeesCount');
+
+        csvContent = buffer.toString();
+      }
+
+      downloadCsv(fileName, csvContent);
+
+      if (mounted) {
+        setState(() => _isExporting = false);
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$reportType exported & downloaded as CSV!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isExporting = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to export CSV: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     }
+  }
+
+  String _escapeCsv(String? input) {
+    if (input == null || input.isEmpty) return '""';
+    final escaped = input.replaceAll('"', '""');
+    return '"$escaped"';
   }
 
   @override
