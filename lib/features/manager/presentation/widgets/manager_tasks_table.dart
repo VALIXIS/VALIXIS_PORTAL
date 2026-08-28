@@ -7,7 +7,7 @@ import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/components/glass_card.dart';
 import '../../../../shared/models/task.dart';
 
-/// Data table for Manager Tasks displaying task specifications, actual assigned employee, status, and interactive column sorting.
+/// Data table for Manager Tasks displaying task specifications, assigned employee, status, and custom interactive column header sorting.
 class ManagerTasksTable extends StatelessWidget {
   const ManagerTasksTable({
     super.key,
@@ -28,23 +28,45 @@ class ManagerTasksTable extends StatelessWidget {
   final bool sortAscending;
   final void Function(String field, bool ascending)? onSort;
 
-  int? _getSortColumnIndex() {
-    switch (sortField) {
-      case 'title':
-        return 0;
-      case 'repo':
-        return 1;
-      case 'priority':
-        return 2;
-      case 'assignment':
-        return 3;
-      case 'deadline':
-        return 4;
-      case 'pr':
-        return 5;
-      default:
-        return 4;
-    }
+  Widget _buildHeaderLabel(String title, String fieldKey) {
+    final isSelected = sortField == fieldKey;
+    final iconData = isSelected
+        ? (sortAscending ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded)
+        : Icons.unfold_more_rounded;
+    final iconColor = isSelected ? AppColors.brandCyan : AppColors.textMuted.withAlpha(140);
+    final textColor = isSelected ? AppColors.brandCyan : AppColors.textPrimary;
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          if (isSelected) {
+            onSort?.call(fieldKey, !sortAscending);
+          } else {
+            onSort?.call(fieldKey, true);
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  color: textColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(iconData, size: 14, color: iconColor),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -56,35 +78,18 @@ class ManagerTasksTable extends StatelessWidget {
         child: DataTable(
           headingRowColor: WidgetStateProperty.all(AppColors.surfaceElevated),
           dataRowMaxHeight: 64,
-          sortColumnIndex: _getSortColumnIndex(),
-          sortAscending: sortAscending,
           columns: [
-            DataColumn(
-              label: const Text('Task Title', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-              onSort: (index, asc) => onSort?.call('title', asc),
-            ),
-            DataColumn(
-              label: const Text('Repository', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-              onSort: (index, asc) => onSort?.call('repo', asc),
-            ),
-            DataColumn(
-              label: const Text('Priority', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-              onSort: (index, asc) => onSort?.call('priority', asc),
-            ),
-            DataColumn(
-              label: const Text('Assignment', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-              onSort: (index, asc) => onSort?.call('assignment', asc),
-            ),
-            DataColumn(
-              label: const Text('Deadline', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-              onSort: (index, asc) => onSort?.call('deadline', asc),
-            ),
-            DataColumn(
-              label: const Text('PR Submitted', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-              onSort: (index, asc) => onSort?.call('pr', asc),
-            ),
+            DataColumn(label: _buildHeaderLabel('Task Title', 'title')),
+            DataColumn(label: _buildHeaderLabel('Repository', 'repo')),
+            DataColumn(label: _buildHeaderLabel('Priority', 'priority')),
+            DataColumn(label: _buildHeaderLabel('Assignment', 'assignment')),
+            DataColumn(label: _buildHeaderLabel('Deadline', 'deadline')),
+            DataColumn(label: _buildHeaderLabel('PR Submitted', 'pr')),
             const DataColumn(
-              label: Text('Actions', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+              label: Text(
+                'Actions',
+                style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700),
+              ),
             ),
           ],
           rows: tasks.map((task) {

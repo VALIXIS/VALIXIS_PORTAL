@@ -3,7 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../shared/components/app_text_field.dart';
 
-/// Filter bar for Manager Tasks supporting search, status filter, repo filter, column sort selector, and ascending/descending toggle.
+/// Filter bar for Manager Tasks supporting search, status filter, repo filter, column sort selector, and ascending/descending toggle button.
 class ManagerTasksFilterBar extends StatelessWidget {
   const ManagerTasksFilterBar({
     super.key,
@@ -109,9 +109,9 @@ class ManagerTasksFilterBar extends StatelessWidget {
               child: DropdownButtonFormField<String>(
                 initialValue: selectedSortField,
                 dropdownColor: AppColors.surfaceElevated,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
                 decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.sort_by_alpha_rounded, color: AppColors.textMuted),
+                  prefixIcon: Icon(Icons.sort_rounded, color: AppColors.brandCyan),
                   filled: true,
                   fillColor: AppColors.surfaceElevated,
                   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -121,10 +121,35 @@ class ManagerTasksFilterBar extends StatelessWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.xs),
-            IconButton(
-              icon: Icon(sortAscending ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded, color: AppColors.brandCyan),
-              tooltip: sortAscending ? 'Sort Order: Ascending' : 'Sort Order: Descending',
-              onPressed: onSortToggle,
+            Tooltip(
+              message: sortAscending ? 'Sort Order: Ascending (A-Z / Low-High)' : 'Sort Order: Descending (Z-A / High-Low)',
+              child: InkWell(
+                onTap: onSortToggle,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceElevated,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColors.brandCyan.withAlpha(80)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        sortAscending ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded,
+                        color: AppColors.brandCyan,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        sortAscending ? 'ASC' : 'DESC',
+                        style: const TextStyle(color: AppColors.brandCyan, fontSize: 11, fontWeight: FontWeight.w800),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ],
         ),

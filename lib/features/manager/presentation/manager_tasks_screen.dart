@@ -94,7 +94,15 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
             cmp = (a.githubRepo ?? 'VALIXIS_PORTAL').toLowerCase().compareTo((b.githubRepo ?? 'VALIXIS_PORTAL').toLowerCase());
             break;
           case 'priority':
-            cmp = a.priority.index.compareTo(b.priority.index);
+            int priorityWeight(TaskPriority p) {
+              return switch (p) {
+                TaskPriority.critical => 4,
+                TaskPriority.high => 3,
+                TaskPriority.medium => 2,
+                TaskPriority.low => 1,
+              };
+            }
+            cmp = priorityWeight(a.priority).compareTo(priorityWeight(b.priority));
             break;
           case 'assignment':
             final aName = a.assignedTo.isEmpty || a.assignedTo == 'Unassigned' ? 'z_unassigned' : a.assignedTo.toLowerCase();
