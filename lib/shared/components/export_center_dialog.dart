@@ -5,7 +5,7 @@ import '../../core/constants/app_spacing.dart';
 import '../../core/network/supabase_client_provider.dart';
 import '../../core/utils/csv_downloader.dart';
 
-/// Modal dialog for exporting system reports directly to downloadable CSV files.
+/// Modal dialog for exporting system reports directly to downloadable CSV files with clean human-readable formatting.
 class ExportCenterDialog extends ConsumerStatefulWidget {
   const ExportCenterDialog({super.key});
 
@@ -34,87 +34,165 @@ class _ExportCenterDialogState extends ConsumerState<ExportCenterDialog> {
 
       if (reportType == 'Task Specifications') {
         fileName = 'VALIXIS_Task_Specifications_$todayStr.csv';
-        final response = await client
-            .from('tasks')
-            .select('*, task_assignments(*, employees(*))')
-            .order('created_at', ascending: false);
 
-        final rows = response as List<dynamic>;
+        final tasksRes = await client.from('tasks').select('*').order('created_at', ascending: false);
+        final assignRes = await client.from('task_assignments').select('*');
+        final empRes = await client.from('employees').select('id, name, email');
+        final subRes = await client.from('submissions').select('*');
+
+        final tasksList = tasksRes as List<dynamic>;
+        final assignList = (assignRes as List<dynamic>).cast<Map<String, dynamic>>();
+        final empList = (empRes as List<dynamic>).cast<Map<String, dynamic>>();
+        final subList = (subRes as List<dynamic>).cast<Map<String, dynamic>>();
+
+        final empMap = <String, Map<String, dynamic>>{};
+        for (final emp in empList) {
+          empMap[emp['id'].toString()] = emp;
+        }
+
+        final assignMap = <String, Map<String, dynamic>>{};
+        for (final ass in assignList) {
+          assignMap[ass['task_id'].toString()] = ass;
+        }
+
+        final subMap = <String, Map<String, dynamic>>{};
+        for (final sub in subList) {
+          final assId = sub['assignment_id']?.toString();
+          if (assId != null) {
+            subMap[assId] = sub;
+          }
+        }
+
         final buffer = StringBuffer();
-        buffer.writeln('Task ID,Title,Priority,Status,Assignee Name,Assignee Email,Deadline,GitHub Repo,Branch,Created At');
+        buffer.writeln('Task Title,Repository,Branch,Priority,Status,Assigned Engineer,Engineer Email,Deadline,PR Submitted,PR Link,Objective,Task ID,Created Date');
 
-        for (final row in rows) {
-          final id = _escapeCsv(row['id']?.toString());
-          final title = _escapeCsv(row['title']?.toString());
-          final priority = _escapeCsv(row['priority']?.toString());
-          final status = _escapeCsv(row['status']?.toString());
+        for (final task in tasksList) {
+          final taskId = task['id']?.toString() ?? '';
+          final title = _escapeCsv(task['title']?.toString());
+          final repo = _escapeCsv(task['github_repository']?.toString() ?? 'VALIXIS_PORTAL');
+          final branch = _escapeCsv(task['branch_name']?.toString() ?? 'main');
+          final priority = _escapeCsv(task['priority']?.toString() ?? 'Medium');
 
-          final assignments = row['task_assignments'] as List<dynamic>?;
-          String assigneeName = 'Unassigned';
-          String assigneeEmail = '';
-          if (assignments != null && assignments.isNotEmpty) {
-            final emp = assignments.first['employees'] as Map<String, dynamic>?;
-            if (emp != null) {
-              assigneeName = emp['name']?.toString() ?? 'Unassigned';
-              assigneeEmail = emp['email']?.toString() ?? '';
+          final assignment = assignMap[taskId];
+          String status = 'Unassigned';
+          String engineerName = 'Unassigned';
+          String engineerEmail = 'N/A';
+          String prSubmitted = 'No';
+          String prUrl = 'N/A';
+
+          if (assignment != null) {
+            final rawStatus = assignment['status']?.toString() ?? 'assigned';
+            status = _formatStatusLabel(rawStatus);
+
+            final empId = assignment['employee_id']?.toString();
+            if (empId != null && empMap.containsKey(empId)) {
+              engineerName = empMap[empId]!['name']?.toString() ?? 'Assigned Engineer';
+              engineerEmail = empMap[empId]!['email']?.toString() ?? '';
+            }
+
+            final assId = assignment['id']?.toString();
+            final submission = assId != null ? subMap[assId] : null;
+            final rawPr = assignment['pr_url']?.toString() ?? submission?['github_pr_url']?.toString();
+            if (rawPr != null && rawPr.isNotEmpty) {
+              prSubmitted = 'Yes';
+              prUrl = rawPr;
             }
           }
 
-          final deadline = _escapeCsv(row['deadline']?.toString());
-          final repo = _escapeCsv(row['github_repository']?.toString());
-          final branch = _escapeCsv(row['branch_name']?.toString());
-          final createdAt = _escapeCsv(row['created_at']?.toString());
+          final deadline = _escapeCsv(task['deadline']?.toString() != null ? task['deadline'].toString().split('T').first : 'N/A');
+          final objective = _escapeCsv(task['objective']?.toString() ?? task['description']?.toString() ?? '');
+          final createdAt = _escapeCsv(task['created_at']?.toString() != null ? task['created_at'].toString().split('T').first : '');
 
-          buffer.writeln('$id,$title,$priority,$status,${_escapeCsv(assigneeName)},${_escapeCsv(assigneeEmail)},$deadline,$repo,$branch,$createdAt');
+          buffer.writeln('$title,$repo,$branch,$priority,${_escapeCsv(status)},${_escapeCsv(engineerName)},${_escapeCsv(engineerEmail)},$deadline,${_escapeCsv(prSubmitted)},${_escapeCsv(prUrl)},$objective,${_escapeCsv(taskId)},$createdAt');
         }
         csvContent = buffer.toString();
       } else if (reportType == 'Workforce Directory') {
         fileName = 'VALIXIS_Workforce_Directory_$todayStr.csv';
-        final response = await client
-            .from('employees')
-            .select('*')
-            .order('name', ascending: true);
 
-        final rows = response as List<dynamic>;
+        final empRes = await client.from('employees').select('*').order('name', ascending: true);
+        final assignRes = await client.from('task_assignments').select('*');
+
+        final empList = empRes as List<dynamic>;
+        final assignList = (assignRes as List<dynamic>).cast<Map<String, dynamic>>();
+
+        final assignedCounts = <String, int>{};
+        final completedCounts = <String, int>{};
+
+        for (final ass in assignList) {
+          final empId = ass['employee_id']?.toString();
+          if (empId != null) {
+            final st = (ass['status']?.toString() ?? '').toLowerCase();
+            if (st == 'approved' || st == 'completed') {
+              completedCounts[empId] = (completedCounts[empId] ?? 0) + 1;
+            } else {
+              assignedCounts[empId] = (assignedCounts[empId] ?? 0) + 1;
+            }
+          }
+        }
+
         final buffer = StringBuffer();
-        buffer.writeln('Employee ID,Name,Email,Role,Department,Phone,Created At');
+        buffer.writeln('Engineer Name,Email Address,Role,Department,Phone Number,Assigned Tasks Count,Completed Tasks Count,Workload Status,Employee ID,Joined Date');
 
-        for (final row in rows) {
-          final id = _escapeCsv(row['id']?.toString());
-          final name = _escapeCsv(row['name']?.toString());
-          final email = _escapeCsv(row['email']?.toString());
-          final role = _escapeCsv(row['role']?.toString());
-          final dept = _escapeCsv(row['department']?.toString());
-          final phone = _escapeCsv(row['phone']?.toString());
-          final createdAt = _escapeCsv(row['created_at']?.toString());
+        for (final emp in empList) {
+          final empId = emp['id']?.toString() ?? '';
+          final name = _escapeCsv(emp['name']?.toString() ?? '');
+          final email = _escapeCsv(emp['email']?.toString() ?? '');
+          final role = _escapeCsv(_capitalize(emp['role']?.toString() ?? 'Engineering'));
+          final dept = _escapeCsv(emp['department']?.toString() ?? 'Engineering');
+          final phone = _escapeCsv(emp['phone']?.toString() ?? 'N/A');
 
-          buffer.writeln('$id,$name,$email,$role,$dept,$phone,$createdAt');
+          final assigned = assignedCounts[empId] ?? 0;
+          final completed = completedCounts[empId] ?? 0;
+          final workloadStatus = assigned >= 3 ? 'Busy' : 'Available';
+
+          final createdAt = _escapeCsv(emp['created_at']?.toString() != null ? emp['created_at'].toString().split('T').first : '');
+
+          buffer.writeln('$name,$email,$role,$dept,$phone,$assigned,$completed,${_escapeCsv(workloadStatus)},${_escapeCsv(empId)},$createdAt');
         }
         csvContent = buffer.toString();
       } else {
         fileName = 'VALIXIS_Executive_Dashboard_$todayStr.csv';
-        final tasksRes = await client.from('tasks').select('status');
+
+        final tasksRes = await client.from('tasks').select('id');
+        final assignRes = await client.from('task_assignments').select('status, pr_url');
         final empRes = await client.from('employees').select('role');
+        final subRes = await client.from('submissions').select('id');
 
-        final tasks = tasksRes as List<dynamic>;
-        final emps = empRes as List<dynamic>;
+        final totalTasks = (tasksRes as List<dynamic>).length;
+        final assignments = (assignRes as List<dynamic>).cast<Map<String, dynamic>>();
+        final emps = (empRes as List<dynamic>).cast<Map<String, dynamic>>();
+        final submissionsCount = (subRes as List<dynamic>).length;
 
-        final totalTasks = tasks.length;
-        final completedTasks = tasks.where((t) => (t['status']?.toString().toLowerCase() ?? '').contains('completed')).length;
-        final pendingTasks = totalTasks - completedTasks;
-        final totalEmps = emps.length;
+        int completedCount = 0;
+        int inProgressCount = 0;
+        int awaitingReviewCount = 0;
+
+        for (final ass in assignments) {
+          final st = (ass['status']?.toString() ?? '').toLowerCase();
+          if (st == 'approved' || st == 'completed') {
+            completedCount++;
+          } else if (st == 'submitted') {
+            awaitingReviewCount++;
+          } else {
+            inProgressCount++;
+          }
+        }
+
+        final totalTeam = emps.length;
         final managersCount = emps.where((e) => (e['role']?.toString().toLowerCase() ?? '').contains('manager')).length;
-        final employeesCount = totalEmps - managersCount;
+        final engineersCount = totalTeam - managersCount;
 
         final buffer = StringBuffer();
-        buffer.writeln('Executive Metric,Value');
-        buffer.writeln('Report Date,$todayStr');
-        buffer.writeln('Total Registered Tasks,$totalTasks');
-        buffer.writeln('Completed Tasks,$completedTasks');
-        buffer.writeln('Pending / Active Tasks,$pendingTasks');
-        buffer.writeln('Total Team Members,$totalEmps');
-        buffer.writeln('Managers Count,$managersCount');
-        buffer.writeln('Engineers Count,$employeesCount');
+        buffer.writeln('Executive Metric,Count / Value,Metric Description');
+        buffer.writeln('Report Export Date,$todayStr,Date of summary generation');
+        buffer.writeln('Total Engineering Tasks,$totalTasks,Total task specifications created');
+        buffer.writeln('Active / In Progress Tasks,$inProgressCount,Tasks currently assigned or in progress');
+        buffer.writeln('Completed Tasks,$completedCount,Tasks verified and approved');
+        buffer.writeln('Awaiting PR Review Tasks,$awaitingReviewCount,Tasks submitted by engineers waiting for review');
+        buffer.writeln('Total PR Submissions,$submissionsCount,Total code submissions recorded');
+        buffer.writeln('Total Team Members,$totalTeam,Active personnel in directory');
+        buffer.writeln('Engineering Managers,$managersCount,Management role accounts');
+        buffer.writeln('Software Engineers,$engineersCount,Engineering role accounts');
 
         csvContent = buffer.toString();
       }
@@ -142,6 +220,29 @@ class _ExportCenterDialogState extends ConsumerState<ExportCenterDialog> {
         );
       }
     }
+  }
+
+  String _formatStatusLabel(String raw) {
+    switch (raw.toLowerCase().trim()) {
+      case 'assigned':
+        return 'Assigned';
+      case 'in_progress':
+        return 'In Progress';
+      case 'submitted':
+        return 'Awaiting Review';
+      case 'approved':
+      case 'completed':
+        return 'Completed';
+      case 'rejected':
+        return 'Changes Requested';
+      default:
+        return _capitalize(raw);
+    }
+  }
+
+  String _capitalize(String s) {
+    if (s.isEmpty) return s;
+    return s[0].toUpperCase() + s.substring(1);
   }
 
   String _escapeCsv(String? input) {
