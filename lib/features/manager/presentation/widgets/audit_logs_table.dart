@@ -25,11 +25,26 @@ class AuditLogItem {
   final String? details;
 }
 
-/// Data table component for Manager Audit Logs.
-class AuditLogsTable extends StatelessWidget {
+/// Data table component for Manager Audit Logs supporting interactive column header sorting.
+class AuditLogsTable extends StatefulWidget {
   const AuditLogsTable({super.key, required this.logs});
 
   final List<AuditLogItem> logs;
+
+  @override
+  State<AuditLogsTable> createState() => _AuditLogsTableState();
+}
+
+class _AuditLogsTableState extends State<AuditLogsTable> {
+  int _sortColumnIndex = 0;
+  bool _sortAscending = false;
+
+  void _onSort(int columnIndex, bool ascending) {
+    setState(() {
+      _sortColumnIndex = columnIndex;
+      _sortAscending = ascending;
+    });
+  }
 
   String _formatDateTime(DateTime dt) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -42,22 +57,84 @@ class AuditLogsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sortedList = List<AuditLogItem>.from(widget.logs);
+    sortedList.sort((a, b) {
+      int cmp = 0;
+      switch (_sortColumnIndex) {
+        case 0:
+          cmp = a.timestamp.compareTo(b.timestamp);
+          break;
+        case 1:
+          final aLast = a.lastSeen ?? a.timestamp;
+          final bLast = b.lastSeen ?? b.timestamp;
+          cmp = aLast.compareTo(bLast);
+          break;
+        case 2:
+          cmp = a.actor.toLowerCase().compareTo(b.actor.toLowerCase());
+          break;
+        case 3:
+          cmp = a.action.toLowerCase().compareTo(b.action.toLowerCase());
+          break;
+        case 4:
+          cmp = a.category.toLowerCase().compareTo(b.category.toLowerCase());
+          break;
+        case 5:
+          cmp = a.ipAddress.compareTo(b.ipAddress);
+          break;
+        case 6:
+          cmp = a.status.compareTo(b.status);
+          break;
+        case 7:
+          cmp = (a.details ?? '').compareTo(b.details ?? '');
+          break;
+        default:
+          cmp = 0;
+      }
+      return _sortAscending ? cmp : -cmp;
+    });
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
         headingRowColor: WidgetStateProperty.all(AppColors.surfaceElevated),
         dataRowMaxHeight: 56,
-        columns: const [
-          DataColumn(label: Text('Timestamp', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
-          DataColumn(label: Text('Last Active', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
-          DataColumn(label: Text('Actor', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
-          DataColumn(label: Text('Action Event', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
-          DataColumn(label: Text('Category', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
-          DataColumn(label: Text('IP Address', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
-          DataColumn(label: Text('Status', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
-          DataColumn(label: Text('Details', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700))),
+        sortColumnIndex: _sortColumnIndex,
+        sortAscending: _sortAscending,
+        columns: [
+          DataColumn(
+            label: const Text('Timestamp', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
+          DataColumn(
+            label: const Text('Last Active', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
+          DataColumn(
+            label: const Text('Actor', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
+          DataColumn(
+            label: const Text('Action Event', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
+          DataColumn(
+            label: const Text('Category', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
+          DataColumn(
+            label: const Text('IP Address', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
+          DataColumn(
+            label: const Text('Status', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
+          DataColumn(
+            label: const Text('Details', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
         ],
-        rows: logs.map((log) {
+        rows: sortedList.map((log) {
           return DataRow(cells: [
             DataCell(Text(_formatDateTime(log.timestamp), style: const TextStyle(color: AppColors.textMuted, fontSize: 12))),
             DataCell(Text(log.lastSeen != null ? _formatDateTime(log.lastSeen!) : _formatDateTime(log.timestamp), style: const TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.w600))),

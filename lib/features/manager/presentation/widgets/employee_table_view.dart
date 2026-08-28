@@ -3,57 +3,94 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../data/employee_management_repository.dart';
 
-/// Desktop data table component for employee directory.
-class EmployeeTableView extends StatelessWidget {
+/// Desktop data table component for employee directory supporting interactive column header sorting.
+class EmployeeTableView extends StatefulWidget {
   const EmployeeTableView({super.key, required this.employees});
 
   final List<EmployeeManagementData> employees;
 
   @override
+  State<EmployeeTableView> createState() => _EmployeeTableViewState();
+}
+
+class _EmployeeTableViewState extends State<EmployeeTableView> {
+  int _sortColumnIndex = 0;
+  bool _sortAscending = true;
+
+  void _onSort(int columnIndex, bool ascending) {
+    setState(() {
+      _sortColumnIndex = columnIndex;
+      _sortAscending = ascending;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final sortedList = List<EmployeeManagementData>.from(widget.employees);
+    sortedList.sort((a, b) {
+      int cmp = 0;
+      switch (_sortColumnIndex) {
+        case 0:
+          cmp = a.employee.fullName.toLowerCase().compareTo(b.employee.fullName.toLowerCase());
+          break;
+        case 1:
+          cmp = a.employee.email.toLowerCase().compareTo(b.employee.email.toLowerCase());
+          break;
+        case 2:
+          cmp = (a.employee.department ?? 'Engineering').toLowerCase().compareTo((b.employee.department ?? 'Engineering').toLowerCase());
+          break;
+        case 3:
+          cmp = a.tasksAssigned.compareTo(b.tasksAssigned);
+          break;
+        case 4:
+          cmp = a.tasksCompleted.compareTo(b.tasksCompleted);
+          break;
+        case 5:
+          cmp = a.status.compareTo(b.status);
+          break;
+        default:
+          cmp = 0;
+      }
+      return _sortAscending ? cmp : -cmp;
+    });
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: DataTable(
         headingRowColor: WidgetStateProperty.all(AppColors.surfaceElevated),
         dataRowMaxHeight: 64,
-        columns: const [
+        sortColumnIndex: _sortColumnIndex,
+        sortAscending: _sortAscending,
+        columns: [
           DataColumn(
-              label: Text('Employee',
-                  style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700))),
+            label: const Text('Employee', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
           DataColumn(
-              label: Text('Email',
-                  style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700))),
+            label: const Text('Email', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
           DataColumn(
-              label: Text('Department',
-                  style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700))),
+            label: const Text('Department', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
           DataColumn(
-              label: Text('Assigned',
-                  style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700))),
+            label: const Text('Assigned', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
           DataColumn(
-              label: Text('Completed',
-                  style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700))),
+            label: const Text('Completed', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
           DataColumn(
-              label: Text('Availability',
-                  style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontWeight: FontWeight.w700))),
+            label: const Text('Availability', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
+            onSort: _onSort,
+          ),
         ],
-        rows: employees.map((e) {
+        rows: sortedList.map((e) {
           final isBusy = e.status == 'Busy';
           final statusColor = isBusy ? AppColors.warning : AppColors.success;
-          final initials = e.employee.fullName.isNotEmpty
-              ? e.employee.fullName[0].toUpperCase()
-              : 'E';
+          final initials = e.employee.fullName.isNotEmpty ? e.employee.fullName[0].toUpperCase() : 'E';
 
           return DataRow(cells: [
             DataCell(
@@ -83,8 +120,7 @@ class EmployeeTableView extends StatelessWidget {
                 ],
               ),
             ),
-            DataCell(Text(e.employee.email,
-                style: const TextStyle(color: AppColors.textMuted))),
+            DataCell(Text(e.employee.email, style: const TextStyle(color: AppColors.textMuted))),
             DataCell(
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -94,24 +130,15 @@ class EmployeeTableView extends StatelessWidget {
                 ),
                 child: Text(
                   e.employee.department ?? 'Engineering',
-                  style: const TextStyle(
-                      color: AppColors.brandCyan,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600),
+                  style: const TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.w600),
                 ),
               ),
             ),
-            DataCell(Text('${e.tasksAssigned}',
-                style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w600))),
-            DataCell(Text('${e.tasksCompleted}',
-                style: const TextStyle(
-                    color: AppColors.success, fontWeight: FontWeight.w600))),
+            DataCell(Text('${e.tasksAssigned}', style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600))),
+            DataCell(Text('${e.tasksCompleted}', style: const TextStyle(color: AppColors.success, fontWeight: FontWeight.w600))),
             DataCell(
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: statusColor.withAlpha(25),
                   borderRadius: BorderRadius.circular(10),
@@ -119,10 +146,7 @@ class EmployeeTableView extends StatelessWidget {
                 ),
                 child: Text(
                   e.status,
-                  style: TextStyle(
-                      color: statusColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700),
+                  style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w700),
                 ),
               ),
             ),

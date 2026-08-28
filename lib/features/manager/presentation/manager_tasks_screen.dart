@@ -32,6 +32,7 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
   String _searchQuery = '';
   late String _selectedStatus;
   String _selectedRepo = 'all';
+  String _selectedSortField = 'deadline';
   bool _sortAscending = true;
 
   @override
@@ -84,7 +85,33 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
       return true;
     }).toList()
       ..sort((a, b) {
-        return _sortAscending ? a.deadline.compareTo(b.deadline) : b.deadline.compareTo(a.deadline);
+        int cmp = 0;
+        switch (_selectedSortField) {
+          case 'title':
+            cmp = a.title.toLowerCase().compareTo(b.title.toLowerCase());
+            break;
+          case 'repo':
+            cmp = (a.githubRepo ?? 'VALIXIS_PORTAL').toLowerCase().compareTo((b.githubRepo ?? 'VALIXIS_PORTAL').toLowerCase());
+            break;
+          case 'priority':
+            cmp = a.priority.index.compareTo(b.priority.index);
+            break;
+          case 'assignment':
+            final aName = a.assignedTo.isEmpty || a.assignedTo == 'Unassigned' ? 'z_unassigned' : a.assignedTo.toLowerCase();
+            final bName = b.assignedTo.isEmpty || b.assignedTo == 'Unassigned' ? 'z_unassigned' : b.assignedTo.toLowerCase();
+            cmp = aName.compareTo(bName);
+            break;
+          case 'pr':
+            final aHasPr = (a.prUrl != null && a.prUrl!.isNotEmpty) ? 1 : 0;
+            final bHasPr = (b.prUrl != null && b.prUrl!.isNotEmpty) ? 1 : 0;
+            cmp = aHasPr.compareTo(bHasPr);
+            break;
+          case 'deadline':
+          default:
+            cmp = a.deadline.compareTo(b.deadline);
+            break;
+        }
+        return _sortAscending ? cmp : -cmp;
       });
   }
 
@@ -170,11 +197,13 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                   searchQuery: _searchQuery,
                   selectedStatus: _selectedStatus,
                   selectedRepo: _selectedRepo,
+                  selectedSortField: _selectedSortField,
                   sortAscending: _sortAscending,
                   repositories: repos,
                   onSearchChanged: (q) => setState(() => _searchQuery = q),
                   onStatusChanged: (s) => setState(() => _selectedStatus = s),
                   onRepoChanged: (r) => setState(() => _selectedRepo = r),
+                  onSortFieldChanged: (f) => setState(() => _selectedSortField = f),
                   onSortToggle: () => setState(() => _sortAscending = !_sortAscending),
                 ),
                 const SizedBox(height: AppSpacing.xl),
@@ -193,6 +222,14 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                     ),
                     desktop: (context) => ManagerTasksTable(
                       tasks: filteredTasks,
+                      sortField: _selectedSortField,
+                      sortAscending: _sortAscending,
+                      onSort: (field, asc) {
+                        setState(() {
+                          _selectedSortField = field;
+                          _sortAscending = asc;
+                        });
+                      },
                       onReassign: (t) => _onReassign(t, metrics.allEmployees),
                       onUnassign: _onUnassign,
                       onDelete: _onDelete,
