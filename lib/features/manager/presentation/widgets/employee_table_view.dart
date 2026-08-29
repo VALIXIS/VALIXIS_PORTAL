@@ -97,17 +97,34 @@ class _EmployeeTableViewState extends State<EmployeeTableView> {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircleAvatar(
-                    radius: 14,
-                    backgroundColor: AppColors.brandBlue.withAlpha(40),
-                    child: Text(
-                      initials,
-                      style: const TextStyle(
-                        color: AppColors.brandCyan,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                  Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 14,
+                        backgroundColor: AppColors.brandBlue.withAlpha(40),
+                        child: Text(
+                          initials,
+                          style: const TextStyle(
+                            color: AppColors.brandCyan,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                       ),
-                    ),
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: statusColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: AppColors.surfaceElevated, width: 1.5),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
