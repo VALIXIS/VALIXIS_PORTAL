@@ -100,13 +100,13 @@ class _PrSubmissionCardState extends ConsumerState<PrSubmissionCard> {
                   child: const Icon(Icons.merge_type_rounded, color: AppColors.brandBlue, size: 20),
                 ),
                 const SizedBox(width: AppSpacing.sm),
-                const Text('PR Submission', style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
+                const Text('PR Submission', style: TextStyle(color: AppColors.textPrimary, fontSize: 20, fontWeight: FontWeight.w800)),
               ],
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
               isSubmitted ? 'Pull Request already submitted for review.' : 'Submit your GitHub Pull Request URL when implementation is complete.',
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+              style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: AppSpacing.lg),
             AppTextField(

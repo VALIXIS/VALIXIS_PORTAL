@@ -64,11 +64,11 @@ class AiPromptCard extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   const Text(
-                    'AI Prompt',
+                    'AI Prompt Specification',
                     style: TextStyle(
                       color: AppColors.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ],
@@ -76,8 +76,8 @@ class AiPromptCard extends StatelessWidget {
               AppButton(
                 label: 'Copy AI Prompt',
                 prefixIcon: Icons.copy_rounded,
-                variant: AppButtonVariant.secondary,
-                size: AppButtonSize.small,
+                variant: AppButtonVariant.primary,
+                size: AppButtonSize.medium,
                 onPressed: () => _copyPromptToClipboard(context),
               ),
             ],
@@ -87,7 +87,7 @@ class AiPromptCard extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.all(AppSpacing.base),
             decoration: BoxDecoration(
-              color: AppColors.surfaceBase.withAlpha(220),
+              color: AppColors.surfaceBase.withAlpha(240),
               borderRadius: BorderRadius.circular(AppRadius.md),
               border: Border.all(color: AppColors.glassBorder),
             ),
@@ -97,14 +97,15 @@ class AiPromptCard extends StatelessWidget {
                 Row(
                   children: const [
                     Icon(Icons.terminal_rounded,
-                        size: 14, color: AppColors.brandCyan),
+                        size: 15, color: AppColors.brandCyan),
                     SizedBox(width: 6),
                     Text(
                       'AI_PROMPT_SPECIFICATION.MD',
                       style: TextStyle(
-                        color: AppColors.textMuted,
+                        color: AppColors.brandCyan,
                         fontFamily: 'monospace',
-                        fontSize: 11,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
                         letterSpacing: 1,
                       ),
                     ),
@@ -114,10 +115,10 @@ class AiPromptCard extends StatelessWidget {
                 SelectableText(
                   prompt,
                   style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontFamily: 'monospace',
-                    fontSize: 13,
-                    height: 1.5,
+                    color: AppColors.textPrimary,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    height: 1.6,
                   ),
                 ),
               ],

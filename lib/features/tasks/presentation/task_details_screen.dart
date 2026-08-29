@@ -93,7 +93,7 @@ class _StatusMetaCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Status',
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 15, fontWeight: FontWeight.w600)),
               StatusBadge(status: task.status),
             ],
           ),
@@ -102,7 +102,7 @@ class _StatusMetaCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Priority',
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 15, fontWeight: FontWeight.w600)),
               PriorityBadge(priority: task.priority),
             ],
           ),
@@ -111,18 +111,18 @@ class _StatusMetaCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text('Deadline',
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+                  style: TextStyle(color: AppColors.textSecondary, fontSize: 15, fontWeight: FontWeight.w600)),
               Row(
                 children: [
                   const Icon(Icons.calendar_month_rounded,
-                      size: 14, color: AppColors.brandCyan),
+                      size: 16, color: AppColors.brandCyan),
                   const SizedBox(width: 6),
                   Text(
                     DateFormatter.formatShortDate(task.deadline),
                     style: const TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700),
                   ),
                 ],
               ),

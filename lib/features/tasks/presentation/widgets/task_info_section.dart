@@ -38,10 +38,10 @@ class TaskInfoSection extends StatelessWidget {
                       task.title,
                       style: const TextStyle(
                         color: AppColors.textPrimary,
-                        fontSize: 24,
+                        fontSize: 28,
                         fontWeight: FontWeight.w800,
                         height: 1.3,
-                        letterSpacing: -0.4,
+                        letterSpacing: -0.5,
                       ),
                     ),
                   ),
@@ -54,9 +54,10 @@ class TaskInfoSection extends StatelessWidget {
                 Text(
                   task.description!,
                   style: const TextStyle(
-                    color: AppColors.textSecondary,
-                    fontSize: 15,
+                    color: AppColors.textPrimary,
+                    fontSize: 16,
                     height: 1.5,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -98,16 +99,16 @@ class TaskInfoSection extends StatelessWidget {
                               style: const TextStyle(
                                 color: AppColors.brandBlue,
                                 decoration: TextDecoration.underline,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
                               ),
                             ),
                             const SizedBox(width: 4),
-                            const Icon(Icons.open_in_new_rounded, size: 14, color: AppColors.brandBlue),
+                            const Icon(Icons.open_in_new_rounded, size: 16, color: AppColors.brandBlue),
                           ],
                         ),
                       )
-                    : const Text('VALIXIS_PORTAL', style: TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w500)),
+                    : const Text('VALIXIS_PORTAL', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700)),
               ),
               const Divider(height: AppSpacing.xl),
               const _InfoRow(
@@ -115,7 +116,7 @@ class TaskInfoSection extends StatelessWidget {
                 label: 'Base Branch',
                 valueWidget: SelectableText(
                   'main',
-                  style: TextStyle(color: AppColors.brandCyan, fontFamily: 'monospace', fontWeight: FontWeight.w600),
+                  style: TextStyle(color: AppColors.brandCyan, fontFamily: 'monospace', fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ),
               if (task.branchName != null &&
@@ -130,7 +131,8 @@ class TaskInfoSection extends StatelessWidget {
                     style: const TextStyle(
                       color: AppColors.brandCyan,
                       fontFamily: 'monospace',
-                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
@@ -141,7 +143,7 @@ class TaskInfoSection extends StatelessWidget {
                 label: 'Assigned Date',
                 valueWidget: Text(
                   task.createdAt != null ? DateFormatter.formatShortDate(task.createdAt!) : 'Recently Assigned',
-                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 14, fontWeight: FontWeight.w500),
+                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ),
               const Divider(height: AppSpacing.xl),
@@ -150,7 +152,7 @@ class TaskInfoSection extends StatelessWidget {
                 label: 'Created By',
                 valueWidget: Text(
                   'Engineering Manager',
-                  style: TextStyle(color: AppColors.brandPurple, fontSize: 14, fontWeight: FontWeight.w700),
+                  style: TextStyle(color: AppColors.brandPurple, fontSize: 16, fontWeight: FontWeight.w800),
                 ),
               ),
             ],
@@ -181,18 +183,18 @@ class _DetailBlock extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(icon, color: AppColors.brandCyan, size: 20),
+              Icon(icon, color: AppColors.brandCyan, size: 22),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 title,
-                style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w800),
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
             content,
-            style: const TextStyle(color: AppColors.textSecondary, fontSize: 14, height: 1.5),
+            style: const TextStyle(color: AppColors.textPrimary, fontSize: 15, height: 1.6, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -218,9 +220,9 @@ class _InfoRow extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon, size: 18, color: AppColors.textMuted),
+            Icon(icon, size: 20, color: AppColors.brandCyan),
             const SizedBox(width: AppSpacing.sm),
-            Text(label, style: const TextStyle(color: AppColors.textMuted, fontSize: 14)),
+            Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 15, fontWeight: FontWeight.w600)),
           ],
         ),
         Flexible(child: valueWidget),
