@@ -99,14 +99,20 @@ class ManagerTasksTable extends StatelessWidget {
             return DataRow(
               cells: [
                 DataCell(
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(task.title, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700, fontSize: 13), overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 2),
-                      Text(task.branchName ?? 'main', style: const TextStyle(color: AppColors.textMuted, fontSize: 11, fontFamily: 'monospace')),
-                    ],
+                  MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: InkWell(
+                      onTap: () => context.go('/tasks/${task.id}'),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(task.title, style: const TextStyle(color: AppColors.brandCyan, fontWeight: FontWeight.w700, fontSize: 13, decoration: TextDecoration.underline), overflow: TextOverflow.ellipsis),
+                          const SizedBox(height: 2),
+                          Text(task.branchName ?? 'main', style: const TextStyle(color: AppColors.textMuted, fontSize: 11, fontFamily: 'monospace')),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 DataCell(Text(task.githubRepo ?? 'VALIXIS_PORTAL', style: const TextStyle(color: AppColors.brandBlue, fontSize: 12, fontWeight: FontWeight.w600))),
