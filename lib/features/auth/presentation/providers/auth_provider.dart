@@ -101,6 +101,32 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
   Future<void> signOut() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
+      final user = _repository.currentUser;
+      if (user != null) {
+        try {
+          final supabase = _ref.read(supabaseClientProvider);
+          String? empId;
+          try {
+            final empRes = await supabase
+                .from('employees')
+                .select('id')
+                .eq('auth_id', user.id)
+                .maybeSingle();
+            if (empRes != null) empId = empRes['id']?.toString();
+          } catch (_) {}
+
+          await supabase.from('audit_logs').insert({
+            if (empId != null && empId.isNotEmpty) 'actor_id': empId,
+            'action': 'Logout',
+            'category': 'Authentication',
+            'status': 'Success',
+            'ip_address': kIsWeb ? 'Web Client' : 'Mobile Client',
+          });
+        } catch (e) {
+          debugPrint('[Audit Log] Failed to insert logout audit record: $e');
+        }
+      }
+
       _ref.read(heartbeatProvider).stop();
       await _repository.signOut();
       _invalidateUserProviders();

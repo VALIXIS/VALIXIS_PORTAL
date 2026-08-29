@@ -135,6 +135,12 @@ class _AuditLogsTableState extends State<AuditLogsTable> {
           ),
         ],
         rows: sortedList.map((log) {
+          final isLineActive = log.status.contains('Active');
+          final isLoggedOut = log.status.contains('Logged Out') || log.status.contains('Ended');
+          final statusColor = isLineActive
+              ? AppColors.success
+              : (isLoggedOut ? AppColors.textMuted : AppColors.error);
+
           return DataRow(cells: [
             DataCell(Text(_formatDateTime(log.timestamp), style: const TextStyle(color: AppColors.textMuted, fontSize: 12))),
             DataCell(Text(log.lastSeen != null ? _formatDateTime(log.lastSeen!) : _formatDateTime(log.timestamp), style: const TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.w600))),
@@ -155,10 +161,11 @@ class _AuditLogsTableState extends State<AuditLogsTable> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.success.withAlpha(25),
+                  color: statusColor.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: statusColor.withAlpha(60)),
                 ),
-                child: Text(log.status, style: const TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w700)),
+                child: Text(log.status, style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w700)),
               ),
             ),
             DataCell(Text(log.details ?? 'N/A', style: const TextStyle(color: AppColors.textMuted, fontSize: 12))),

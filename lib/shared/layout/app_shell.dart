@@ -49,13 +49,6 @@ const _allNavItems = [
     isManagerOnly: true,
   ),
   NavItem(
-    route: AppRoutes.managerAssignments,
-    label: 'Assignments',
-    icon: Icons.assignment_ind_outlined,
-    selectedIcon: Icons.assignment_ind_rounded,
-    isManagerOnly: true,
-  ),
-  NavItem(
     route: AppRoutes.managerReviews,
     label: 'Reviews',
     icon: Icons.rate_review_outlined,

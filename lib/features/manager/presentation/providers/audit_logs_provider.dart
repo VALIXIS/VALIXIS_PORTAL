@@ -10,9 +10,11 @@ final auditLogsProvider = FutureProvider<List<AuditLogItem>>((ref) async {
       .order('timestamp', ascending: false);
 
   final list = response as List<dynamic>;
+  final nowUtc = DateTime.now().toUtc();
+
   return list.map((item) {
     final timestampStr = item['timestamp'] as String? ?? '';
-    final timestampUtc = DateTime.tryParse(timestampStr)?.toUtc() ?? DateTime.now().toUtc();
+    final timestampUtc = DateTime.tryParse(timestampStr)?.toUtc() ?? nowUtc;
 
     final lastSeenStr = item['last_seen'] as String?;
     DateTime? lastSeenUtc;
@@ -24,10 +26,7 @@ final auditLogsProvider = FutureProvider<List<AuditLogItem>>((ref) async {
 
     if (lastSeenUtc != null) {
       var diffSeconds = lastSeenUtc.difference(timestampUtc).inSeconds;
-
-      if (diffSeconds < 0) {
-        diffSeconds = 0;
-      }
+      if (diffSeconds < 0) diffSeconds = 0;
 
       final totalMinutes = diffSeconds ~/ 60;
       final hours = totalMinutes ~/ 60;
@@ -42,15 +41,33 @@ final auditLogsProvider = FutureProvider<List<AuditLogItem>>((ref) async {
       }
     }
 
+    final rawAction = item['action']?.toString() ?? 'Login';
+    String status = item['status']?.toString() ?? 'Success';
+
+    if (rawAction.toLowerCase() == 'login') {
+      if (lastSeenUtc != null) {
+        final secondsSinceLastSeen = nowUtc.difference(lastSeenUtc).inSeconds;
+        if (secondsSinceLastSeen > 120) {
+          status = 'Session Ended (Tab Closed)';
+        } else {
+          status = 'Active Session';
+        }
+      } else {
+        status = 'Active Session';
+      }
+    } else if (rawAction.toLowerCase() == 'logout') {
+      status = 'Logged Out';
+    }
+
     return AuditLogItem(
       id: item['id']?.toString() ?? '',
       actor: item['actor']?.toString() ?? 'Unknown User',
-      action: item['action']?.toString() ?? '',
+      action: rawAction,
       category: item['category']?.toString() ?? 'Authentication',
       timestamp: timestampUtc.toLocal(),
       lastSeen: lastSeenUtc?.toLocal(),
-      ipAddress: item['ip_address']?.toString() ?? 'N/A',
-      status: item['status']?.toString() ?? 'Success',
+      ipAddress: item['ip_address']?.toString() ?? 'Web Client',
+      status: status,
       details: details,
     );
   }).toList();

@@ -33,10 +33,10 @@ class ManagerQuickActions extends StatelessWidget {
               onTap: () => context.go(AppRoutes.managerCreateTask),
             ),
             _ActionPill(
-              label: 'Assign Task',
-              icon: Icons.assignment_ind_rounded,
+              label: 'Manager Tasks',
+              icon: Icons.assignment_rounded,
               color: AppColors.brandBlue,
-              onTap: () => context.go(AppRoutes.managerAssignments),
+              onTap: () => context.go(AppRoutes.managerTasks),
             ),
             _ActionPill(
               label: 'Review Submissions',
