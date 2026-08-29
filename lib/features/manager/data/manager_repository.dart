@@ -194,20 +194,17 @@ class ManagerRepository {
     List<Map<String, dynamic>>? liveEmployees;
     List<Map<String, dynamic>>? liveSubmissions;
 
-    try {
-      final assignRes = await _client.from('task_assignments').select('*');
-      liveAssignments = (assignRes as List<dynamic>).cast<Map<String, dynamic>>();
-    } catch (_) {}
-
-    try {
-      final empRes = await _client.from('employees').select('id, auth_id, name, email, role, department');
-      liveEmployees = (empRes as List<dynamic>).cast<Map<String, dynamic>>();
-    } catch (_) {}
-
-    try {
-      final subRes = await _client.from('submissions').select('*');
-      liveSubmissions = (subRes as List<dynamic>).cast<Map<String, dynamic>>();
-    } catch (_) {}
+    await Future.wait([
+      _client.from('task_assignments').select('*').then((assignRes) {
+        liveAssignments = (assignRes as List<dynamic>).cast<Map<String, dynamic>>();
+      }).catchError((_) {}),
+      _client.from('employees').select('id, auth_id, name, email, role, department').then((empRes) {
+        liveEmployees = (empRes as List<dynamic>).cast<Map<String, dynamic>>();
+      }).catchError((_) {}),
+      _client.from('submissions').select('*').then((subRes) {
+        liveSubmissions = (subRes as List<dynamic>).cast<Map<String, dynamic>>();
+      }).catchError((_) {}),
+    ]);
 
     return ManagerDashboardMetrics.fromJson(
       data,
@@ -325,36 +322,22 @@ class ManagerRepository {
     }
   }
 
-  /// Deletes a task and all related assignments and submissions using admin Edge Function and client fallback.
+  /// Deletes a task and all related assignments & submissions via atomic CASCADE deletion.
   Future<bool> deleteTask(String taskId) async {
     try {
-      final response = await _client.functions.invoke(
-        'delete-task',
-        body: {'task_id': taskId},
-      );
-      if (response.status < 400) return true;
-    } catch (e) {
-      debugPrint('Delete task Edge Function notice: $e');
-    }
-
-    try {
-      // 1. Query task_assignments for this task_id
-      final assignments = await _client.from('task_assignments').select('id').eq('task_id', taskId);
-      final assignmentList = assignments as List<dynamic>? ?? [];
-      for (final a in assignmentList) {
-        final aId = a['id'];
-        if (aId != null) {
-          await _client.from('submissions').delete().eq('assignment_id', aId);
-        }
-      }
-      // 2. Delete task_assignments
-      await _client.from('task_assignments').delete().eq('task_id', taskId);
-      // 3. Delete task
       await _client.from('tasks').delete().eq('id', taskId);
       return true;
     } catch (e) {
-      debugPrint('Delete task client fallback error: $e');
-      return false;
+      debugPrint('Direct task delete notice, trying Edge Function: $e');
+      try {
+        final response = await _client.functions.invoke(
+          'delete-task',
+          body: {'task_id': taskId},
+        );
+        return response.status < 400;
+      } catch (_) {
+        return false;
+      }
     }
   }
 

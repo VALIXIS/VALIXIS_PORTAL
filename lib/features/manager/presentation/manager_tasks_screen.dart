@@ -130,7 +130,18 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
       employees: employees,
       managerRepo: ref.read(managerRepositoryProvider),
     );
-    if (ok == true) _refreshAllProviders();
+    if (ok == true) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Task "${task.title}" reassignment initiated!'),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      Future.delayed(const Duration(milliseconds: 300), _refreshAllProviders);
+    }
   }
 
   Future<void> _onUnassign(Task task) async {
@@ -139,7 +150,18 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
       task: task,
       managerRepo: ref.read(managerRepositoryProvider),
     );
-    if (ok == true) _refreshAllProviders();
+    if (ok == true) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Task "${task.title}" unassigned!'),
+            backgroundColor: AppColors.warning,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      Future.delayed(const Duration(milliseconds: 300), _refreshAllProviders);
+    }
   }
 
   Future<void> _onDelete(Task task) async {
@@ -148,7 +170,18 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
       task: task,
       managerRepo: ref.read(managerRepositoryProvider),
     );
-    if (ok == true) _refreshAllProviders();
+    if (ok == true) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Task "${task.title}" deleted!'),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      Future.delayed(const Duration(milliseconds: 300), _refreshAllProviders);
+    }
   }
 
   @override

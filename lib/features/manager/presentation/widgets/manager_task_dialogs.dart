@@ -59,9 +59,9 @@ abstract final class ManagerTaskDialogs {
                 ElevatedButton(
                   onPressed: selectedEmpId == null
                       ? null
-                      : () async {
-                          await managerRepo.assignTask(taskId: task.id, employeeId: selectedEmpId!);
-                          if (context.mounted) Navigator.pop(context, true);
+                      : () {
+                          Navigator.pop(context, true);
+                          managerRepo.assignTask(taskId: task.id, employeeId: selectedEmpId!);
                         },
                   child: const Text('Reassign'),
                 ),
@@ -96,7 +96,7 @@ abstract final class ManagerTaskDialogs {
     );
 
     if (confirmed == true) {
-      await managerRepo.unassignTask(task.id);
+      managerRepo.unassignTask(task.id);
       return true;
     }
     return false;
@@ -125,17 +125,8 @@ abstract final class ManagerTaskDialogs {
     );
 
     if (confirmed == true) {
-      final success = await managerRepo.deleteTask(task.id);
-      if (!success && context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to delete task. Please check database permissions or network connection.'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-        return false;
-      }
-      return success;
+      managerRepo.deleteTask(task.id);
+      return true;
     }
     return false;
   }
