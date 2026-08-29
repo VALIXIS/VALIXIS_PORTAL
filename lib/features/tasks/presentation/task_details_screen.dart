@@ -30,7 +30,7 @@ class TaskDetailsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text('Task #$taskId'),
+        title: const Text('Task Specification & Workspace'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () => context.go(AppRoutes.tasks),

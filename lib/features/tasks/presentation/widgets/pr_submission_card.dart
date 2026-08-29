@@ -82,7 +82,7 @@ class _PrSubmissionCardState extends ConsumerState<PrSubmissionCard> {
     final isLoading = submissionState.isLoading;
     final isSubmitted = widget.task.status == TaskStatus.submitted || widget.task.status == TaskStatus.approved;
     final repoName = widget.task.githubRepo ?? 'VALIXIS/VALIXIS_PORTAL';
-    final branchName = widget.task.branchName ?? 'feature/${widget.task.id.toLowerCase()}';
+    final branchName = widget.task.branchName;
 
     return GlassCard(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -144,13 +144,18 @@ class _PrSubmissionCardState extends ConsumerState<PrSubmissionCard> {
 }
 
 class _PrInstructionalHelperCard extends StatelessWidget {
-  const _PrInstructionalHelperCard({required this.repoName, required this.branchName});
+  const _PrInstructionalHelperCard({required this.repoName, this.branchName});
 
   final String repoName;
-  final String branchName;
+  final String? branchName;
 
   @override
   Widget build(BuildContext context) {
+    final b = branchName;
+    final hasCustomBranch = b != null &&
+        b.isNotEmpty &&
+        !b.contains('feature/');
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -172,11 +177,17 @@ class _PrInstructionalHelperCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           _HelperMetaRow(label: 'Repository:', value: repoName),
           const SizedBox(height: 4),
-          const _HelperMetaRow(label: 'Base Branch:', value: 'main'),
+          const _HelperMetaRow(label: 'Target Branch:', value: 'main'),
+          if (hasCustomBranch) ...[
+            const SizedBox(height: 4),
+            _HelperMetaRow(label: 'Feature Branch:', value: b),
+          ],
           const SizedBox(height: 4),
-          _HelperMetaRow(label: 'Your Branch:', value: branchName),
-          const SizedBox(height: 4),
-          const _HelperMetaRow(label: 'Example PR:', value: 'https://github.com/VALIXIS/VALIXIS_PORTAL/pull/15', isUrl: true),
+          _HelperMetaRow(
+            label: 'Example PR:',
+            value: 'https://github.com/${repoName.replaceAll("https://github.com/", "")}/pull/1',
+            isUrl: true,
+          ),
         ],
       ),
     );

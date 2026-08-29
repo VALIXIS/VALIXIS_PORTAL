@@ -118,15 +118,23 @@ class TaskInfoSection extends StatelessWidget {
                   style: TextStyle(color: AppColors.brandCyan, fontFamily: 'monospace', fontWeight: FontWeight.w600),
                 ),
               ),
-              const Divider(height: AppSpacing.xl),
-              _InfoRow(
-                icon: Icons.account_tree_outlined,
-                label: 'Feature Branch',
-                valueWidget: SelectableText(
-                  task.branchName ?? 'feature/${task.id.toLowerCase()}',
-                  style: const TextStyle(color: AppColors.brandCyan, fontFamily: 'monospace', fontWeight: FontWeight.w600),
+              if (task.branchName != null &&
+                  task.branchName!.isNotEmpty &&
+                  !task.branchName!.contains(task.id.toLowerCase())) ...[
+                const Divider(height: AppSpacing.xl),
+                _InfoRow(
+                  icon: Icons.account_tree_outlined,
+                  label: 'Feature Branch',
+                  valueWidget: SelectableText(
+                    task.branchName!,
+                    style: const TextStyle(
+                      color: AppColors.brandCyan,
+                      fontFamily: 'monospace',
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
+              ],
               const Divider(height: AppSpacing.xl),
               _InfoRow(
                 icon: Icons.calendar_today_rounded,
