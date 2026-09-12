@@ -29,7 +29,7 @@ dependencies:
 
   # Utilities
   url_launcher: ^6.3.2
-  file_picker: ^8.1.7
+  file_picker: ^10.0.0
 
 dev_dependencies:
   flutter_test:

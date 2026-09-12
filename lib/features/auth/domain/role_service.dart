@@ -13,7 +13,7 @@ enum UserRole {
     final normalized = role.toLowerCase().trim();
     if (normalized.contains('manager') ||
         normalized.contains('admin') ||
-        normalized == 'lead') {
+        normalized.contains('lead')) {
       return UserRole.manager;
     }
     return UserRole.employee;

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/network/realtime_sync_service.dart';
 import '../../../shared/components/app_button.dart';
 import '../../../shared/components/empty_state.dart';
-import '../../auth/presentation/providers/auth_provider.dart';
-import '../../auth/presentation/providers/role_provider.dart';
 import 'providers/manager_dashboard_provider.dart';
 import 'widgets/manager_hero_header.dart';
 import 'widgets/manager_metrics_grid.dart';
@@ -18,62 +18,64 @@ class ManagerDashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final roleAsync = ref.watch(roleProvider);
-    final user = ref.watch(authNotifierProvider).valueOrNull;
-    debugPrint('[6. Manager Dashboard] current role: ${roleAsync.valueOrNull}, current user id: ${user?.id}');
-
     final metricsAsync = ref.watch(managerDashboardProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: metricsAsync.when(
-        loading: () => const ManagerShimmer(),
-        error: (err, _) => Center(
-          child: EmptyState(
-            icon: Icons.error_outline_rounded,
-            title: 'Failed to load Manager Dashboard',
-            description: err.toString(),
-            action: AppButton(
-              label: 'Retry Loading',
-              prefixIcon: Icons.refresh_rounded,
-              onPressed: () => ref.refresh(managerDashboardProvider),
+      body: RefreshIndicator(
+        color: AppColors.brandCyan,
+        backgroundColor: AppColors.surfaceElevated,
+        onRefresh: () async {
+          ref.read(realtimeSyncProvider.notifier).forceRefresh();
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+        },
+        child: metricsAsync.when(
+          loading: () => const ManagerShimmer(),
+          error: (err, _) => Center(
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(AppSpacing.xl),
+              child: EmptyState(
+                icon: Icons.cloud_off_rounded,
+                title: 'Unable to Load Manager Dashboard',
+                description: err.toString(),
+                action: AppButton(
+                  label: 'Retry Connection',
+                  prefixIcon: Icons.refresh_rounded,
+                  onPressed: () {
+                    ref.read(realtimeSyncProvider.notifier).forceRefresh();
+                  },
+                ),
+              ),
             ),
           ),
-        ),
-        data: (metrics) {
-          return SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 400),
-              curve: Curves.easeOutCubic,
-              tween: Tween(begin: 0.0, end: 1.0),
-              builder: (context, value, child) {
-                return Opacity(
-                  opacity: value,
-                  child: Transform.translate(
-                    offset: Offset(0, (1 - value) * 16),
-                    child: child,
-                  ),
-                );
-              },
+          data: (metrics) {
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.base,
+                vertical: AppSpacing.md,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const ManagerHeroHeader(),
-                  const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.base),
                   const ManagerQuickActions(),
-                  const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.base),
                   ManagerMetricsGrid(metrics: metrics),
-                  const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.base),
                   RecentSubmissionsCard(
                     submissions: metrics.recentSubmissions,
                   ),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

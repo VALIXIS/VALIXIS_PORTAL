@@ -36,7 +36,7 @@ enum TaskStatus {
 
   static TaskStatus fromString(String? value) {
     return switch (value?.toLowerCase()) {
-      'in_progress' || 'in progress' => TaskStatus.inProgress,
+      'in_progress' || 'in progress' || 'inprogress' => TaskStatus.inProgress,
       'submitted' || 'under_review' => TaskStatus.submitted,
       'approved' || 'completed' => TaskStatus.approved,
       'rejected' => TaskStatus.rejected,
@@ -118,9 +118,10 @@ class Task {
           ? DateTime.tryParse(taskData['deadline'].toString()) ??
               DateTime.now()
           : DateTime.now(),
-      assignedTo: json['employee_id'] as String? ??
+      assignedTo: json['assigned_to'] as String? ??
+          json['employee_name'] as String? ??
+          json['employee_id'] as String? ??
           json['user_id'] as String? ??
-          json['assigned_to'] as String? ??
           '',
       createdAt: taskData['created_at'] != null
           ? DateTime.tryParse(taskData['created_at'].toString())

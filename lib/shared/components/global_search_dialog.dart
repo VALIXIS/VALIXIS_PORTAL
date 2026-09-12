@@ -59,63 +59,43 @@ class _GlobalSearchDialogState extends ConsumerState<GlobalSearchDialog> {
 
     final commandActions = [
       _CommandAction(
-        title: 'Create New Task',
-        subtitle: 'Dispatch a new engineering task specification',
-        icon: Icons.add_task_rounded,
-        color: AppColors.brandCyan,
-        onTap: () {
-          Navigator.pop(context);
-          context.go(AppRoutes.managerCreateTask);
-        },
-      ),
-      _CommandAction(
         title: 'Manager Tasks Overview',
-        subtitle: 'View, filter, sort, reassign, or delete tasks',
+        subtitle: 'View, filter, sort, and manage team tasks',
         icon: Icons.assignment_rounded,
-        color: AppColors.brandBlue,
+        color: AppColors.brandCyan,
         onTap: () {
           Navigator.pop(context);
           context.go(AppRoutes.managerTasks);
         },
       ),
       _CommandAction(
-        title: 'Review Submissions',
+        title: 'Review Submissions Queue',
         subtitle: 'Audit PR links and evaluate developer submissions',
         icon: Icons.rate_review_rounded,
-        color: AppColors.brandPurple,
+        color: AppColors.brandBlue,
         onTap: () {
           Navigator.pop(context);
           context.go(AppRoutes.managerReviews);
         },
       ),
       _CommandAction(
-        title: 'Employee Workload Directory',
-        subtitle: 'View active employee roster and availability',
-        icon: Icons.people_alt_rounded,
-        color: AppColors.success,
-        onTap: () {
-          Navigator.pop(context);
-          context.go(AppRoutes.managerEmployees);
-        },
-      ),
-      _CommandAction(
         title: 'Security Audit Logs',
         subtitle: 'Inspect login events, durations, and system activity',
         icon: Icons.fact_check_rounded,
-        color: AppColors.warning,
+        color: AppColors.brandPurple,
         onTap: () {
           Navigator.pop(context);
           context.go(AppRoutes.managerAuditLogs);
         },
       ),
       _CommandAction(
-        title: 'Direct WhatsApp Task Dispatcher',
-        subtitle: 'Send instant automated task alerts to WhatsApp',
-        icon: Icons.chat_bubble_rounded,
+        title: 'Employee Roster Directory',
+        subtitle: 'View active employee roster and availability',
+        icon: Icons.people_alt_rounded,
         color: AppColors.success,
         onTap: () {
           Navigator.pop(context);
-          context.go(AppRoutes.managerWhatsApp);
+          context.go(AppRoutes.managerEmployees);
         },
       ),
       _CommandAction(

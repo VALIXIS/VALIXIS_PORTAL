@@ -4,7 +4,7 @@ import '../../../../app/router/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 
-/// Executive Quick Actions toolbar for manager operations.
+/// Executive Quick Navigation toolbar for manager mobile operations.
 class ManagerQuickActions extends StatelessWidget {
   const ManagerQuickActions({super.key});
 
@@ -14,7 +14,7 @@ class ManagerQuickActions extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Quick Actions',
+          'Quick Navigation',
           style: TextStyle(
             color: AppColors.textPrimary,
             fontSize: 16,
@@ -27,25 +27,25 @@ class ManagerQuickActions extends StatelessWidget {
           runSpacing: AppSpacing.sm,
           children: [
             _ActionPill(
-              label: 'Create Task',
-              icon: Icons.add_rounded,
-              color: AppColors.brandCyan,
-              onTap: () => context.go(AppRoutes.managerCreateTask),
-            ),
-            _ActionPill(
               label: 'Manager Tasks',
               icon: Icons.assignment_rounded,
-              color: AppColors.brandBlue,
+              color: AppColors.brandCyan,
               onTap: () => context.go(AppRoutes.managerTasks),
             ),
             _ActionPill(
-              label: 'Review Submissions',
+              label: 'Review Queue',
               icon: Icons.rate_review_rounded,
-              color: AppColors.brandPurple,
+              color: AppColors.brandBlue,
               onTap: () => context.go(AppRoutes.managerReviews),
             ),
             _ActionPill(
-              label: 'Employee Roster',
+              label: 'Audit Logs',
+              icon: Icons.fact_check_rounded,
+              color: AppColors.brandPurple,
+              onTap: () => context.go(AppRoutes.managerAuditLogs),
+            ),
+            _ActionPill(
+              label: 'Team Roster',
               icon: Icons.people_alt_rounded,
               color: AppColors.success,
               onTap: () => context.go(AppRoutes.managerEmployees),

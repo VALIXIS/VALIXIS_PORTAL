@@ -35,9 +35,10 @@ abstract final class TaskMapper {
           ? DateTime.tryParse(taskData['deadline'].toString()) ??
               DateTime.now()
           : DateTime.now(),
-      assignedTo: json['employee_id'] as String? ??
+      assignedTo: json['assigned_to'] as String? ??
+          json['employee_name'] as String? ??
+          json['employee_id'] as String? ??
           json['user_id'] as String? ??
-          json['assigned_to'] as String? ??
           '',
       createdAt: taskData['created_at'] != null
           ? DateTime.tryParse(taskData['created_at'].toString())

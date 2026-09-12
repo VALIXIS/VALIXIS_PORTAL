@@ -4,7 +4,7 @@ import '../core/theme/app_theme.dart';
 import 'router/app_router.dart';
 import 'providers.dart';
 
-/// Root application widget.
+/// Root application widget for VALIXIS Manager.
 ///
 /// Connects the router and theme to the widget tree.
 class ValixisApp extends ConsumerWidget {
@@ -16,7 +16,7 @@ class ValixisApp extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
 
     return MaterialApp.router(
-      title: 'VALIXIS Portal',
+      title: 'VALIXIS Manager',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark,
       darkTheme: AppTheme.dark,

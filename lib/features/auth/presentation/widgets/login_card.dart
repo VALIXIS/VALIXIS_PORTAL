@@ -77,7 +77,7 @@ class LoginCard extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               const Text(
-                'Sign in to access your enterprise workspace',
+                'Sign in to access VALIXIS Manager workspace',
                 style: TextStyle(
                   color: AppColors.textMuted,
                   fontSize: 14,
@@ -174,7 +174,7 @@ class _EnterpriseBadge extends StatelessWidget {
         ),
       ),
       child: const Text(
-        'ENTERPRISE PORTAL',
+        'VALIXIS MANAGER',
         style: TextStyle(
           color: AppColors.brandCyan,
           fontSize: 10,
