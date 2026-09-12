@@ -10,6 +10,7 @@ import 'providers/manager_dashboard_provider.dart';
 import 'widgets/manager_shimmer.dart';
 import 'widgets/manager_task_card.dart';
 import 'widgets/manager_task_dialogs.dart';
+import 'widgets/manager_tasks_table.dart';
 
 /// Mobile-optimized Executive Manager Tasks Screen for monitoring, filtering, and reassigning tasks.
 class ManagerTasksScreen extends ConsumerStatefulWidget {
@@ -148,6 +149,26 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
           SnackBar(
             content: Text('Task "${task.title}" unassigned!'),
             backgroundColor: AppColors.warning,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      _refresh();
+    }
+  }
+
+  Future<void> _onDelete(Task task) async {
+    final ok = await ManagerTaskDialogs.showDeleteDialog(
+      context: context,
+      task: task,
+      managerRepo: ref.read(managerRepositoryProvider),
+    );
+    if (ok == true) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Task "${task.title}" deleted!'),
+            backgroundColor: AppColors.error,
             duration: const Duration(seconds: 2),
           ),
         );
@@ -409,6 +430,21 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                           description: 'No tasks match your search query and selected filter options.',
                         ),
                       ),
+                    )
+                  else if (MediaQuery.of(context).size.width >= 768)
+                    ManagerTasksTable(
+                      tasks: filteredTasks,
+                      sortField: _selectedSortField,
+                      sortAscending: _sortAscending,
+                      onSort: (field, asc) {
+                        setState(() {
+                          _selectedSortField = field;
+                          _sortAscending = asc;
+                        });
+                      },
+                      onReassign: (task) => _onReassign(task, metrics.allEmployees),
+                      onUnassign: (task) => _onUnassign(task),
+                      onDelete: (task) => _onDelete(task),
                     )
                   else
                     ListView.separated(
