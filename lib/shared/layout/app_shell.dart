@@ -10,6 +10,7 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/role_provider.dart';
 import '../../features/manager/presentation/providers/manager_dashboard_provider.dart';
 import 'manager_profile_sheet.dart';
+import 'valixis_rail.dart';
 
 class _ManagerNavItem {
   const _ManagerNavItem({
@@ -129,6 +130,112 @@ class AppShell extends ConsumerWidget {
 
     final isOffline = syncState.status == SyncConnectionState.disconnected ||
         syncState.status == SyncConnectionState.error;
+
+    final isDesktop = MediaQuery.of(context).size.width >= 800;
+
+    if (isDesktop) {
+      final railItems = [
+        const NavItem(
+          route: AppRoutes.managerDashboard,
+          label: 'Dashboard',
+          icon: Icons.grid_view_outlined,
+          selectedIcon: Icons.grid_view_rounded,
+        ),
+        const NavItem(
+          route: AppRoutes.managerTasks,
+          label: 'Manager Tasks',
+          icon: Icons.assignment_outlined,
+          selectedIcon: Icons.assignment_rounded,
+        ),
+        NavItem(
+          route: AppRoutes.managerReviews,
+          label: 'Reviews',
+          icon: Icons.rate_review_outlined,
+          selectedIcon: Icons.rate_review_rounded,
+        ),
+        const NavItem(
+          route: AppRoutes.managerEmployees,
+          label: 'Employees',
+          icon: Icons.people_outline_rounded,
+          selectedIcon: Icons.people_rounded,
+        ),
+        const NavItem(
+          route: AppRoutes.managerAuditLogs,
+          label: 'Audit Logs',
+          icon: Icons.fact_check_outlined,
+          selectedIcon: Icons.fact_check_rounded,
+        ),
+        const NavItem(
+          route: AppRoutes.profile,
+          label: 'Profile',
+          icon: Icons.person_outline_rounded,
+          selectedIcon: Icons.person_rounded,
+        ),
+      ];
+
+      int selectedRailIndex = 0;
+      for (int i = 0; i < railItems.length; i++) {
+        if (location == railItems[i].route ||
+            (railItems[i].route != AppRoutes.managerDashboard &&
+                location.startsWith(railItems[i].route))) {
+          selectedRailIndex = i;
+          break;
+        }
+      }
+
+      return Scaffold(
+        backgroundColor: AppColors.surfaceBase,
+        body: Row(
+          children: [
+            ValixisRail(
+              items: railItems,
+              selectedIndex: selectedRailIndex,
+              extended: MediaQuery.of(context).size.width >= 1100,
+              onDestinationSelected: (i) => context.go(railItems[i].route),
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  if (isOffline)
+                    Material(
+                      color: AppColors.error.withAlpha(40),
+                      child: InkWell(
+                        onTap: () => ref.read(realtimeSyncProvider.notifier).forceRefresh(),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 6),
+                          decoration: const BoxDecoration(
+                            border: Border(bottom: BorderSide(color: AppColors.error, width: 1)),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.wifi_off_rounded, size: 14, color: AppColors.error),
+                              SizedBox(width: 8),
+                              Text(
+                                'Offline Mode • Tap to reconnect',
+                                style: TextStyle(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  Expanded(
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(
+                        gradient: AppColors.backgroundGradient,
+                      ),
+                      child: child,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.surfaceBase,
