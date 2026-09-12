@@ -27,15 +27,6 @@ class ManagerTasksTable extends StatelessWidget {
   final bool sortAscending;
   final void Function(String field, bool ascending)? onSort;
 
-  /// Helper to filter out raw UUID strings from assignee display
-  String? _getCleanAssigneeName(String assignee) {
-    if (assignee.isEmpty || assignee == 'Unassigned') return null;
-    final isUuid = RegExp(r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$').hasMatch(assignee) ||
-                   RegExp(r'^[0-9a-fA-F-]{20,}$').hasMatch(assignee);
-    if (isUuid) return null;
-    return assignee;
-  }
-
   Widget _buildHeaderLabel(String title, String fieldKey) {
     final isSelected = sortField == fieldKey;
     final iconData = isSelected
@@ -112,7 +103,6 @@ class ManagerTasksTable extends StatelessWidget {
                   rows: tasks.map((task) {
                     final hasPr = task.prUrl != null && task.prUrl!.isNotEmpty;
                     final isAssigned = task.assignedTo.isNotEmpty && task.assignedTo != 'Unassigned';
-                    final cleanName = _getCleanAssigneeName(task.assignedTo);
 
                     return DataRow(
                       cells: [
@@ -171,33 +161,17 @@ class ManagerTasksTable extends StatelessWidget {
                         ),
                         DataCell(
                           isAssigned
-                              ? Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.brandPurple.withAlpha(25),
-                                        borderRadius: BorderRadius.circular(6),
-                                        border: Border.all(color: AppColors.brandPurple.withAlpha(80)),
-                                      ),
-                                      child: const Text(
-                                        'Assigned',
-                                        style: TextStyle(color: AppColors.brandPurple, fontSize: 11, fontWeight: FontWeight.w700),
-                                      ),
-                                    ),
-                                    if (cleanName != null) ...[
-                                      const SizedBox(width: 8),
-                                      ConstrainedBox(
-                                        constraints: const BoxConstraints(maxWidth: 160),
-                                        child: Text(
-                                          cleanName,
-                                          style: const TextStyle(color: AppColors.textPrimary, fontSize: 13, fontWeight: FontWeight.w600),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                    ],
-                                  ],
+                              ? Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.brandPurple.withAlpha(25),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: AppColors.brandPurple.withAlpha(80)),
+                                  ),
+                                  child: const Text(
+                                    'Assigned',
+                                    style: TextStyle(color: AppColors.brandPurple, fontSize: 11, fontWeight: FontWeight.w700),
+                                  ),
                                 )
                               : Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
