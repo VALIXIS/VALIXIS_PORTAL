@@ -146,7 +146,7 @@ class _ReviewSubmissionsScreenState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'PR Review Queue',
+                            'Reviews & PRs',
                             style: AppTypography.textTheme.headlineSmall?.copyWith(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.w800,
@@ -155,7 +155,7 @@ class _ReviewSubmissionsScreenState
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            '$pendingCount ${pendingCount == 1 ? 'pull request' : 'pull requests'} awaiting verification',
+                            '$pendingCount ${pendingCount == 1 ? 'pull request' : 'pull requests'} awaiting manager review',
                             style: AppTypography.textTheme.bodySmall?.copyWith(
                               color: AppColors.textMuted,
                             ),
@@ -177,7 +177,7 @@ class _ReviewSubmissionsScreenState
                           ),
                         ),
                         child: Text(
-                          pendingCount > 0 ? '$pendingCount PENDING' : 'ALL VERIFIED',
+                          pendingCount > 0 ? '$pendingCount PENDING' : 'ALL REVIEWED',
                           style: AppTypography.telemetryHeader(
                             size: 9,
                             color: pendingCount > 0 ? AppColors.brandCyan : AppColors.success,

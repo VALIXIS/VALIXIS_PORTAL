@@ -61,7 +61,7 @@ class _EmployeeManagementScreenState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: const [
                         Text(
-                          'Enterprise Workforce Directory',
+                          'Team Directory',
                           style: TextStyle(
                             color: AppColors.textPrimary,
                             fontSize: 22,
@@ -71,7 +71,7 @@ class _EmployeeManagementScreenState
                         ),
                         SizedBox(height: 2),
                         Text(
-                          'Audit employee task workloads, department assignments, and availability',
+                          'Manage team members, department assignments, and workload availability.',
                           style: TextStyle(
                             color: AppColors.textMuted,
                             fontSize: 13,

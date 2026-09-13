@@ -60,7 +60,7 @@ class _ManagerAuditLogsScreenState
           ],
         ),
         content: const Text(
-          'Are you sure you want to clear all security audit logs? This action cannot be undone and permanently purges recorded system events.',
+          'Are you sure you want to clear all audit logs? This action cannot be undone.',
           style: TextStyle(color: AppColors.textMuted, fontSize: 13),
         ),
         actions: [
@@ -212,7 +212,7 @@ class _ManagerAuditLogsScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Security & Audit Logs',
+                                'Audit Logs',
                                 style: TextStyle(
                                   color: AppColors.textPrimary,
                                   fontSize: 20,

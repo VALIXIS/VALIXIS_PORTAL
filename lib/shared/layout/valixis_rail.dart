@@ -107,33 +107,12 @@ class _ValixisRailState extends State<ValixisRail> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                'VALIXIS',
-                                style: AppTypography.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.5,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                              const SizedBox(width: 4),
-                              Container(
-                                width: 5,
-                                height: 5,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.brandCyan,
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                            ],
-                          ),
                           Text(
-                            'COMMAND OS',
-                            style: AppTypography.telemetryHeader(
-                              size: 9,
-                              color: AppColors.brandCyan,
-                              spacing: 1.5,
+                            'VALIXIS',
+                            style: AppTypography.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 1.5,
+                              color: AppColors.textPrimary,
                             ),
                           ),
                         ],
@@ -205,7 +184,7 @@ class _ValixisRailState extends State<ValixisRail> {
                         if (widget.extended) ...[
                           const SizedBox(width: 8),
                           Text(
-                            'Quick Jump',
+                            'Search',
                             style: AppTypography.textTheme.bodySmall?.copyWith(
                               color: AppColors.textSecondary,
                             ),
@@ -395,7 +374,7 @@ class _ValixisRailState extends State<ValixisRail> {
                       IconButton(
                         icon: const Icon(Icons.tune_rounded, size: 18),
                         color: AppColors.textMuted,
-                        tooltip: 'System Preferences',
+                        tooltip: 'Preferences',
                         onPressed: () => UserPreferencesDialog.show(context),
                       ),
                       IconButton(
@@ -409,7 +388,7 @@ class _ValixisRailState extends State<ValixisRail> {
                         builder: (context, ref, _) => IconButton(
                           icon: const Icon(Icons.power_settings_new_rounded, size: 18),
                           color: AppColors.textMuted,
-                          tooltip: 'Terminate Session',
+                          tooltip: 'Sign Out',
                           onPressed: () =>
                               ref.read(authNotifierProvider.notifier).signOut(),
                         ),

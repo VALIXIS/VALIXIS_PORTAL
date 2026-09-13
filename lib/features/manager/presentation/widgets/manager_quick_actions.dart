@@ -15,26 +15,13 @@ class ManagerQuickActions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'FAST JUMP NODES',
-              style: AppTypography.telemetryHeader(
-                size: 10,
-                color: AppColors.textMuted,
-                spacing: 1.2,
-              ),
-            ),
-            Text(
-              'DIRECT ACCESS',
-              style: AppTypography.telemetryHeader(
-                size: 9,
-                color: AppColors.brandCyan,
-                spacing: 1.0,
-              ),
-            ),
-          ],
+        Text(
+          'QUICK ACCESS',
+          style: AppTypography.telemetryHeader(
+            size: 10,
+            color: AppColors.textMuted,
+            spacing: 1.2,
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
@@ -42,25 +29,25 @@ class ManagerQuickActions extends StatelessWidget {
           runSpacing: AppSpacing.sm,
           children: [
             _ActionPill(
-              label: 'Tasks Workspace',
+              label: 'Tasks',
               icon: Icons.assignment_rounded,
               color: AppColors.brandCyan,
               onTap: () => context.go(AppRoutes.managerTasks),
             ),
             _ActionPill(
-              label: 'Review PR Queue',
+              label: 'Reviews & PRs',
               icon: Icons.rate_review_rounded,
               color: AppColors.brandBlue,
               onTap: () => context.go(AppRoutes.managerReviews),
             ),
             _ActionPill(
-              label: 'Audit Stream',
+              label: 'Audit Logs',
               icon: Icons.fact_check_rounded,
               color: AppColors.brandPurple,
               onTap: () => context.go(AppRoutes.managerAuditLogs),
             ),
             _ActionPill(
-              label: 'Personnel Matrix',
+              label: 'Team',
               icon: Icons.people_alt_rounded,
               color: AppColors.success,
               onTap: () => context.go(AppRoutes.managerEmployees),

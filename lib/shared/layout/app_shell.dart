@@ -135,7 +135,7 @@ class AppShell extends ConsumerWidget {
               ),
               const NavItem(
                 route: AppRoutes.managerTasks,
-                label: 'Tasks Workspace',
+                label: 'Tasks',
                 icon: Icons.assignment_outlined,
                 selectedIcon: Icons.assignment_rounded,
               ),
@@ -148,19 +148,19 @@ class AppShell extends ConsumerWidget {
               ),
               const NavItem(
                 route: AppRoutes.managerEmployees,
-                label: 'Personnel',
+                label: 'Team',
                 icon: Icons.people_outline_rounded,
                 selectedIcon: Icons.people_rounded,
               ),
               const NavItem(
                 route: AppRoutes.managerAuditLogs,
-                label: 'Audit Stream',
+                label: 'Audit Logs',
                 icon: Icons.fact_check_outlined,
                 selectedIcon: Icons.fact_check_rounded,
               ),
               const NavItem(
                 route: AppRoutes.profile,
-                label: 'System Profile',
+                label: 'Profile',
                 icon: Icons.person_outline_rounded,
                 selectedIcon: Icons.person_rounded,
               ),
@@ -180,7 +180,7 @@ class AppShell extends ConsumerWidget {
               ),
               const NavItem(
                 route: AppRoutes.profile,
-                label: 'System Profile',
+                label: 'Profile',
                 icon: Icons.person_outline_rounded,
                 selectedIcon: Icons.person_rounded,
               ),
@@ -215,7 +215,7 @@ class AppShell extends ConsumerWidget {
             Expanded(
               child: Column(
                 children: [
-                  // ── Top Telemetry Command Header ───────────────────────
+                  // ── Top Command Header ─────────────────────────────────
                   Container(
                     height: 54,
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -227,7 +227,7 @@ class AppShell extends ConsumerWidget {
                     ),
                     child: Row(
                       children: [
-                        // Telemetry Breadcrumb
+                        // Breadcrumb
                         Row(
                           children: [
                             Text(
@@ -265,7 +265,7 @@ class AppShell extends ConsumerWidget {
                         const NotificationBellButton(),
                         const SizedBox(width: AppSpacing.sm),
 
-                        // Manager / User Profile Command Node
+                        // Manager / User Profile Node with Official Logo
                         InkWell(
                           borderRadius: BorderRadius.circular(20),
                           onTap: () => ManagerProfileSheet.show(context),
@@ -282,20 +282,23 @@ class AppShell extends ConsumerWidget {
                                 Container(
                                   width: 24,
                                   height: 24,
-                                  decoration: const BoxDecoration(
-                                    gradient: AppColors.primaryGradient,
+                                  decoration: BoxDecoration(
                                     shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: AppColors.brandCyan.withValues(alpha: 0.3),
+                                      width: 1,
+                                    ),
                                   ),
-                                  child: Center(
-                                    child: Text(
-                                      (user?.email?.isNotEmpty == true
-                                              ? user!.email!.substring(0, 1)
-                                              : (isManager ? 'M' : 'E'))
-                                          .toUpperCase(),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 11,
+                                  child: ClipOval(
+                                    child: Image.asset(
+                                      'assets/logos/valixis_icon.png',
+                                      width: 24,
+                                      height: 24,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => const Icon(
+                                        Icons.bolt_rounded,
+                                        color: AppColors.brandCyan,
+                                        size: 14,
                                       ),
                                     ),
                                   ),
@@ -303,10 +306,29 @@ class AppShell extends ConsumerWidget {
                                 const SizedBox(width: 8),
                                 Text(
                                   user?.email?.split('@').first ??
-                                      (isManager ? 'Manager' : 'Employee'),
+                                      (isManager ? 'official.valixis' : 'employee'),
                                   style: AppTypography.textTheme.bodySmall?.copyWith(
                                     color: AppColors.textPrimary,
                                     fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: (isManager ? AppColors.brandPurple : AppColors.brandBlue).withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(4),
+                                    border: Border.all(
+                                      color: (isManager ? AppColors.brandPurple : AppColors.brandBlue).withValues(alpha: 0.4),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    isManager ? 'MANAGER' : 'EMPLOYEE',
+                                    style: AppTypography.telemetryHeader(
+                                      size: 8,
+                                      color: isManager ? AppColors.brandPurple : AppColors.brandCyan,
+                                      spacing: 0.5,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 4),
@@ -341,7 +363,7 @@ class AppShell extends ConsumerWidget {
                               Icon(Icons.wifi_off_rounded, size: 14, color: AppColors.error),
                               SizedBox(width: 8),
                               Text(
-                                'Offline Mode • Tap to reconnect telemetry link',
+                                'Offline Mode • Tap to reconnect',
                                 style: TextStyle(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
                               ),
                             ],
@@ -398,28 +420,14 @@ class AppShell extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'VALIXIS',
-                  style: TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-                Text(
-                  'COMMAND OS',
-                  style: AppTypography.telemetryHeader(
-                    size: 8,
-                    color: AppColors.brandCyan,
-                    spacing: 1.2,
-                  ),
-                ),
-              ],
+            const Text(
+              'VALIXIS',
+              style: TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 14,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.5,
+              ),
             ),
           ],
         ),
@@ -436,23 +444,22 @@ class AppShell extends ConsumerWidget {
               width: 28,
               height: 28,
               decoration: BoxDecoration(
-                gradient: AppColors.primaryGradient,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.brandCyan.withValues(alpha: 0.5),
-                  width: 1.5,
+                  color: AppColors.brandCyan.withValues(alpha: 0.4),
+                  width: 1,
                 ),
               ),
-              child: Center(
-                child: Text(
-                  (user?.email?.isNotEmpty == true
-                          ? user!.email!.substring(0, 1)
-                          : (isManager ? 'M' : 'E'))
-                      .toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 12,
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/logos/valixis_icon.png',
+                  width: 28,
+                  height: 28,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.bolt_rounded,
+                    color: AppColors.brandCyan,
+                    size: 16,
                   ),
                 ),
               ),
@@ -562,7 +569,7 @@ class _SyncStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (color, label) = switch (syncState.status) {
-      SyncConnectionState.connected => (AppColors.success, 'TELEMETRY LIVE'),
+      SyncConnectionState.connected => (AppColors.success, 'SYSTEM ONLINE'),
       SyncConnectionState.connecting => (AppColors.warning, 'SYNCING'),
       SyncConnectionState.disconnected => (AppColors.textMuted, 'OFFLINE'),
       SyncConnectionState.error => (AppColors.error, 'LINK ERROR'),

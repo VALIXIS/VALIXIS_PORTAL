@@ -25,18 +25,18 @@ void main() {
       await tester.pumpWidget(_wrapWithTheme(const ManagerHeroHeader()));
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('Mission Control & Operations'), findsOneWidget);
-      expect(find.text('MANAGER NODE'), findsOneWidget);
+      expect(find.text('Manager Overview'), findsOneWidget);
+      expect(find.text('MANAGER'), findsOneWidget);
     });
 
     testWidgets('ManagerQuickActions renders manager navigation shortcuts and NO Create Task', (tester) async {
       await tester.pumpWidget(_wrapWithTheme(const ManagerQuickActions()));
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('Tasks Workspace'), findsOneWidget);
-      expect(find.text('Review PR Queue'), findsOneWidget);
-      expect(find.text('Audit Stream'), findsOneWidget);
-      expect(find.text('Personnel Matrix'), findsOneWidget);
+      expect(find.text('Tasks'), findsOneWidget);
+      expect(find.text('Reviews & PRs'), findsOneWidget);
+      expect(find.text('Audit Logs'), findsOneWidget);
+      expect(find.text('Team'), findsOneWidget);
 
       // Verify STRICTLY NO Create Task button exists
       expect(find.text('Create Task'), findsNothing);

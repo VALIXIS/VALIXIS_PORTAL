@@ -60,7 +60,7 @@ class ManagerHeroHeader extends StatelessWidget {
                               ),
                               const SizedBox(width: 5),
                               Text(
-                                'SYSTEM ACTIVE',
+                                'SYSTEM ONLINE',
                                 style: AppTypography.telemetryHeader(
                                   size: 9,
                                   color: AppColors.brandCyan,
@@ -85,7 +85,7 @@ class ManagerHeroHeader extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            'MANAGER NODE',
+                            'MANAGER',
                             style: AppTypography.telemetryHeader(
                               size: 9,
                               color: AppColors.brandPurple,
@@ -99,7 +99,7 @@ class ManagerHeroHeader extends StatelessWidget {
 
                     // Title
                     Text(
-                      'Mission Control & Operations',
+                      'Manager Overview',
                       style: AppTypography.textTheme.headlineSmall?.copyWith(
                         color: AppColors.textPrimary,
                         fontWeight: FontWeight.w800,
@@ -127,7 +127,7 @@ class ManagerHeroHeader extends StatelessWidget {
                         const SizedBox(width: AppSpacing.md),
                         Flexible(
                           child: Text(
-                            'Real-time fleet orchestration & telemetry streams',
+                            'Manage tasks, team activity, reviews, and project progress.',
                             style: AppTypography.textTheme.bodySmall?.copyWith(
                               color: AppColors.textSecondary,
                             ),

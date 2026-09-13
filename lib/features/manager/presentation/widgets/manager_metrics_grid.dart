@@ -37,13 +37,13 @@ class ManagerMetricsGrid extends StatelessWidget {
             _MetricCard(
               title: 'TOTAL TASKS',
               value: metrics.totalTasks.toString(),
-              subtitle: 'Fleet operations catalog',
+              subtitle: 'All managed tasks',
               icon: Icons.assignment_rounded,
               color: AppColors.brandBlue,
               onTap: () => context.go(AppRoutes.managerTasks),
             ),
             _MetricCard(
-              title: 'IN ACTIVE FLIGHT',
+              title: 'IN PROGRESS',
               value: activeTasksCount.toString(),
               subtitle: '${metrics.inProgressCount} in progress',
               icon: Icons.bolt_rounded,
@@ -53,7 +53,7 @@ class ManagerMetricsGrid extends StatelessWidget {
             _MetricCard(
               title: 'PENDING REVIEWS',
               value: metrics.submittedCount.toString(),
-              subtitle: 'Awaiting PR verification',
+              subtitle: 'Awaiting manager review',
               icon: Icons.rate_review_rounded,
               color: AppColors.telemetryViolet,
               onTap: () => context.go(AppRoutes.managerReviews),
@@ -61,15 +61,15 @@ class ManagerMetricsGrid extends StatelessWidget {
             _MetricCard(
               title: 'COMPLETED',
               value: metrics.approvedCount.toString(),
-              subtitle: 'Merged & verified',
+              subtitle: 'Successfully completed',
               icon: Icons.check_circle_rounded,
               color: AppColors.success,
               onTap: () => context.go('${AppRoutes.managerTasks}?status=completed'),
             ),
             _MetricCard(
-              title: 'PERSONNEL',
+              title: 'TEAM MEMBERS',
               value: metrics.totalEmployees.toString(),
-              subtitle: 'Active engineer nodes',
+              subtitle: 'Active team members',
               icon: Icons.people_alt_rounded,
               color: AppColors.telemetryIndigo,
               onTap: () => context.go(AppRoutes.managerEmployees),
@@ -77,7 +77,7 @@ class ManagerMetricsGrid extends StatelessWidget {
             _MetricCard(
               title: 'CRITICAL / OVERDUE',
               value: overdueCount.toString(),
-              subtitle: overdueCount > 0 ? 'Requires attention' : 'Nominal deadline pace',
+              subtitle: overdueCount > 0 ? '$overdueCount requiring attention' : 'Tasks requiring attention',
               icon: Icons.warning_amber_rounded,
               color: overdueCount > 0 ? AppColors.error : AppColors.textMuted,
               onTap: () => context.go('${AppRoutes.managerTasks}?status=overdue'),

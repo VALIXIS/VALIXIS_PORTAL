@@ -240,7 +240,7 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text(
-                            'Manager Tasks',
+                            'Tasks',
                             style: TextStyle(
                               color: AppColors.textPrimary,
                               fontSize: 20,
