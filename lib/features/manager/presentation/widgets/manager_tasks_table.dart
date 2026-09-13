@@ -15,6 +15,7 @@ class ManagerTasksTable extends StatelessWidget {
     required this.onReassign,
     required this.onUnassign,
     required this.onDelete,
+    required this.onEdit,
     this.sortField = 'deadline',
     this.sortAscending = true,
     this.onSort,
@@ -24,6 +25,7 @@ class ManagerTasksTable extends StatelessWidget {
   final ValueChanged<Task> onReassign;
   final ValueChanged<Task> onUnassign;
   final ValueChanged<Task> onDelete;
+  final ValueChanged<Task> onEdit;
   final String sortField;
   final bool sortAscending;
   final void Function(String field, bool ascending)? onSort;
@@ -338,6 +340,13 @@ class ManagerTasksTable extends StatelessWidget {
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                 onPressed: () => ManagerTaskDetailsSheet.show(context, task),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, size: 16, color: AppColors.brandCyan),
+                                tooltip: 'Edit Task',
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                                onPressed: () => onEdit(task),
                               ),
                               IconButton(
                                 icon: const Icon(Icons.person_add_outlined, size: 16, color: AppColors.telemetryViolet),

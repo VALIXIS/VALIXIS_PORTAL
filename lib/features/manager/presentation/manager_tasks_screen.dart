@@ -157,6 +157,26 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
     }
   }
 
+  Future<void> _onEdit(Task task) async {
+    final ok = await ManagerTaskDialogs.showEditTaskDialog(
+      context: context,
+      task: task,
+      managerRepo: ref.read(managerRepositoryProvider),
+    );
+    if (ok == true) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Task "${task.title}" updated successfully!'),
+            backgroundColor: AppColors.success,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+      _refresh();
+    }
+  }
+
   Future<void> _onDelete(Task task) async {
     final ok = await ManagerTaskDialogs.showDeleteDialog(
       context: context,
@@ -450,6 +470,7 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                       onReassign: (task) => _onReassign(task, metrics.allEmployees),
                       onUnassign: (task) => _onUnassign(task),
                       onDelete: (task) => _onDelete(task),
+                      onEdit: (task) => _onEdit(task),
                     )
                   else
                     ListView.separated(
@@ -463,6 +484,7 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                           task: task,
                           onReassign: () => _onReassign(task, metrics.allEmployees),
                           onUnassign: () => _onUnassign(task),
+                          onEdit: () => _onEdit(task),
                         );
                       },
                     ),

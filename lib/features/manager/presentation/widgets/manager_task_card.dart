@@ -15,11 +15,13 @@ class ManagerTaskCard extends StatelessWidget {
     required this.task,
     required this.onReassign,
     required this.onUnassign,
+    this.onEdit,
   });
 
   final Task task;
   final VoidCallback onReassign;
   final VoidCallback onUnassign;
+  final VoidCallback? onEdit;
 
   Color _getStatusColor(TaskStatus status) {
     return switch (status) {
@@ -294,6 +296,15 @@ class ManagerTaskCard extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      if (onEdit != null)
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined, size: 18, color: AppColors.brandCyan),
+                          tooltip: 'Edit Task',
+                          visualDensity: VisualDensity.compact,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                          onPressed: onEdit,
+                        ),
                       IconButton(
                         icon: const Icon(Icons.person_add_alt_1_rounded, size: 18, color: AppColors.brandCyan),
                         tooltip: 'Assign / Reassign',

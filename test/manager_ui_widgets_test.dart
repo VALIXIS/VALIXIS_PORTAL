@@ -94,6 +94,33 @@ void main() {
       expect(find.text('PR ACTIVE'), findsOneWidget);
     });
 
+    testWidgets('ManagerTaskCard with onEdit fires edit callback when clicked', (tester) async {
+      bool editFired = false;
+      final task = Task(
+        id: '205',
+        title: 'Backend Refactoring Task',
+        priority: TaskPriority.high,
+        status: TaskStatus.assigned,
+        deadline: DateTime.now().add(const Duration(days: 5)),
+        assignedTo: 'Official Team',
+        githubRepo: 'VALIXIS_PORTAL',
+      );
+
+      await tester.pumpWidget(_wrapWithTheme(ManagerTaskCard(
+        task: task,
+        onReassign: () {},
+        onUnassign: () {},
+        onEdit: () => editFired = true,
+      )));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final editBtn = find.byTooltip('Edit Task');
+      expect(editBtn, findsOneWidget);
+      await tester.tap(editBtn);
+      await tester.pump();
+      expect(editFired, isTrue);
+    });
+
     testWidgets('UnauthorizedScreen renders restricted access message and sign out', (tester) async {
       await tester.pumpWidget(_wrapWithTheme(const UnauthorizedScreen(userEmail: 'dev@valixis.com')));
       await tester.pump(const Duration(milliseconds: 100));

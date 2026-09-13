@@ -277,7 +277,8 @@ class ManagerRepository {
       'updated_at': DateTime.now().toUtc().toIso8601String(),
     };
 
-    await _client.from('tasks').update(payload).eq('id', taskId);
+    final dynamic idVal = int.tryParse(taskId) ?? taskId;
+    await _client.from('tasks').update(payload).eq('id', idVal);
     return true;
   }
 

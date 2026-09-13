@@ -276,12 +276,31 @@ class ManagerTaskDetailsSheet extends ConsumerWidget {
                     ),
                   ],
                   const SizedBox(height: AppSpacing.xl2),
-                  // Assignment actions
+                  // Actions Row (Edit, Assign/Reassign, Unassign)
                   Row(
                     children: [
                       Expanded(
                         child: AppButton(
-                          label: isAssigned ? 'Reassign Employee' : 'Assign Employee',
+                          label: 'Edit Task',
+                          variant: AppButtonVariant.secondary,
+                          prefixIcon: Icons.edit_outlined,
+                          onPressed: () async {
+                            Navigator.of(context).pop();
+                            final ok = await ManagerTaskDialogs.showEditTaskDialog(
+                              context: context,
+                              task: task,
+                              managerRepo: ref.read(managerRepositoryProvider),
+                            );
+                            if (ok == true) {
+                              ref.invalidate(managerDashboardProvider);
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: AppButton(
+                          label: isAssigned ? 'Reassign' : 'Assign',
                           prefixIcon: Icons.person_add_alt_1_rounded,
                           onPressed: () async {
                             Navigator.of(context).pop();
@@ -299,7 +318,7 @@ class ManagerTaskDetailsSheet extends ConsumerWidget {
                         const SizedBox(width: AppSpacing.md),
                         AppButton(
                           label: 'Unassign',
-                          variant: AppButtonVariant.secondary,
+                          variant: AppButtonVariant.danger,
                           prefixIcon: Icons.person_remove_rounded,
                           onPressed: () async {
                             Navigator.of(context).pop();
