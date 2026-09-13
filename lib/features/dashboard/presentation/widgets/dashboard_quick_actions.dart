@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_durations.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../providers/dashboard_provider.dart';
 
 /// Quick Action shortcuts for common employee workflows.
@@ -15,12 +17,12 @@ class DashboardQuickActions extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Quick Actions',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
+        Text(
+          'QUICK ACCESS',
+          style: AppTypography.telemetryHeader(
+            size: 10,
+            color: AppColors.textMuted,
+            spacing: 1.2,
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -29,19 +31,19 @@ class DashboardQuickActions extends ConsumerWidget {
           runSpacing: AppSpacing.sm,
           children: [
             _QuickActionPill(
-              label: 'View All Tasks',
+              label: 'View My Tasks',
               icon: Icons.task_alt_rounded,
               color: AppColors.brandBlue,
               onTap: () => context.go(AppRoutes.tasks),
             ),
             _QuickActionPill(
-              label: 'My Profile',
+              label: 'Profile & Settings',
               icon: Icons.person_outline_rounded,
               color: AppColors.brandPurple,
               onTap: () => context.go(AppRoutes.profile),
             ),
             _QuickActionPill(
-              label: 'Refresh Data',
+              label: 'Sync Data',
               icon: Icons.refresh_rounded,
               color: AppColors.brandCyan,
               onTap: () => ref.invalidate(dashboardProvider),
@@ -53,7 +55,7 @@ class DashboardQuickActions extends ConsumerWidget {
   }
 }
 
-class _QuickActionPill extends StatelessWidget {
+class _QuickActionPill extends StatefulWidget {
   const _QuickActionPill({
     required this.label,
     required this.icon,
@@ -67,37 +69,62 @@ class _QuickActionPill extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_QuickActionPill> createState() => _QuickActionPillState();
+}
+
+class _QuickActionPillState extends State<_QuickActionPill> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: AppDurations.fast,
+          curve: AppCurves.snappy,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+            vertical: 10,
           ),
           decoration: BoxDecoration(
-            color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(12),
+            color: _isHovered ? AppColors.surfaceElevated : AppColors.surfaceCard,
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: AppColors.glassBorder,
+              color: _isHovered
+                  ? widget.color.withValues(alpha: 0.5)
+                  : AppColors.border,
               width: 1,
             ),
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: widget.color.withValues(alpha: 0.15),
+                      blurRadius: 12,
+                    ),
+                  ]
+                : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: AppSpacing.xs),
+              Icon(widget.icon, size: 15, color: widget.color),
+              const SizedBox(width: AppSpacing.xs + 2),
               Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 13,
+                widget.label,
+                style: AppTypography.textTheme.bodyMedium?.copyWith(
+                  color: _isHovered ? AppColors.textPrimary : AppColors.textSecondary,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 14,
+                color: _isHovered ? widget.color : AppColors.textMuted,
               ),
             ],
           ),

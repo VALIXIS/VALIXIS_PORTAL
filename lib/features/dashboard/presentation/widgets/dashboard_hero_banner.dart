@@ -3,6 +3,7 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/components/glass_card.dart';
+import '../../../../shared/components/valixis_command_core_3d.dart';
 import '../../../../shared/models/employee.dart';
 
 /// Motivational quotes array for developer inspiration.
@@ -46,6 +47,8 @@ class DashboardHeroBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = MediaQuery.of(context).size.width >= 800;
+
     return GlassCard(
       showGlow: true,
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -193,6 +196,14 @@ class DashboardHeroBanner extends StatelessWidget {
                   ],
                 ),
               ),
+              if (isDesktop) ...[
+                const SizedBox(width: AppSpacing.lg),
+                const ValixisCommandCore3D(
+                  size: 90,
+                  systemState: CoreSystemState.nominal,
+                  enableParallax: true,
+                ),
+              ],
             ],
           ),
           const SizedBox(height: AppSpacing.lg),

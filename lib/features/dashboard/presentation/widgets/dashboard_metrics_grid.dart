@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../app/router/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/components/glass_card.dart';
 
 /// Grid of metric cards summarizing active task counts, completion rates, and gamified sprint progress bar.
@@ -36,6 +39,7 @@ class DashboardMetricsGrid extends StatelessWidget {
                 badgeText: 'Action Needed',
                 icon: Icons.pending_actions_rounded,
                 color: AppColors.warning,
+                onTap: () => context.go(AppRoutes.tasks),
               ),
             ),
             SizedBox(
@@ -50,6 +54,7 @@ class DashboardMetricsGrid extends StatelessWidget {
                 badgeText: 'Verified & Merged',
                 icon: Icons.task_alt_rounded,
                 color: AppColors.success,
+                onTap: () => context.go(AppRoutes.tasks),
               ),
             ),
           ],
@@ -65,32 +70,45 @@ class DashboardMetricsGrid extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
-                    children: const [
-                      Icon(Icons.workspace_premium_rounded, color: AppColors.brandCyan, size: 20),
-                      SizedBox(width: 8),
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: AppColors.brandCyan.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.brandCyan.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.workspace_premium_rounded,
+                          color: AppColors.brandCyan,
+                          size: 18,
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
                       Text(
-                        'Weekly Sprint Progress',
-                        style: TextStyle(
+                        'Weekly Sprint Velocity',
+                        style: AppTypography.textTheme.titleMedium?.copyWith(
                           color: AppColors.textPrimary,
-                          fontSize: 15,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.brandCyan.withAlpha(25),
+                      color: AppColors.brandCyan.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.brandCyan.withAlpha(60)),
+                      border: Border.all(color: AppColors.brandCyan.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       '$percentage% Sprint Velocity',
-                      style: const TextStyle(
+                      style: AppTypography.telemetryHeader(
+                        size: 10,
                         color: AppColors.brandCyan,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
+                        spacing: 0.8,
                       ),
                     ),
                   ),
@@ -101,20 +119,22 @@ class DashboardMetricsGrid extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
                   value: progress,
-                  minHeight: 10,
+                  minHeight: 8,
                   backgroundColor: AppColors.surfaceElevated,
                   valueColor: AlwaysStoppedAnimation<Color>(
                     percentage == 100 ? AppColors.success : AppColors.brandCyan,
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: AppSpacing.sm),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     '$completedCount of $total assigned tasks completed',
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                    style: AppTypography.textTheme.bodySmall?.copyWith(
+                      color: AppColors.textMuted,
+                    ),
                   ),
                   Text(
                     percentage == 100 ? '🎉 Sprint Goal Achieved!' : '${100 - percentage}% remaining',
@@ -141,6 +161,7 @@ class _StatCard extends StatelessWidget {
     required this.badgeText,
     required this.icon,
     required this.color,
+    required this.onTap,
   });
 
   final String title;
@@ -148,11 +169,14 @@ class _StatCard extends StatelessWidget {
   final String badgeText;
   final IconData icon;
   final Color color;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return GlassCard(
+      isInteractive: true,
       showGlow: true,
+      onTap: onTap,
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,11 +187,11 @@ class _StatCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: color.withAlpha(25),
+                  color: color.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: color.withAlpha(60)),
+                  border: Border.all(color: color.withValues(alpha: 0.3)),
                 ),
-                child: Icon(icon, color: color, size: 22),
+                child: Icon(icon, color: color, size: 20),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(
@@ -175,8 +199,9 @@ class _StatCard extends StatelessWidget {
                   vertical: 3,
                 ),
                 decoration: BoxDecoration(
-                  color: color.withAlpha(20),
-                  borderRadius: BorderRadius.circular(10),
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: color.withValues(alpha: 0.25)),
                 ),
                 child: Text(
                   badgeText,
@@ -190,21 +215,31 @@ class _StatCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          Text(
-            value,
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                value,
+                style: AppTypography.metricValue(
+                  size: 32,
+                  weight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              const Icon(
+                Icons.arrow_outward_rounded,
+                size: 16,
+                color: AppColors.textMuted,
+              ),
+            ],
           ),
           const SizedBox(height: 2),
           Text(
             title,
-            style: const TextStyle(
-              color: AppColors.textMuted,
-              fontSize: 13,
+            style: AppTypography.textTheme.bodySmall?.copyWith(
+              color: AppColors.textSecondary,
               fontWeight: FontWeight.w500,
             ),
           ),
