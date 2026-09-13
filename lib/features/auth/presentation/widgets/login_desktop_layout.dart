@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../shared/components/valixis_command_core_3d.dart';
 import 'login_card.dart';
 
 /// Desktop split-screen layout for authentication.
@@ -45,28 +46,15 @@ class LoginDesktopLayout extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        decoration: BoxDecoration(
-                          color: AppColors.brandBlue.withAlpha(25),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.brandBlue.withAlpha(50),
-                            width: 1.5,
-                          ),
-                        ),
-                        child: Image.asset(
-                          'assets/logos/valixis_icon.png',
-                          width: 48,
-                          height: 48,
-                          errorBuilder: (context, error, _) => const Icon(
-                            Icons.bolt_rounded,
-                            size: 48,
-                            color: AppColors.brandCyan,
-                          ),
+                      const SizedBox(
+                        width: 140,
+                        height: 140,
+                        child: ValixisCommandCore3D(
+                          size: 130,
+                          enableParallax: true,
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xl),
+                      const SizedBox(height: AppSpacing.md),
                       ShaderMask(
                         shaderCallback: (b) =>
                             AppColors.brandGradient.createShader(b),

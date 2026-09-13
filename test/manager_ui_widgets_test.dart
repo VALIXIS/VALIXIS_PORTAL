@@ -25,18 +25,18 @@ void main() {
       await tester.pumpWidget(_wrapWithTheme(const ManagerHeroHeader()));
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('Executive Overview'), findsOneWidget);
-      expect(find.text('MANAGER'), findsOneWidget);
+      expect(find.text('Mission Control & Operations'), findsOneWidget);
+      expect(find.text('MANAGER NODE'), findsOneWidget);
     });
 
     testWidgets('ManagerQuickActions renders manager navigation shortcuts and NO Create Task', (tester) async {
       await tester.pumpWidget(_wrapWithTheme(const ManagerQuickActions()));
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('Manager Tasks'), findsOneWidget);
-      expect(find.text('Review Queue'), findsOneWidget);
-      expect(find.text('Audit Logs'), findsOneWidget);
-      expect(find.text('Team Roster'), findsOneWidget);
+      expect(find.text('Tasks Workspace'), findsOneWidget);
+      expect(find.text('Review PR Queue'), findsOneWidget);
+      expect(find.text('Audit Stream'), findsOneWidget);
+      expect(find.text('Personnel Matrix'), findsOneWidget);
 
       // Verify STRICTLY NO Create Task button exists
       expect(find.text('Create Task'), findsNothing);
@@ -91,7 +91,7 @@ void main() {
       expect(find.text('VALIXIS_PORTAL'), findsOneWidget);
       expect(find.text('feat/sync'), findsOneWidget);
       expect(find.text('Nagasai'), findsOneWidget);
-      expect(find.text('PR Linked'), findsOneWidget);
+      expect(find.text('PR ACTIVE'), findsOneWidget);
     });
 
     testWidgets('UnauthorizedScreen renders restricted access message and sign out', (tester) async {

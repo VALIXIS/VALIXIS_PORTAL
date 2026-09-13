@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/components/glass_card.dart';
 import '../../../../shared/models/task.dart';
 import 'manager_task_details_sheet.dart';
 
-/// Data table for Manager Tasks displaying task specifications, assigned employee, status, and custom interactive column header sorting.
+/// Next-Gen Data table for Manager Tasks displaying specifications, telemetry status, and quick action controls.
 class ManagerTasksTable extends StatelessWidget {
   const ManagerTasksTable({
     super.key,
@@ -32,8 +33,8 @@ class ManagerTasksTable extends StatelessWidget {
     final iconData = isSelected
         ? (sortAscending ? Icons.arrow_upward_rounded : Icons.arrow_downward_rounded)
         : Icons.unfold_more_rounded;
-    final iconColor = isSelected ? AppColors.brandCyan : AppColors.textMuted.withAlpha(140);
-    final textColor = isSelected ? AppColors.brandCyan : AppColors.textPrimary;
+    final iconColor = isSelected ? AppColors.brandCyan : AppColors.textMuted;
+    final textColor = isSelected ? AppColors.brandCyan : AppColors.textSecondary;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -47,20 +48,20 @@ class ManagerTasksTable extends StatelessWidget {
           }
         },
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: const EdgeInsets.symmetric(vertical: 10),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                title,
-                style: TextStyle(
+                title.toUpperCase(),
+                style: AppTypography.telemetryHeader(
+                  size: 10,
                   color: textColor,
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13,
+                  spacing: 0.8,
                 ),
               ),
               const SizedBox(width: 4),
-              Icon(iconData, size: 14, color: iconColor),
+              Icon(iconData, size: 13, color: iconColor),
             ],
           ),
         ),
@@ -81,22 +82,26 @@ class ManagerTasksTable extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: BoxConstraints(minWidth: constraints.maxWidth),
                 child: DataTable(
-                  columnSpacing: 18,
-                  horizontalMargin: 16,
-                  headingRowHeight: 48,
-                  dataRowMaxHeight: 56,
+                  columnSpacing: 20,
+                  horizontalMargin: 20,
+                  headingRowHeight: 46,
+                  dataRowMaxHeight: 58,
                   headingRowColor: WidgetStateProperty.all(AppColors.surfaceElevated),
                   columns: [
                     DataColumn(label: _buildHeaderLabel('Task Title', 'title')),
                     DataColumn(label: _buildHeaderLabel('Repository', 'repo')),
                     DataColumn(label: _buildHeaderLabel('Priority', 'priority')),
-                    DataColumn(label: _buildHeaderLabel('Assignment', 'assignment')),
+                    DataColumn(label: _buildHeaderLabel('Status', 'assignment')),
                     DataColumn(label: _buildHeaderLabel('Deadline', 'deadline')),
-                    DataColumn(label: _buildHeaderLabel('PR Submitted', 'pr')),
-                    const DataColumn(
+                    DataColumn(label: _buildHeaderLabel('PR Link', 'pr')),
+                    DataColumn(
                       label: Text(
-                        'Actions',
-                        style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w700),
+                        'ACTIONS',
+                        style: AppTypography.telemetryHeader(
+                          size: 10,
+                          color: AppColors.textMuted,
+                          spacing: 0.8,
+                        ),
                       ),
                     ),
                   ],
@@ -106,92 +111,173 @@ class ManagerTasksTable extends StatelessWidget {
 
                     return DataRow(
                       cells: [
+                        // Task Title & Branch
                         DataCell(
                           MouseRegion(
                             cursor: SystemMouseCursors.click,
                             child: InkWell(
                               onTap: () => ManagerTaskDetailsSheet.show(context, task),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    task.title,
-                                    style: const TextStyle(
-                                      color: AppColors.brandCyan,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 13,
-                                      decoration: TextDecoration.underline,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      task.title,
+                                      style: AppTypography.textTheme.bodyMedium?.copyWith(
+                                        color: AppColors.textPrimary,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 13,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    task.branchName ?? 'main',
-                                    style: const TextStyle(
-                                      color: AppColors.textMuted,
-                                      fontSize: 11,
-                                      fontFamily: 'monospace',
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.fork_right_rounded,
+                                          size: 11,
+                                          color: AppColors.textMuted,
+                                        ),
+                                        const SizedBox(width: 3),
+                                        Text(
+                                          task.branchName ?? 'main',
+                                          style: AppTypography.mono(
+                                            size: 10,
+                                            color: AppColors.textMuted,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
                           ),
                         ),
+
+                        // Repository
                         DataCell(
-                          Text(
-                            task.githubRepo ?? 'VALIXIS_PORTAL',
-                            style: const TextStyle(
-                              color: AppColors.brandBlue,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceElevated,
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.source_rounded,
+                                  size: 11,
+                                  color: AppColors.brandBlue,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  task.githubRepo ?? 'VALIXIS_PORTAL',
+                                  style: AppTypography.mono(
+                                    size: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
+
+                        // Priority
                         DataCell(
-                          Text(
-                            task.priority.label,
-                            style: TextStyle(
-                              color: task.priority.color,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12,
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: task.priority.color.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: task.priority.color.withValues(alpha: 0.35),
+                                width: 1,
+                              ),
+                            ),
+                            child: Text(
+                              task.priority.label.toUpperCase(),
+                              style: AppTypography.telemetryHeader(
+                                size: 9,
+                                color: task.priority.color,
+                                spacing: 0.5,
+                              ),
                             ),
                           ),
                         ),
+
+                        // Assignment Status
                         DataCell(
                           isAssigned
                               ? Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
-                                    color: AppColors.brandPurple.withAlpha(25),
+                                    color: AppColors.telemetryViolet.withValues(alpha: 0.12),
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: AppColors.brandPurple.withAlpha(80)),
+                                    border: Border.all(
+                                      color: AppColors.telemetryViolet.withValues(alpha: 0.35),
+                                    ),
                                   ),
-                                  child: const Text(
-                                    'Assigned',
-                                    style: TextStyle(color: AppColors.brandPurple, fontSize: 11, fontWeight: FontWeight.w700),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 5,
+                                        height: 5,
+                                        decoration: const BoxDecoration(
+                                          color: AppColors.telemetryViolet,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Text(
+                                        'ASSIGNED',
+                                        style: AppTypography.telemetryHeader(
+                                          size: 9,
+                                          color: AppColors.telemetryViolet,
+                                          spacing: 0.5,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 )
                               : Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
-                                    color: AppColors.textMuted.withAlpha(25),
+                                    color: AppColors.surfaceElevated,
                                     borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: AppColors.textMuted.withAlpha(80)),
+                                    border: Border.all(color: AppColors.border),
                                   ),
-                                  child: const Text(
-                                    'Unassigned',
-                                    style: TextStyle(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w700),
+                                  child: Text(
+                                    'UNASSIGNED',
+                                    style: AppTypography.telemetryHeader(
+                                      size: 9,
+                                      color: AppColors.textMuted,
+                                      spacing: 0.5,
+                                    ),
                                   ),
                                 ),
                         ),
+
+                        // Deadline
                         DataCell(
                           Text(
                             DateFormatter.formatShortDate(task.deadline),
-                            style: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                            style: AppTypography.mono(
+                              size: 11,
+                              color: task.deadline.isBefore(DateTime.now()) && !task.status.isCompleted
+                                  ? AppColors.error
+                                  : AppColors.textSecondary,
+                            ),
                           ),
                         ),
+
+                        // PR Link
                         DataCell(
                           hasPr
                               ? InkWell(
@@ -205,57 +291,74 @@ class ManagerTasksTable extends StatelessWidget {
                                   child: Container(
                                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                     decoration: BoxDecoration(
-                                      color: AppColors.success.withAlpha(30),
+                                      color: AppColors.success.withValues(alpha: 0.12),
                                       borderRadius: BorderRadius.circular(6),
-                                      border: Border.all(color: AppColors.success.withAlpha(90)),
+                                      border: Border.all(
+                                        color: AppColors.success.withValues(alpha: 0.4),
+                                      ),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
-                                      children: const [
-                                        Icon(Icons.open_in_new_rounded, size: 12, color: AppColors.success),
-                                        SizedBox(width: 4),
-                                        Text('Yes', style: TextStyle(color: AppColors.success, fontSize: 11, fontWeight: FontWeight.w700)),
+                                      children: [
+                                        const Icon(
+                                          Icons.open_in_new_rounded,
+                                          size: 11,
+                                          color: AppColors.success,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          'OPEN PR',
+                                          style: AppTypography.telemetryHeader(
+                                            size: 9,
+                                            color: AppColors.success,
+                                            spacing: 0.5,
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ),
                                 )
-                              : Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                  decoration: BoxDecoration(color: AppColors.textMuted.withAlpha(20), borderRadius: BorderRadius.circular(6)),
-                                  child: const Text('No', style: TextStyle(color: AppColors.textMuted, fontSize: 11, fontWeight: FontWeight.w700)),
+                              : Text(
+                                  '—',
+                                  style: AppTypography.mono(
+                                    size: 12,
+                                    color: AppColors.textMuted,
+                                  ),
                                 ),
                         ),
+
+                        // Quick Actions
                         DataCell(
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.visibility_outlined, size: 18, color: AppColors.brandCyan),
-                                tooltip: 'Task Details',
+                                icon: const Icon(Icons.visibility_outlined, size: 16, color: AppColors.brandCyan),
+                                tooltip: 'View Telemetry',
                                 padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                 onPressed: () => ManagerTaskDetailsSheet.show(context, task),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.person_add_outlined, size: 18, color: AppColors.brandPurple),
-                                tooltip: 'Reassign',
+                                icon: const Icon(Icons.person_add_outlined, size: 16, color: AppColors.telemetryViolet),
+                                tooltip: 'Reassign Engineer',
                                 padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                 onPressed: () => onReassign(task),
                               ),
                               if (isAssigned)
                                 IconButton(
-                                  icon: const Icon(Icons.person_remove_outlined, size: 18, color: AppColors.warning),
-                                  tooltip: 'Unassign',
+                                  icon: const Icon(Icons.person_remove_outlined, size: 16, color: AppColors.warning),
+                                  tooltip: 'Unassign Task',
                                   padding: EdgeInsets.zero,
-                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                   onPressed: () => onUnassign(task),
                                 ),
                               IconButton(
-                                icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.error),
+                                icon: const Icon(Icons.delete_outline_rounded, size: 16, color: AppColors.error),
                                 tooltip: 'Delete Task',
                                 padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                 onPressed: () => onDelete(task),
                               ),
                             ],
@@ -273,3 +376,4 @@ class ManagerTasksTable extends StatelessWidget {
     );
   }
 }
+

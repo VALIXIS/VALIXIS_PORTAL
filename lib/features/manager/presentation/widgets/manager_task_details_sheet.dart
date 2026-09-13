@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/components/app_button.dart';
 import '../../../../shared/models/task.dart';
@@ -267,11 +268,9 @@ class ManagerTaskDetailsSheet extends ConsumerWidget {
                       ),
                       child: Text(
                         task.aiPrompt!,
-                        style: const TextStyle(
+                        style: AppTypography.mono(
+                          size: 12,
                           color: AppColors.textSecondary,
-                          fontSize: 13,
-                          fontFamily: 'Courier',
-                          height: 1.4,
                         ),
                       ),
                     ),

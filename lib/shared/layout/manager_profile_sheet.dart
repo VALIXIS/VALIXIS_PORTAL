@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
+import '../../core/constants/app_typography.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/role_provider.dart';
 import '../../core/network/realtime_sync_service.dart';
@@ -46,7 +47,7 @@ class ManagerProfileSheet extends ConsumerWidget {
           children: [
             Center(
               child: Container(
-                width: 40,
+                width: 36,
                 height: 4,
                 margin: const EdgeInsets.only(bottom: AppSpacing.lg),
                 decoration: BoxDecoration(
@@ -58,14 +59,14 @@ class ManagerProfileSheet extends ConsumerWidget {
             Row(
               children: [
                 Container(
-                  width: 52,
-                  height: 52,
+                  width: 48,
+                  height: 48,
                   decoration: BoxDecoration(
                     gradient: AppColors.primaryGradient,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.brandBlue.withAlpha(80),
+                        color: AppColors.brandBlue.withValues(alpha: 0.35),
                         blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
@@ -76,7 +77,7 @@ class ManagerProfileSheet extends ConsumerWidget {
                       name.isNotEmpty ? name.substring(0, 1) : 'M',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -89,9 +90,8 @@ class ManagerProfileSheet extends ConsumerWidget {
                     children: [
                       Text(
                         name,
-                        style: const TextStyle(
+                        style: AppTypography.textTheme.titleMedium?.copyWith(
                           color: AppColors.textPrimary,
-                          fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
                         maxLines: 1,
@@ -100,9 +100,9 @@ class ManagerProfileSheet extends ConsumerWidget {
                       const SizedBox(height: 2),
                       Text(
                         email,
-                        style: const TextStyle(
+                        style: AppTypography.mono(
+                          size: 12,
                           color: AppColors.textMuted,
-                          fontSize: 13,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -112,30 +112,29 @@ class ManagerProfileSheet extends ConsumerWidget {
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
+                    horizontal: 9,
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.brandPurple.withAlpha(30),
-                    borderRadius: BorderRadius.circular(10),
+                    color: AppColors.brandPurple.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: AppColors.brandPurple.withAlpha(60),
+                      color: AppColors.brandPurple.withValues(alpha: 0.4),
                     ),
                   ),
                   child: Text(
                     role,
-                    style: const TextStyle(
+                    style: AppTypography.telemetryHeader(
+                      size: 9,
                       color: AppColors.brandPurple,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: 1,
+                      spacing: 0.8,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.xl),
-            const Divider(color: AppColors.border, height: 1),
+            const SizedBox(height: AppSpacing.lg),
+            const Divider(color: AppColors.divider, height: 1),
             const SizedBox(height: AppSpacing.md),
             // Sync & connection details
             Row(

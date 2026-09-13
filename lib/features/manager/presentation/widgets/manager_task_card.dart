@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/components/glass_card.dart';
 import '../../../../shared/models/task.dart';
@@ -20,20 +21,11 @@ class ManagerTaskCard extends StatelessWidget {
   final VoidCallback onReassign;
   final VoidCallback onUnassign;
 
-  Color _getPriorityColor(TaskPriority priority) {
-    return switch (priority) {
-      TaskPriority.critical => AppColors.error,
-      TaskPriority.high => const Color(0xFFFF9100),
-      TaskPriority.medium => AppColors.brandCyan,
-      TaskPriority.low => AppColors.textMuted,
-    };
-  }
-
   Color _getStatusColor(TaskStatus status) {
     return switch (status) {
-      TaskStatus.assigned => AppColors.brandBlue,
-      TaskStatus.inProgress => const Color(0xFFFFD740),
-      TaskStatus.submitted => AppColors.brandPurple,
+      TaskStatus.assigned => AppColors.telemetryViolet,
+      TaskStatus.inProgress => AppColors.brandCyan,
+      TaskStatus.submitted => AppColors.telemetryIndigo,
       TaskStatus.approved => AppColors.success,
       TaskStatus.rejected => AppColors.error,
     };
@@ -57,12 +49,13 @@ class ManagerTaskCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final priorityColor = _getPriorityColor(task.priority);
+    final priorityColor = task.priority.color;
     final statusColor = _getStatusColor(task.status);
     final isOverdue = task.deadline.isBefore(DateTime.now()) && !task.status.isCompleted;
     final isAssigned = task.assignedTo.isNotEmpty && task.assignedTo != 'Unassigned';
 
     return GlassCard(
+      isInteractive: true,
       showGlow: isOverdue || task.status == TaskStatus.submitted,
       padding: EdgeInsets.zero,
       child: InkWell(
@@ -73,7 +66,7 @@ class ManagerTaskCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header: Priority, Status (Clean executive layout without raw long UUID)
+              // Header: Priority, Status
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -81,35 +74,34 @@ class ManagerTaskCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 8,
-                        height: 8,
+                        width: 7,
+                        height: 7,
                         decoration: BoxDecoration(
                           color: priorityColor,
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
-                              color: priorityColor.withAlpha(120),
+                              color: priorityColor.withValues(alpha: 0.6),
                               blurRadius: 6,
                               spreadRadius: 1,
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                         decoration: BoxDecoration(
-                          color: priorityColor.withAlpha(25),
+                          color: priorityColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: priorityColor.withAlpha(70), width: 0.8),
+                          border: Border.all(color: priorityColor.withValues(alpha: 0.35), width: 0.8),
                         ),
                         child: Text(
                           task.priority.name.toUpperCase(),
-                          style: TextStyle(
+                          style: AppTypography.telemetryHeader(
+                            size: 9,
                             color: priorityColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 0.5,
+                            spacing: 0.5,
                           ),
                         ),
                       ),
@@ -118,37 +110,36 @@ class ManagerTaskCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: statusColor.withAlpha(25),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: statusColor.withAlpha(70), width: 1),
+                      color: statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: statusColor.withValues(alpha: 0.35), width: 1),
                     ),
                     child: Text(
                       task.status.label.toUpperCase(),
-                      style: TextStyle(
+                      style: AppTypography.telemetryHeader(
+                        size: 9,
                         color: statusColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.5,
+                        spacing: 0.5,
                       ),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: AppSpacing.sm),
+
               // Title
               Text(
                 task.title,
-                style: const TextStyle(
+                style: AppTypography.textTheme.titleMedium?.copyWith(
                   color: AppColors.textPrimary,
-                  fontSize: 15,
                   fontWeight: FontWeight.w700,
-                  letterSpacing: -0.2,
                 ),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: AppSpacing.sm),
-              // Repo & Branch
+
+              // Repo & Branch & PR
               Wrap(
                 spacing: AppSpacing.xs,
                 runSpacing: 4,
@@ -156,20 +147,20 @@ class ManagerTaskCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: AppColors.brandBlue.withAlpha(20),
+                      color: AppColors.surfaceElevated,
                       borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: AppColors.border),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.code_rounded, size: 11, color: AppColors.brandBlue),
+                        const Icon(Icons.source_rounded, size: 11, color: AppColors.brandBlue),
                         const SizedBox(width: 4),
                         Text(
                           task.githubRepo ?? 'VALIXIS_PORTAL',
-                          style: const TextStyle(
-                            color: AppColors.brandBlue,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
+                          style: AppTypography.mono(
+                            size: 10,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
@@ -179,8 +170,9 @@ class ManagerTaskCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.brandPurple.withAlpha(20),
+                        color: AppColors.surfaceElevated,
                         borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: AppColors.border),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -189,10 +181,9 @@ class ManagerTaskCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Text(
                             task.branchName!,
-                            style: const TextStyle(
+                            style: AppTypography.mono(
+                              size: 10,
                               color: AppColors.brandPurple,
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
@@ -208,25 +199,23 @@ class ManagerTaskCard extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.brandCyan.withAlpha(20),
+                          color: AppColors.success.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.brandCyan.withAlpha(50)),
+                          border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
-                          children: const [
-                            Icon(Icons.link_rounded, size: 11, color: AppColors.brandCyan),
-                            SizedBox(width: 3),
+                          children: [
+                            const Icon(Icons.open_in_new_rounded, size: 10, color: AppColors.success),
+                            const SizedBox(width: 4),
                             Text(
-                              'PR Linked',
-                              style: TextStyle(
-                                color: AppColors.brandCyan,
-                                fontSize: 11,
-                                fontWeight: FontWeight.w700,
+                              'PR ACTIVE',
+                              style: AppTypography.telemetryHeader(
+                                size: 9,
+                                color: AppColors.success,
+                                spacing: 0.5,
                               ),
                             ),
-                            SizedBox(width: 2),
-                            Icon(Icons.open_in_new_rounded, size: 9, color: AppColors.brandCyan),
                           ],
                         ),
                       ),
@@ -234,9 +223,10 @@ class ManagerTaskCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
-              const Divider(color: AppColors.glassBorder, height: 1),
+              const Divider(color: AppColors.divider, height: 1),
               const SizedBox(height: AppSpacing.sm),
-              // Footer: Assignee, Deadline & Actions
+
+              // Footer: Assignee, Deadline & Quick Actions
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -259,16 +249,15 @@ class ManagerTaskCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 isAssigned ? task.assignedTo : 'Unassigned',
-                                style: TextStyle(
+                                style: AppTypography.textTheme.bodySmall?.copyWith(
                                   color: isAssigned ? AppColors.textPrimary : AppColors.textMuted,
-                                  fontSize: 12,
                                   fontWeight: FontWeight.w600,
                                 ),
                                 maxLines: 1,
@@ -285,10 +274,10 @@ class ManagerTaskCard extends StatelessWidget {
                                   Flexible(
                                     child: Text(
                                       _formatDeadline(task.deadline),
-                                      style: TextStyle(
+                                      style: AppTypography.mono(
+                                        size: 10,
                                         color: isOverdue ? AppColors.error : AppColors.textMuted,
-                                        fontSize: 11,
-                                        fontWeight: isOverdue ? FontWeight.w700 : FontWeight.w500,
+                                        weight: isOverdue ? FontWeight.w700 : FontWeight.w500,
                                       ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
@@ -334,3 +323,4 @@ class ManagerTaskCard extends StatelessWidget {
     );
   }
 }
+

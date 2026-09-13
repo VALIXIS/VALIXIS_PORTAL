@@ -121,6 +121,50 @@ abstract final class AppTypography {
         ),
       );
 
+  // ── Telemetry & Monospace Specializations ──────────────────────────────────
+  /// Monospace font for telemetry data, latency pips, timestamps, and hashes.
+  static TextStyle mono({
+    double size = 12,
+    FontWeight weight = FontWeight.w500,
+    Color color = AppColors.textSecondary,
+    double spacing = 0.5,
+  }) =>
+      GoogleFonts.jetBrainsMono(
+        fontSize: size,
+        fontWeight: weight,
+        color: color,
+        letterSpacing: spacing,
+      );
+
+  /// Futuristic yet highly legible metric numbers for KPIs.
+  static TextStyle metricValue({
+    double size = 32,
+    FontWeight weight = FontWeight.w700,
+    Color color = AppColors.textPrimary,
+    double spacing = -0.5,
+  }) =>
+      GoogleFonts.plusJakartaSans(
+        fontSize: size,
+        fontWeight: weight,
+        color: color,
+        letterSpacing: spacing,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      );
+
+  /// Architectural telemetry uppercase header tag.
+  static TextStyle telemetryHeader({
+    double size = 11,
+    FontWeight weight = FontWeight.w700,
+    Color color = AppColors.brandCyan,
+    double spacing = 1.2,
+  }) =>
+      GoogleFonts.jetBrainsMono(
+        fontSize: size,
+        fontWeight: weight,
+        color: color,
+        letterSpacing: spacing,
+      );
+
   static TextStyle _font({
     required double size,
     required FontWeight weight,

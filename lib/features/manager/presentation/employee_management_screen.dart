@@ -44,45 +44,48 @@ class _EmployeeManagementScreenState
       body: SingleChildScrollView(
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1400),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_rounded),
-                  onPressed: () => context.go(AppRoutes.managerDashboard),
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
-                      'Enterprise Workforce Directory',
-                      style: TextStyle(
-                        color: AppColors.textPrimary,
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.5,
-                      ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      onPressed: () => context.go(AppRoutes.managerDashboard),
                     ),
-                    SizedBox(height: 2),
-                    Text(
-                      'Audit employee task workloads, department assignments, and availability',
-                      style: TextStyle(
-                        color: AppColors.textMuted,
-                        fontSize: 13,
-                      ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: const [
+                        Text(
+                          'Enterprise Workforce Directory',
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        SizedBox(height: 2),
+                        Text(
+                          'Audit employee task workloads, department assignments, and availability',
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            GlassCard(
-              showGlow: true,
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
+                const SizedBox(height: AppSpacing.xl),
+                GlassCard(
+                  showGlow: true,
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  child: Column(
                 children: [
                   AppTextField(
                     controller: _searchController,
@@ -179,6 +182,8 @@ class _EmployeeManagementScreenState
           ],
         ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 }

@@ -216,17 +216,22 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                 .toSet()
                 .toList();
 
+            final isDesktop = MediaQuery.of(context).size.width >= 900;
+
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.base,
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? AppSpacing.xl : AppSpacing.base,
                 vertical: AppSpacing.md,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1400),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                   // Screen Header (Monitoring only - strictly NO create task)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -464,8 +469,10 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                   const SizedBox(height: AppSpacing.xl),
                 ],
               ),
-            );
-          },
+            ),
+          ),
+        );
+      },
         ),
       ),
     );

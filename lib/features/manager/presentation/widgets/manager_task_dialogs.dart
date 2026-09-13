@@ -20,7 +20,14 @@ abstract final class ManagerTaskDialogs {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: AppColors.surfaceElevated,
-              title: Text('Reassign Task "${task.title}"', style: const TextStyle(color: AppColors.textPrimary, fontSize: 16)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: AppColors.glassBorder),
+              ),
+              title: Text(
+                'Reassign Task "${task.title}"',
+                style: const TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.w700),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -38,14 +45,23 @@ abstract final class ManagerTaskDialogs {
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                         margin: const EdgeInsets.only(bottom: 6),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.brandCyan.withAlpha(30) : AppColors.surfaceCard,
+                          color: isSelected ? AppColors.brandCyan.withValues(alpha: 0.15) : AppColors.surfaceCard,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: isSelected ? AppColors.brandCyan : AppColors.glassBorder),
+                          border: Border.all(
+                            color: isSelected ? AppColors.brandCyan : AppColors.glassBorder,
+                          ),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(empName, style: TextStyle(color: isSelected ? AppColors.brandCyan : AppColors.textPrimary, fontSize: 14, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500)),
+                            Text(
+                              empName,
+                              style: TextStyle(
+                                color: isSelected ? AppColors.brandCyan : AppColors.textPrimary,
+                                fontSize: 14,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                              ),
+                            ),
                             if (isSelected) const Icon(Icons.check_circle_rounded, size: 18, color: AppColors.brandCyan),
                           ],
                         ),
@@ -55,15 +71,23 @@ abstract final class ManagerTaskDialogs {
                 ],
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+                ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandCyan,
+                    foregroundColor: Colors.black,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
                   onPressed: selectedEmpId == null
                       ? null
                       : () {
                           Navigator.pop(context, true);
                           managerRepo.assignTask(taskId: task.id, employeeId: selectedEmpId!);
                         },
-                  child: const Text('Reassign'),
+                  child: const Text('Reassign', style: TextStyle(fontWeight: FontWeight.w700)),
                 ),
               ],
             );
@@ -82,14 +106,25 @@ abstract final class ManagerTaskDialogs {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surfaceElevated,
-        title: const Text('Unassign Task', style: TextStyle(color: AppColors.textPrimary)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: AppColors.glassBorder),
+        ),
+        title: const Text('Unassign Task', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
         content: Text('Are you sure you want to remove assignment from "${task.title}"?', style: const TextStyle(color: AppColors.textSecondary)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.warning),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.warning,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Unassign'),
+            child: const Text('Unassign', style: TextStyle(fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -111,14 +146,25 @@ abstract final class ManagerTaskDialogs {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surfaceElevated,
-        title: const Text('Delete Task?', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.bold)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: AppColors.error.withValues(alpha: 0.3)),
+        ),
+        title: const Text('Delete Task?', style: TextStyle(color: AppColors.error, fontWeight: FontWeight.w700)),
         content: Text('Delete "${task.title}"?\nThis action cannot be undone and will remove all related submissions and assignments.', style: const TextStyle(color: AppColors.textSecondary)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete Permanently'),
+            child: const Text('Delete Permanently', style: TextStyle(fontWeight: FontWeight.w700)),
           ),
         ],
       ),

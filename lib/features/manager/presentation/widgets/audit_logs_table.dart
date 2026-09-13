@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../../../shared/components/glass_card.dart';
 
 class AuditLogItem {
   const AuditLogItem({
@@ -52,7 +54,7 @@ class _AuditLogsTableState extends State<AuditLogsTable> {
     final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
     final amPm = dt.hour >= 12 ? 'PM' : 'AM';
     final minuteStr = dt.minute.toString().padLeft(2, '0');
-    return '${dt.day} $month ${dt.year} ${hour.toString().padLeft(2, '0')}:$minuteStr $amPm';
+    return '${dt.day} $month ${dt.year} • ${hour.toString().padLeft(2, '0')}:$minuteStr $amPm';
   }
 
   @override
@@ -93,85 +95,162 @@ class _AuditLogsTableState extends State<AuditLogsTable> {
       return _sortAscending ? cmp : -cmp;
     });
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        headingRowColor: WidgetStateProperty.all(AppColors.surfaceElevated),
-        dataRowMaxHeight: 56,
-        sortColumnIndex: _sortColumnIndex,
-        sortAscending: _sortAscending,
-        columns: [
-          DataColumn(
-            label: const Text('Timestamp', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-            onSort: _onSort,
-          ),
-          DataColumn(
-            label: const Text('Last Active', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-            onSort: _onSort,
-          ),
-          DataColumn(
-            label: const Text('Actor', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-            onSort: _onSort,
-          ),
-          DataColumn(
-            label: const Text('Action Event', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-            onSort: _onSort,
-          ),
-          DataColumn(
-            label: const Text('Category', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-            onSort: _onSort,
-          ),
-          DataColumn(
-            label: const Text('IP Address', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-            onSort: _onSort,
-          ),
-          DataColumn(
-            label: const Text('Status', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-            onSort: _onSort,
-          ),
-          DataColumn(
-            label: const Text('Details', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
-            onSort: _onSort,
-          ),
-        ],
-        rows: sortedList.map((log) {
-          final isLineActive = log.status.contains('Active');
-          final isLoggedOut = log.status.contains('Logged Out') || log.status.contains('Ended');
-          final statusColor = isLineActive
-              ? AppColors.success
-              : (isLoggedOut ? AppColors.textMuted : AppColors.error);
+    return GlassCard(
+      padding: EdgeInsets.zero,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return SizedBox(
+            width: constraints.maxWidth,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                child: DataTable(
+                  headingRowColor: WidgetStateProperty.all(AppColors.surfaceElevated),
+                  headingRowHeight: 46,
+                  dataRowMaxHeight: 56,
+                  sortColumnIndex: _sortColumnIndex,
+                  sortAscending: _sortAscending,
+                  columnSpacing: 20,
+                  horizontalMargin: 20,
+                  columns: [
+                    DataColumn(
+                      label: Text(
+                        'TIMESTAMP',
+                        style: AppTypography.telemetryHeader(size: 10, color: AppColors.textSecondary, spacing: 0.8),
+                      ),
+                      onSort: _onSort,
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'LAST SEEN',
+                        style: AppTypography.telemetryHeader(size: 10, color: AppColors.textSecondary, spacing: 0.8),
+                      ),
+                      onSort: _onSort,
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'ACTOR',
+                        style: AppTypography.telemetryHeader(size: 10, color: AppColors.textSecondary, spacing: 0.8),
+                      ),
+                      onSort: _onSort,
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'EVENT ACTION',
+                        style: AppTypography.telemetryHeader(size: 10, color: AppColors.textSecondary, spacing: 0.8),
+                      ),
+                      onSort: _onSort,
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'CATEGORY',
+                        style: AppTypography.telemetryHeader(size: 10, color: AppColors.textSecondary, spacing: 0.8),
+                      ),
+                      onSort: _onSort,
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'IP ADDRESS',
+                        style: AppTypography.telemetryHeader(size: 10, color: AppColors.textSecondary, spacing: 0.8),
+                      ),
+                      onSort: _onSort,
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'STATUS',
+                        style: AppTypography.telemetryHeader(size: 10, color: AppColors.textSecondary, spacing: 0.8),
+                      ),
+                      onSort: _onSort,
+                    ),
+                    DataColumn(
+                      label: Text(
+                        'DETAILS',
+                        style: AppTypography.telemetryHeader(size: 10, color: AppColors.textMuted, spacing: 0.8),
+                      ),
+                      onSort: _onSort,
+                    ),
+                  ],
+                  rows: sortedList.map((log) {
+                    final isLineActive = log.status.contains('Active');
+                    final isLoggedOut = log.status.contains('Logged Out') || log.status.contains('Ended');
+                    final statusColor = isLineActive
+                        ? AppColors.success
+                        : (isLoggedOut ? AppColors.textMuted : AppColors.error);
 
-          return DataRow(cells: [
-            DataCell(Text(_formatDateTime(log.timestamp), style: const TextStyle(color: AppColors.textMuted, fontSize: 12))),
-            DataCell(Text(log.lastSeen != null ? _formatDateTime(log.lastSeen!) : _formatDateTime(log.timestamp), style: const TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.w600))),
-            DataCell(Text(log.actor, style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600))),
-            DataCell(Text(log.action, style: const TextStyle(color: AppColors.brandCyan, fontWeight: FontWeight.w600))),
-            DataCell(
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.brandBlue.withAlpha(25),
-                  borderRadius: BorderRadius.circular(8),
+                    return DataRow(cells: [
+                      DataCell(Text(
+                        _formatDateTime(log.timestamp),
+                        style: AppTypography.mono(size: 11, color: AppColors.textMuted),
+                      )),
+                      DataCell(Text(
+                        log.lastSeen != null ? _formatDateTime(log.lastSeen!) : _formatDateTime(log.timestamp),
+                        style: AppTypography.mono(size: 11, color: AppColors.brandCyan),
+                      )),
+                      DataCell(Text(
+                        log.actor,
+                        style: AppTypography.textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.w600, fontSize: 13),
+                      )),
+                      DataCell(Text(
+                        log.action,
+                        style: AppTypography.textTheme.bodyMedium?.copyWith(color: AppColors.brandCyan, fontWeight: FontWeight.w600, fontSize: 13),
+                      )),
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: AppColors.brandBlue.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: AppColors.brandBlue.withValues(alpha: 0.3)),
+                          ),
+                          child: Text(
+                            log.category.toUpperCase(),
+                            style: AppTypography.telemetryHeader(size: 9, color: AppColors.brandBlue, spacing: 0.5),
+                          ),
+                        ),
+                      ),
+                      DataCell(Text(
+                        log.ipAddress,
+                        style: AppTypography.mono(size: 11, color: AppColors.textSecondary),
+                      )),
+                      DataCell(
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: statusColor.withValues(alpha: 0.35)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 5,
+                                height: 5,
+                                decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                log.status.toUpperCase(),
+                                style: AppTypography.telemetryHeader(size: 9, color: statusColor, spacing: 0.5),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      DataCell(Text(
+                        log.details ?? '—',
+                        style: AppTypography.mono(size: 11, color: AppColors.textMuted),
+                      )),
+                    ]);
+                  }).toList(),
                 ),
-                child: Text(log.category, style: const TextStyle(color: AppColors.brandBlue, fontSize: 11, fontWeight: FontWeight.w700)),
               ),
             ),
-            DataCell(Text(log.ipAddress, style: const TextStyle(color: AppColors.textMuted))),
-            DataCell(
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: statusColor.withAlpha(25),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: statusColor.withAlpha(60)),
-                ),
-                child: Text(log.status, style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.w700)),
-              ),
-            ),
-            DataCell(Text(log.details ?? 'N/A', style: const TextStyle(color: AppColors.textMuted, fontSize: 12))),
-          ]);
-        }).toList(),
+          );
+        },
       ),
     );
   }
 }
+

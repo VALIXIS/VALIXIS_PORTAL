@@ -50,28 +50,35 @@ class ManagerDashboardScreen extends ConsumerWidget {
             ),
           ),
           data: (metrics) {
+            final isDesktop = MediaQuery.of(context).size.width >= 900;
+
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.base,
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? AppSpacing.xl : AppSpacing.base,
                 vertical: AppSpacing.md,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const ManagerHeroHeader(),
-                  const SizedBox(height: AppSpacing.base),
-                  const ManagerQuickActions(),
-                  const SizedBox(height: AppSpacing.base),
-                  ManagerMetricsGrid(metrics: metrics),
-                  const SizedBox(height: AppSpacing.base),
-                  RecentSubmissionsCard(
-                    submissions: metrics.recentSubmissions,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1400),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const ManagerHeroHeader(),
+                      const SizedBox(height: AppSpacing.base),
+                      const ManagerQuickActions(),
+                      const SizedBox(height: AppSpacing.base),
+                      ManagerMetricsGrid(metrics: metrics),
+                      const SizedBox(height: AppSpacing.base),
+                      RecentSubmissionsCard(
+                        submissions: metrics.recentSubmissions,
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                    ],
                   ),
-                  const SizedBox(height: AppSpacing.xl),
-                ],
+                ),
               ),
             );
           },

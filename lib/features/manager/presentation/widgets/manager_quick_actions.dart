@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../../../core/constants/app_durations.dart';
 
-/// Executive Quick Navigation toolbar for manager mobile operations.
+/// Executive Quick Navigation toolbar for manager command operations.
 class ManagerQuickActions extends StatelessWidget {
   const ManagerQuickActions({super.key});
 
@@ -13,13 +15,26 @@ class ManagerQuickActions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Quick Navigation',
-          style: TextStyle(
-            color: AppColors.textPrimary,
-            fontSize: 16,
-            fontWeight: FontWeight.w700,
-          ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'FAST JUMP NODES',
+              style: AppTypography.telemetryHeader(
+                size: 10,
+                color: AppColors.textMuted,
+                spacing: 1.2,
+              ),
+            ),
+            Text(
+              'DIRECT ACCESS',
+              style: AppTypography.telemetryHeader(
+                size: 9,
+                color: AppColors.brandCyan,
+                spacing: 1.0,
+              ),
+            ),
+          ],
         ),
         const SizedBox(height: AppSpacing.sm),
         Wrap(
@@ -27,25 +42,25 @@ class ManagerQuickActions extends StatelessWidget {
           runSpacing: AppSpacing.sm,
           children: [
             _ActionPill(
-              label: 'Manager Tasks',
+              label: 'Tasks Workspace',
               icon: Icons.assignment_rounded,
               color: AppColors.brandCyan,
               onTap: () => context.go(AppRoutes.managerTasks),
             ),
             _ActionPill(
-              label: 'Review Queue',
+              label: 'Review PR Queue',
               icon: Icons.rate_review_rounded,
               color: AppColors.brandBlue,
               onTap: () => context.go(AppRoutes.managerReviews),
             ),
             _ActionPill(
-              label: 'Audit Logs',
+              label: 'Audit Stream',
               icon: Icons.fact_check_rounded,
               color: AppColors.brandPurple,
               onTap: () => context.go(AppRoutes.managerAuditLogs),
             ),
             _ActionPill(
-              label: 'Team Roster',
+              label: 'Personnel Matrix',
               icon: Icons.people_alt_rounded,
               color: AppColors.success,
               onTap: () => context.go(AppRoutes.managerEmployees),
@@ -57,7 +72,7 @@ class ManagerQuickActions extends StatelessWidget {
   }
 }
 
-class _ActionPill extends StatelessWidget {
+class _ActionPill extends StatefulWidget {
   const _ActionPill({
     required this.label,
     required this.icon,
@@ -71,37 +86,62 @@ class _ActionPill extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_ActionPill> createState() => _ActionPillState();
+}
+
+class _ActionPillState extends State<_ActionPill> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: AppDurations.fast,
+          curve: AppCurves.snappy,
           padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md,
-            vertical: AppSpacing.sm,
+            vertical: 10,
           ),
           decoration: BoxDecoration(
-            color: AppColors.surfaceElevated,
-            borderRadius: BorderRadius.circular(12),
+            color: _isHovered ? AppColors.surfaceElevated : AppColors.surfaceCard,
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: AppColors.glassBorder,
+              color: _isHovered
+                  ? widget.color.withValues(alpha: 0.5)
+                  : AppColors.border,
               width: 1,
             ),
+            boxShadow: _isHovered
+                ? [
+                    BoxShadow(
+                      color: widget.color.withValues(alpha: 0.15),
+                      blurRadius: 12,
+                    ),
+                  ]
+                : null,
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 16, color: color),
-              const SizedBox(width: AppSpacing.xs),
+              Icon(widget.icon, size: 15, color: widget.color),
+              const SizedBox(width: AppSpacing.xs + 2),
               Text(
-                label,
-                style: const TextStyle(
-                  color: AppColors.textPrimary,
-                  fontSize: 13,
+                widget.label,
+                style: AppTypography.textTheme.bodyMedium?.copyWith(
+                  color: _isHovered ? AppColors.textPrimary : AppColors.textSecondary,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                 ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 14,
+                color: _isHovered ? widget.color : AppColors.textMuted,
               ),
             ],
           ),
@@ -110,3 +150,4 @@ class _ActionPill extends StatelessWidget {
     );
   }
 }
+

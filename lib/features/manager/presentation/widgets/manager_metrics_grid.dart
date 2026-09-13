@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_router.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
 import '../../../../shared/components/glass_card.dart';
 import '../../data/manager_repository.dart';
 
@@ -34,45 +35,51 @@ class ManagerMetricsGrid extends StatelessWidget {
           childAspectRatio: 1.6,
           children: [
             _MetricCard(
-              title: 'Total Tasks',
+              title: 'TOTAL TASKS',
               value: metrics.totalTasks.toString(),
+              subtitle: 'Fleet operations catalog',
               icon: Icons.assignment_rounded,
               color: AppColors.brandBlue,
               onTap: () => context.go(AppRoutes.managerTasks),
             ),
             _MetricCard(
-              title: 'Active Tasks',
+              title: 'IN ACTIVE FLIGHT',
               value: activeTasksCount.toString(),
-              icon: Icons.hourglass_top_rounded,
-              color: AppColors.warning,
+              subtitle: '${metrics.inProgressCount} in progress',
+              icon: Icons.bolt_rounded,
+              color: AppColors.brandCyan,
               onTap: () => context.go('${AppRoutes.managerTasks}?status=active'),
             ),
             _MetricCard(
-              title: 'Pending Reviews',
+              title: 'PENDING REVIEWS',
               value: metrics.submittedCount.toString(),
+              subtitle: 'Awaiting PR verification',
               icon: Icons.rate_review_rounded,
-              color: AppColors.brandCyan,
+              color: AppColors.telemetryViolet,
               onTap: () => context.go(AppRoutes.managerReviews),
             ),
             _MetricCard(
-              title: 'Completed Tasks',
+              title: 'COMPLETED',
               value: metrics.approvedCount.toString(),
+              subtitle: 'Merged & verified',
               icon: Icons.check_circle_rounded,
               color: AppColors.success,
               onTap: () => context.go('${AppRoutes.managerTasks}?status=completed'),
             ),
             _MetricCard(
-              title: 'Employees',
+              title: 'PERSONNEL',
               value: metrics.totalEmployees.toString(),
+              subtitle: 'Active engineer nodes',
               icon: Icons.people_alt_rounded,
-              color: AppColors.brandPurple,
+              color: AppColors.telemetryIndigo,
               onTap: () => context.go(AppRoutes.managerEmployees),
             ),
             _MetricCard(
-              title: 'Overdue Tasks',
+              title: 'CRITICAL / OVERDUE',
               value: overdueCount.toString(),
+              subtitle: overdueCount > 0 ? 'Requires attention' : 'Nominal deadline pace',
               icon: Icons.warning_amber_rounded,
-              color: AppColors.error,
+              color: overdueCount > 0 ? AppColors.error : AppColors.textMuted,
               onTap: () => context.go('${AppRoutes.managerTasks}?status=overdue'),
             ),
           ],
@@ -86,6 +93,7 @@ class _MetricCard extends StatelessWidget {
   const _MetricCard({
     required this.title,
     required this.value,
+    required this.subtitle,
     required this.icon,
     required this.color,
     required this.onTap,
@@ -93,65 +101,85 @@ class _MetricCard extends StatelessWidget {
 
   final String title;
   final String value;
+  final String subtitle;
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: GlassCard(
-          showGlow: true,
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return GlassCard(
+      isInteractive: true,
+      onTap: onTap,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: AppColors.textMuted,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: color.withAlpha(25),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(icon, color: color, size: 16),
-                  ),
-                ],
+              Text(
+                title,
+                style: AppTypography.telemetryHeader(
+                  size: 10,
+                  color: AppColors.textMuted,
+                  spacing: 1.0,
+                ),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w800,
-                      letterSpacing: -0.5,
-                    ),
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: color.withValues(alpha: 0.3),
+                    width: 1,
                   ),
-                  const Icon(Icons.arrow_forward_rounded, size: 14, color: AppColors.textMuted),
-                ],
+                ),
+                child: Icon(icon, color: color, size: 16),
               ),
             ],
           ),
-        ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  Text(
+                    value,
+                    style: AppTypography.metricValue(
+                      size: 28,
+                      weight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_outward_rounded,
+                    size: 14,
+                    color: AppColors.textMuted,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Text(
+                subtitle,
+                style: AppTypography.textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontSize: 11,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
+

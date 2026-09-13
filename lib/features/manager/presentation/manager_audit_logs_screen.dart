@@ -7,9 +7,10 @@ import '../../../core/network/supabase_client_provider.dart';
 import '../../../shared/components/app_button.dart';
 import '../../../shared/components/empty_state.dart';
 import 'providers/audit_logs_provider.dart';
+import 'widgets/audit_logs_table.dart';
 import 'widgets/manager_audit_log_card.dart';
 
-/// Screen for Manager Security Audit Logs & System Activity Timeline on mobile.
+/// Screen for Manager Security Audit Logs & System Activity Timeline.
 class ManagerAuditLogsScreen extends ConsumerStatefulWidget {
   const ManagerAuditLogsScreen({super.key});
 
@@ -42,7 +43,7 @@ class _ManagerAuditLogsScreenState
         backgroundColor: AppColors.surfaceElevated,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: AppColors.error.withAlpha(80), width: 1.5),
+          side: BorderSide(color: AppColors.error.withValues(alpha: 0.3), width: 1.5),
         ),
         title: Row(
           children: const [
@@ -118,6 +119,8 @@ class _ManagerAuditLogsScreenState
   @override
   Widget build(BuildContext context) {
     final logsAsync = ref.watch(auditLogsProvider);
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isDesktop = screenWidth >= 900;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -191,138 +194,154 @@ class _ManagerAuditLogsScreenState
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.base,
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? AppSpacing.xl : AppSpacing.base,
                 vertical: AppSpacing.md,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Title Header with Clear Button
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1400),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      // Title Header with Clear Button
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text(
-                            'Security & Audit Logs',
-                            style: TextStyle(
-                              color: AppColors.textPrimary,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.5,
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Security & Audit Logs',
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.5,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${logs.length} events recorded • $activeSessionCount active',
+                                style: const TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                          if (logs.isNotEmpty)
+                            IconButton(
+                              icon: Icon(
+                                Icons.delete_sweep_rounded,
+                                color: _isClearing ? AppColors.textMuted : AppColors.error,
+                                size: 20,
+                              ),
+                              tooltip: 'Clear Audit Logs',
+                              onPressed: _isClearing ? null : _onClearAllLogs,
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      // Filter and Search Row
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        alignment: WrapAlignment.spaceBetween,
+                        children: [
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            physics: const BouncingScrollPhysics(),
+                            child: Row(
+                              children: [
+                                _CategoryFilterChip(
+                                  label: 'All (${logs.length})',
+                                  isSelected: _selectedCategory == 'all',
+                                  onTap: () => setState(() => _selectedCategory = 'all'),
+                                ),
+                                _CategoryFilterChip(
+                                  label: 'Active Sessions ($activeSessionCount)',
+                                  isSelected: _selectedCategory == 'active',
+                                  onTap: () => setState(() => _selectedCategory = 'active'),
+                                ),
+                                _CategoryFilterChip(
+                                  label: 'Authentication',
+                                  isSelected: _selectedCategory == 'auth',
+                                  onTap: () => setState(() => _selectedCategory = 'auth'),
+                                ),
+                                _CategoryFilterChip(
+                                  label: 'Tasks & Reviews',
+                                  isSelected: _selectedCategory == 'tasks',
+                                  onTap: () => setState(() => _selectedCategory = 'tasks'),
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 2),
-                          Text(
-                            '${logs.length} events recorded • $activeSessionCount active',
-                            style: const TextStyle(
-                              color: AppColors.textMuted,
-                              fontSize: 12,
+                          ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 380, minWidth: 260),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceCard,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: AppColors.glassBorder),
+                              ),
+                              child: TextField(
+                                controller: _searchController,
+                                style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
+                                decoration: InputDecoration(
+                                  hintText: 'Filter by actor, action, IP...',
+                                  hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.brandCyan, size: 18),
+                                  suffixIcon: _query.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.clear_rounded, size: 16, color: AppColors.textMuted),
+                                          onPressed: () {
+                                            _searchController.clear();
+                                            setState(() => _query = '');
+                                          },
+                                        )
+                                      : null,
+                                  border: InputBorder.none,
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 10),
+                                ),
+                                onChanged: (val) => setState(() => _query = val.trim()),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      if (logs.isNotEmpty)
-                        IconButton(
-                          icon: Icon(
-                            Icons.delete_sweep_rounded,
-                            color: _isClearing ? AppColors.textMuted : AppColors.error,
-                            size: 20,
+                      const SizedBox(height: AppSpacing.md),
+                      // List or Table
+                      if (filtered.isEmpty)
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: AppSpacing.xl3),
+                          child: Center(
+                            child: EmptyState(
+                              icon: Icons.fact_check_rounded,
+                              title: 'No Audit Logs Recorded',
+                              description:
+                                  'Real-time audit log events will appear here when actions and logins occur.',
+                            ),
                           ),
-                          tooltip: 'Clear Audit Logs',
-                          onPressed: _isClearing ? null : _onClearAllLogs,
+                        )
+                      else if (isDesktop)
+                        AuditLogsTable(logs: filtered)
+                      else
+                        ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: filtered.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(height: AppSpacing.sm),
+                          itemBuilder: (context, index) {
+                            return ManagerAuditLogCard(log: filtered[index]);
+                          },
                         ),
+                      const SizedBox(height: AppSpacing.xl),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  // Filter Chips
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    child: Row(
-                      children: [
-                        _CategoryFilterChip(
-                          label: 'All (${logs.length})',
-                          isSelected: _selectedCategory == 'all',
-                          onTap: () => setState(() => _selectedCategory = 'all'),
-                        ),
-                        _CategoryFilterChip(
-                          label: 'Active Sessions ($activeSessionCount)',
-                          isSelected: _selectedCategory == 'active',
-                          onTap: () => setState(() => _selectedCategory = 'active'),
-                        ),
-                        _CategoryFilterChip(
-                          label: 'Authentication',
-                          isSelected: _selectedCategory == 'auth',
-                          onTap: () => setState(() => _selectedCategory = 'auth'),
-                        ),
-                        _CategoryFilterChip(
-                          label: 'Tasks & Reviews',
-                          isSelected: _selectedCategory == 'tasks',
-                          onTap: () => setState(() => _selectedCategory = 'tasks'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  // Search
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceCard,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.glassBorder),
-                    ),
-                    child: TextField(
-                      controller: _searchController,
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
-                      decoration: InputDecoration(
-                        hintText: 'Filter by actor, action, IP, or details...',
-                        hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 13),
-                        prefixIcon: const Icon(Icons.search_rounded, color: AppColors.brandCyan, size: 20),
-                        suffixIcon: _query.isNotEmpty
-                            ? IconButton(
-                                icon: const Icon(Icons.clear_rounded, size: 18, color: AppColors.textMuted),
-                                onPressed: () {
-                                  _searchController.clear();
-                                  setState(() => _query = '');
-                                },
-                              )
-                            : null,
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
-                      ),
-                      onChanged: (val) => setState(() => _query = val.trim()),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  // List
-                  if (filtered.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSpacing.xl3),
-                      child: Center(
-                        child: EmptyState(
-                          icon: Icons.fact_check_rounded,
-                          title: 'No Audit Logs Recorded',
-                          description:
-                              'Real-time audit log events will appear here when actions and logins occur.',
-                        ),
-                      ),
-                    )
-                  else
-                    ListView.separated(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: filtered.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: AppSpacing.sm),
-                      itemBuilder: (context, index) {
-                        return ManagerAuditLogCard(log: filtered[index]);
-                      },
-                    ),
-                  const SizedBox(height: AppSpacing.xl),
-                ],
+                ),
               ),
             );
           },

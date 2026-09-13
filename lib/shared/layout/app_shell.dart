@@ -4,11 +4,14 @@ import 'package:go_router/go_router.dart';
 import '../../app/router/app_router.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
+import '../../core/constants/app_typography.dart';
 import '../../core/network/realtime_sync_service.dart';
 import '../../features/auth/domain/role_service.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/role_provider.dart';
 import '../../features/manager/presentation/providers/manager_dashboard_provider.dart';
+import '../../features/notifications/presentation/widgets/notification_bell_button.dart';
+import '../components/global_search_dialog.dart';
 import 'manager_profile_sheet.dart';
 import 'valixis_rail.dart';
 
@@ -28,8 +31,8 @@ class _ManagerNavItem {
   final int? badgeCount;
 }
 
-/// Executive Mobile App Shell tailored for VALIXIS Manager.
-/// Houses the 4 primary manager destinations: Overview, Tasks, Reviews, and Audit Logs.
+/// Executive Command Center App Shell for VALIXIS Manager.
+/// Houses the primary manager destinations with real-time telemetry headers.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.child});
 
@@ -53,7 +56,6 @@ class AppShell extends ConsumerWidget {
 
     final userRole = roleAsync.valueOrNull ?? UserRole.employee;
     if (!userRole.isManager) {
-      // If a non-manager account somehow reached the shell, show restricted state
       return Scaffold(
         backgroundColor: AppColors.surfaceBase,
         body: Center(
@@ -64,14 +66,19 @@ class AppShell extends ConsumerWidget {
               children: [
                 const Icon(Icons.lock_person_rounded, size: 48, color: AppColors.error),
                 const SizedBox(height: AppSpacing.md),
-                const Text(
+                Text(
                   'VALIXIS Manager Access Restricted',
-                  style: TextStyle(color: AppColors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700),
+                  style: AppTypography.textTheme.titleLarge?.copyWith(
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                const Text(
+                Text(
                   'Your account does not possess manager authorization.',
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                  style: AppTypography.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textMuted,
+                  ),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.lg),
@@ -137,37 +144,38 @@ class AppShell extends ConsumerWidget {
       final railItems = [
         const NavItem(
           route: AppRoutes.managerDashboard,
-          label: 'Dashboard',
+          label: 'Overview',
           icon: Icons.grid_view_outlined,
           selectedIcon: Icons.grid_view_rounded,
         ),
         const NavItem(
           route: AppRoutes.managerTasks,
-          label: 'Manager Tasks',
+          label: 'Tasks Workspace',
           icon: Icons.assignment_outlined,
           selectedIcon: Icons.assignment_rounded,
         ),
         NavItem(
           route: AppRoutes.managerReviews,
-          label: 'Reviews',
+          label: 'Reviews & PRs',
           icon: Icons.rate_review_outlined,
           selectedIcon: Icons.rate_review_rounded,
+          badgeCount: pendingCount > 0 ? pendingCount : null,
         ),
         const NavItem(
           route: AppRoutes.managerEmployees,
-          label: 'Employees',
+          label: 'Personnel',
           icon: Icons.people_outline_rounded,
           selectedIcon: Icons.people_rounded,
         ),
         const NavItem(
           route: AppRoutes.managerAuditLogs,
-          label: 'Audit Logs',
+          label: 'Audit Stream',
           icon: Icons.fact_check_outlined,
           selectedIcon: Icons.fact_check_rounded,
         ),
         const NavItem(
           route: AppRoutes.profile,
-          label: 'Profile',
+          label: 'System Profile',
           icon: Icons.person_outline_rounded,
           selectedIcon: Icons.person_rounded,
         ),
@@ -183,6 +191,8 @@ class AppShell extends ConsumerWidget {
         }
       }
 
+      final activeSectionLabel = railItems[selectedRailIndex].label;
+
       return Scaffold(
         backgroundColor: AppColors.surfaceBase,
         body: Row(
@@ -190,15 +200,123 @@ class AppShell extends ConsumerWidget {
             ValixisRail(
               items: railItems,
               selectedIndex: selectedRailIndex,
-              extended: MediaQuery.of(context).size.width >= 1100,
+              extended: MediaQuery.of(context).size.width >= 1150,
               onDestinationSelected: (i) => context.go(railItems[i].route),
             ),
             Expanded(
               child: Column(
                 children: [
+                  // ── Top Telemetry Command Header ───────────────────────
+                  Container(
+                    height: 54,
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                    decoration: const BoxDecoration(
+                      color: AppColors.surfaceCard,
+                      border: Border(
+                        bottom: BorderSide(color: AppColors.divider, width: 1),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        // Telemetry Breadcrumb
+                        Row(
+                          children: [
+                            Text(
+                              'CORE',
+                              style: AppTypography.telemetryHeader(
+                                size: 10,
+                                color: AppColors.textMuted,
+                                spacing: 1.0,
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 6),
+                              child: Text(
+                                '/',
+                                style: TextStyle(color: AppColors.divider, fontSize: 13),
+                              ),
+                            ),
+                            Text(
+                              activeSectionLabel.toUpperCase(),
+                              style: AppTypography.telemetryHeader(
+                                size: 11,
+                                color: AppColors.brandCyan,
+                                spacing: 1.2,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+
+                        // Live Sync Status Pill
+                        _SyncStatusBadge(syncState: syncState),
+                        const SizedBox(width: AppSpacing.md),
+
+                        // Notification Bell
+                        const NotificationBellButton(),
+                        const SizedBox(width: AppSpacing.sm),
+
+                        // Manager Profile Command Node
+                        InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () => ManagerProfileSheet.show(context),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceElevated,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: AppColors.border),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: const BoxDecoration(
+                                    gradient: AppColors.primaryGradient,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      (user?.email?.isNotEmpty == true
+                                              ? user!.email!.substring(0, 1)
+                                              : 'M')
+                                          .toUpperCase(),
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  user?.email?.split('@').first ?? 'Manager',
+                                  style: AppTypography.textTheme.bodySmall?.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                const Icon(
+                                  Icons.keyboard_arrow_down_rounded,
+                                  size: 16,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Offline Alert Strip
                   if (isOffline)
                     Material(
-                      color: AppColors.error.withAlpha(40),
+                      color: AppColors.error.withValues(alpha: 0.15),
                       child: InkWell(
                         onTap: () => ref.read(realtimeSyncProvider.notifier).forceRefresh(),
                         child: Container(
@@ -213,7 +331,7 @@ class AppShell extends ConsumerWidget {
                               Icon(Icons.wifi_off_rounded, size: 14, color: AppColors.error),
                               SizedBox(width: 8),
                               Text(
-                                'Offline Mode • Tap to reconnect',
+                                'Offline Mode • Tap to reconnect telemetry link',
                                 style: TextStyle(color: AppColors.textPrimary, fontSize: 12, fontWeight: FontWeight.w600),
                               ),
                             ],
@@ -221,6 +339,8 @@ class AppShell extends ConsumerWidget {
                         ),
                       ),
                     ),
+
+                  // Main View Content with Background Gradient
                   Expanded(
                     child: DecoratedBox(
                       decoration: const BoxDecoration(
@@ -237,6 +357,7 @@ class AppShell extends ConsumerWidget {
       );
     }
 
+    // ── Mobile / Small Tablet View ─────────────────────────────────────────
     return Scaffold(
       backgroundColor: AppColors.surfaceBase,
       appBar: AppBar(
@@ -246,37 +367,46 @@ class AppShell extends ConsumerWidget {
         titleSpacing: AppSpacing.md,
         title: Row(
           children: [
-            Image.asset(
-              'assets/logos/valixis_icon.png',
-              height: 28,
-              width: 28,
-              errorBuilder: (context, error, stackTrace) => const Icon(
-                Icons.hub_rounded,
-                color: AppColors.brandCyan,
-                size: 26,
+            Container(
+              width: 26,
+              height: 26,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: AppColors.brandGradient,
+              ),
+              child: Center(
+                child: Image.asset(
+                  'assets/logos/valixis_icon.png',
+                  height: 16,
+                  width: 16,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.bolt_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                const Text(
                   'VALIXIS',
                   style: TextStyle(
                     color: AppColors.textPrimary,
-                    fontSize: 14,
+                    fontSize: 13,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.5,
                   ),
                 ),
                 Text(
-                  'MANAGER',
-                  style: TextStyle(
+                  'COMMAND OS',
+                  style: AppTypography.telemetryHeader(
+                    size: 8,
                     color: AppColors.brandCyan,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.8,
+                    spacing: 1.2,
                   ),
                 ),
               ],
@@ -284,19 +414,22 @@ class AppShell extends ConsumerWidget {
           ],
         ),
         actions: [
-          // Live Sync Status Pill
           _SyncStatusBadge(syncState: syncState),
           const SizedBox(width: AppSpacing.xs),
-          // Manager Profile / Logout Sheet Trigger
+          IconButton(
+            icon: const Icon(Icons.search_rounded, color: AppColors.brandCyan, size: 20),
+            tooltip: 'Search',
+            onPressed: () => GlobalSearchDialog.show(context),
+          ),
           IconButton(
             icon: Container(
-              width: 32,
-              height: 32,
+              width: 28,
+              height: 28,
               decoration: BoxDecoration(
                 gradient: AppColors.primaryGradient,
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: AppColors.brandCyan.withAlpha(120),
+                  color: AppColors.brandCyan.withValues(alpha: 0.5),
                   width: 1.5,
                 ),
               ),
@@ -309,12 +442,12 @@ class AppShell extends ConsumerWidget {
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w800,
-                    fontSize: 14,
+                    fontSize: 12,
                   ),
                 ),
               ),
             ),
-            tooltip: 'Manager Profile & Sync',
+            tooltip: 'Manager Profile',
             onPressed: () => ManagerProfileSheet.show(context),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -324,7 +457,7 @@ class AppShell extends ConsumerWidget {
         children: [
           if (isOffline)
             Material(
-              color: AppColors.error.withAlpha(40),
+              color: AppColors.error.withValues(alpha: 0.15),
               child: InkWell(
                 onTap: () => ref.read(realtimeSyncProvider.notifier).forceRefresh(),
                 child: Container(
@@ -360,7 +493,7 @@ class AppShell extends ConsumerWidget {
       bottomNavigationBar: NavigationBarTheme(
         data: NavigationBarThemeData(
           backgroundColor: AppColors.surfaceCard,
-          indicatorColor: AppColors.brandBlue.withAlpha(50),
+          indicatorColor: AppColors.brandBlue.withValues(alpha: 0.25),
           labelTextStyle: WidgetStateProperty.resolveWith((states) {
             final isSelected = states.contains(WidgetState.selected);
             return TextStyle(
@@ -419,18 +552,18 @@ class _SyncStatusBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (color, label) = switch (syncState.status) {
-      SyncConnectionState.connected => (AppColors.success, 'LIVE'),
-      SyncConnectionState.connecting => (AppColors.warning, 'SYNC'),
+      SyncConnectionState.connected => (AppColors.success, 'TELEMETRY LIVE'),
+      SyncConnectionState.connecting => (AppColors.warning, 'SYNCING'),
       SyncConnectionState.disconnected => (AppColors.textMuted, 'OFFLINE'),
-      SyncConnectionState.error => (AppColors.error, 'ERROR'),
+      SyncConnectionState.error => (AppColors.error, 'LINK ERROR'),
     };
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withAlpha(25),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withAlpha(60), width: 1),
+        border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -441,16 +574,22 @@ class _SyncStatusBadge extends StatelessWidget {
             decoration: BoxDecoration(
               color: color,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: color.withValues(alpha: 0.6),
+                  blurRadius: 6,
+                  spreadRadius: 1,
+                ),
+              ],
             ),
           ),
-          const SizedBox(width: 5),
+          const SizedBox(width: 6),
           Text(
             label,
-            style: TextStyle(
+            style: AppTypography.telemetryHeader(
+              size: 9,
               color: color,
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.5,
+              spacing: 0.8,
             ),
           ),
         ],
@@ -458,3 +597,4 @@ class _SyncStatusBadge extends StatelessWidget {
     );
   }
 }
+
