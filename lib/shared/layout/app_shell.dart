@@ -55,80 +55,64 @@ class AppShell extends ConsumerWidget {
     }
 
     final userRole = roleAsync.valueOrNull ?? UserRole.employee;
-    if (!userRole.isManager) {
-      return Scaffold(
-        backgroundColor: AppColors.surfaceBase,
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.xl),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.lock_person_rounded, size: 48, color: AppColors.error),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  'VALIXIS Manager Access Restricted',
-                  style: AppTypography.textTheme.titleLarge?.copyWith(
-                    color: AppColors.textPrimary,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Your account does not possess manager authorization.',
-                  style: AppTypography.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textMuted,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: AppSpacing.lg),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: AppColors.brandBlue),
-                  onPressed: () => ref.read(authNotifierProvider.notifier).signOut(),
-                  child: const Text('Sign Out', style: TextStyle(color: Colors.white)),
-                ),
-              ],
+    final isManager = userRole.isManager;
+    final pendingCount = isManager ? (metricsAsync.valueOrNull?.submittedCount ?? 0) : 0;
+
+    final navItems = isManager
+        ? [
+            const _ManagerNavItem(
+              route: AppRoutes.managerDashboard,
+              label: 'Overview',
+              icon: Icons.dashboard_outlined,
+              selectedIcon: Icons.dashboard_rounded,
             ),
-          ),
-        ),
-      );
-    }
-
-    final pendingCount = metricsAsync.valueOrNull?.submittedCount ?? 0;
-
-    final navItems = [
-      const _ManagerNavItem(
-        route: AppRoutes.managerDashboard,
-        label: 'Overview',
-        icon: Icons.dashboard_outlined,
-        selectedIcon: Icons.dashboard_rounded,
-      ),
-      const _ManagerNavItem(
-        route: AppRoutes.managerTasks,
-        label: 'Tasks',
-        icon: Icons.assignment_outlined,
-        selectedIcon: Icons.assignment_rounded,
-      ),
-      _ManagerNavItem(
-        route: AppRoutes.managerReviews,
-        label: 'Reviews',
-        icon: Icons.rate_review_outlined,
-        selectedIcon: Icons.rate_review_rounded,
-        badgeCount: pendingCount > 0 ? pendingCount : null,
-      ),
-      const _ManagerNavItem(
-        route: AppRoutes.managerAuditLogs,
-        label: 'Audit Logs',
-        icon: Icons.fact_check_outlined,
-        selectedIcon: Icons.fact_check_rounded,
-      ),
-    ];
+            const _ManagerNavItem(
+              route: AppRoutes.managerTasks,
+              label: 'Tasks',
+              icon: Icons.assignment_outlined,
+              selectedIcon: Icons.assignment_rounded,
+            ),
+            _ManagerNavItem(
+              route: AppRoutes.managerReviews,
+              label: 'Reviews',
+              icon: Icons.rate_review_outlined,
+              selectedIcon: Icons.rate_review_rounded,
+              badgeCount: pendingCount > 0 ? pendingCount : null,
+            ),
+            const _ManagerNavItem(
+              route: AppRoutes.managerAuditLogs,
+              label: 'Audit Logs',
+              icon: Icons.fact_check_outlined,
+              selectedIcon: Icons.fact_check_rounded,
+            ),
+          ]
+        : [
+            const _ManagerNavItem(
+              route: AppRoutes.dashboard,
+              label: 'Dashboard',
+              icon: Icons.dashboard_outlined,
+              selectedIcon: Icons.dashboard_rounded,
+            ),
+            const _ManagerNavItem(
+              route: AppRoutes.tasks,
+              label: 'My Tasks',
+              icon: Icons.assignment_outlined,
+              selectedIcon: Icons.assignment_rounded,
+            ),
+            const _ManagerNavItem(
+              route: AppRoutes.profile,
+              label: 'Profile',
+              icon: Icons.person_outline_rounded,
+              selectedIcon: Icons.person_rounded,
+            ),
+          ];
 
     final location = GoRouterState.of(context).uri.path;
     int selectedIndex = 0;
     for (int i = 0; i < navItems.length; i++) {
       if (location == navItems[i].route ||
           (navItems[i].route != AppRoutes.managerDashboard &&
+              navItems[i].route != AppRoutes.dashboard &&
               location.startsWith(navItems[i].route))) {
         selectedIndex = i;
         break;
@@ -141,57 +125,82 @@ class AppShell extends ConsumerWidget {
     final isDesktop = MediaQuery.of(context).size.width >= 800;
 
     if (isDesktop) {
-      final railItems = [
-        const NavItem(
-          route: AppRoutes.managerDashboard,
-          label: 'Overview',
-          icon: Icons.grid_view_outlined,
-          selectedIcon: Icons.grid_view_rounded,
-        ),
-        const NavItem(
-          route: AppRoutes.managerTasks,
-          label: 'Tasks Workspace',
-          icon: Icons.assignment_outlined,
-          selectedIcon: Icons.assignment_rounded,
-        ),
-        NavItem(
-          route: AppRoutes.managerReviews,
-          label: 'Reviews & PRs',
-          icon: Icons.rate_review_outlined,
-          selectedIcon: Icons.rate_review_rounded,
-          badgeCount: pendingCount > 0 ? pendingCount : null,
-        ),
-        const NavItem(
-          route: AppRoutes.managerEmployees,
-          label: 'Personnel',
-          icon: Icons.people_outline_rounded,
-          selectedIcon: Icons.people_rounded,
-        ),
-        const NavItem(
-          route: AppRoutes.managerAuditLogs,
-          label: 'Audit Stream',
-          icon: Icons.fact_check_outlined,
-          selectedIcon: Icons.fact_check_rounded,
-        ),
-        const NavItem(
-          route: AppRoutes.profile,
-          label: 'System Profile',
-          icon: Icons.person_outline_rounded,
-          selectedIcon: Icons.person_rounded,
-        ),
-      ];
+      final railItems = isManager
+          ? [
+              const NavItem(
+                route: AppRoutes.managerDashboard,
+                label: 'Overview',
+                icon: Icons.grid_view_outlined,
+                selectedIcon: Icons.grid_view_rounded,
+              ),
+              const NavItem(
+                route: AppRoutes.managerTasks,
+                label: 'Tasks Workspace',
+                icon: Icons.assignment_outlined,
+                selectedIcon: Icons.assignment_rounded,
+              ),
+              NavItem(
+                route: AppRoutes.managerReviews,
+                label: 'Reviews & PRs',
+                icon: Icons.rate_review_outlined,
+                selectedIcon: Icons.rate_review_rounded,
+                badgeCount: pendingCount > 0 ? pendingCount : null,
+              ),
+              const NavItem(
+                route: AppRoutes.managerEmployees,
+                label: 'Personnel',
+                icon: Icons.people_outline_rounded,
+                selectedIcon: Icons.people_rounded,
+              ),
+              const NavItem(
+                route: AppRoutes.managerAuditLogs,
+                label: 'Audit Stream',
+                icon: Icons.fact_check_outlined,
+                selectedIcon: Icons.fact_check_rounded,
+              ),
+              const NavItem(
+                route: AppRoutes.profile,
+                label: 'System Profile',
+                icon: Icons.person_outline_rounded,
+                selectedIcon: Icons.person_rounded,
+              ),
+            ]
+          : [
+              const NavItem(
+                route: AppRoutes.dashboard,
+                label: 'Dashboard',
+                icon: Icons.grid_view_outlined,
+                selectedIcon: Icons.grid_view_rounded,
+              ),
+              const NavItem(
+                route: AppRoutes.tasks,
+                label: 'My Tasks',
+                icon: Icons.assignment_outlined,
+                selectedIcon: Icons.assignment_rounded,
+              ),
+              const NavItem(
+                route: AppRoutes.profile,
+                label: 'System Profile',
+                icon: Icons.person_outline_rounded,
+                selectedIcon: Icons.person_rounded,
+              ),
+            ];
 
       int selectedRailIndex = 0;
       for (int i = 0; i < railItems.length; i++) {
         if (location == railItems[i].route ||
             (railItems[i].route != AppRoutes.managerDashboard &&
+                railItems[i].route != AppRoutes.dashboard &&
                 location.startsWith(railItems[i].route))) {
           selectedRailIndex = i;
           break;
         }
       }
 
-      final activeSectionLabel = railItems[selectedRailIndex].label;
+      final activeSectionLabel = selectedRailIndex < railItems.length
+          ? railItems[selectedRailIndex].label
+          : (isManager ? 'OVERVIEW' : 'DASHBOARD');
+      final rootBreadcrumb = isManager ? 'CORE' : 'PORTAL';
 
       return Scaffold(
         backgroundColor: AppColors.surfaceBase,
@@ -222,7 +231,7 @@ class AppShell extends ConsumerWidget {
                         Row(
                           children: [
                             Text(
-                              'CORE',
+                              rootBreadcrumb,
                               style: AppTypography.telemetryHeader(
                                 size: 10,
                                 color: AppColors.textMuted,
@@ -256,7 +265,7 @@ class AppShell extends ConsumerWidget {
                         const NotificationBellButton(),
                         const SizedBox(width: AppSpacing.sm),
 
-                        // Manager Profile Command Node
+                        // Manager / User Profile Command Node
                         InkWell(
                           borderRadius: BorderRadius.circular(20),
                           onTap: () => ManagerProfileSheet.show(context),
@@ -281,7 +290,7 @@ class AppShell extends ConsumerWidget {
                                     child: Text(
                                       (user?.email?.isNotEmpty == true
                                               ? user!.email!.substring(0, 1)
-                                              : 'M')
+                                              : (isManager ? 'M' : 'E'))
                                           .toUpperCase(),
                                       style: const TextStyle(
                                         color: Colors.white,
@@ -293,7 +302,8 @@ class AppShell extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  user?.email?.split('@').first ?? 'Manager',
+                                  user?.email?.split('@').first ??
+                                      (isManager ? 'Manager' : 'Employee'),
                                   style: AppTypography.textTheme.bodySmall?.copyWith(
                                     color: AppColors.textPrimary,
                                     fontWeight: FontWeight.w600,
@@ -437,7 +447,7 @@ class AppShell extends ConsumerWidget {
                 child: Text(
                   (user?.email?.isNotEmpty == true
                           ? user!.email!.substring(0, 1)
-                          : 'M')
+                          : (isManager ? 'M' : 'E'))
                       .toUpperCase(),
                   style: const TextStyle(
                     color: Colors.white,
@@ -447,7 +457,7 @@ class AppShell extends ConsumerWidget {
                 ),
               ),
             ),
-            tooltip: 'Manager Profile',
+            tooltip: isManager ? 'Manager Profile' : 'Profile',
             onPressed: () => ManagerProfileSheet.show(context),
           ),
           const SizedBox(width: AppSpacing.sm),

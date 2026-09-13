@@ -77,13 +77,22 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
 
           final userRole = roleAsync.valueOrNull ?? UserRole.employee;
           final isManager = userRole.isManager;
+          final matched = state.matchedLocation;
 
-          if (!isManager) {
-            return isUnauthorized ? null : AppRoutes.unauthorized;
+          if (isManager) {
+            if (isLogin || isUnauthorized || isSplash) {
+              return AppRoutes.managerDashboard;
+            }
+            return null;
           }
 
-          if (isLogin || isUnauthorized) {
-            return AppRoutes.managerDashboard;
+          // Employee role
+          if (matched.startsWith('/manager')) {
+            return AppRoutes.unauthorized;
+          }
+
+          if (isLogin || isUnauthorized || isSplash) {
+            return AppRoutes.dashboard;
           }
         }
 

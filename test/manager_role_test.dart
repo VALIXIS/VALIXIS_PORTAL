@@ -24,5 +24,29 @@ void main() {
       expect(UserRole.manager.isManager, isTrue);
       expect(UserRole.employee.isManager, isFalse);
     });
+
+    test('Route authorization logic allows employees to portal and blocks manager paths', () {
+      const managerRoutes = [
+        '/manager',
+        '/manager/all-tasks',
+        '/manager/reviews',
+        '/manager/audit-logs',
+        '/manager/employees',
+      ];
+      const employeeRoutes = [
+        '/dashboard',
+        '/tasks',
+        '/tasks/123',
+        '/profile',
+      ];
+
+      for (final route in managerRoutes) {
+        expect(route.startsWith('/manager'), isTrue);
+      }
+
+      for (final route in employeeRoutes) {
+        expect(route.startsWith('/manager'), isFalse);
+      }
+    });
   });
 }

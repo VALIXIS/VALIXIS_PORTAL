@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../shared/components/app_button.dart';
@@ -78,6 +80,14 @@ class UnauthorizedScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xl2),
+                    AppButton(
+                      label: 'Go to Employee Portal',
+                      variant: AppButtonVariant.primary,
+                      prefixIcon: Icons.dashboard_rounded,
+                      isFullWidth: true,
+                      onPressed: () => context.go(AppRoutes.dashboard),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
                     AppButton(
                       label: 'Sign Out',
                       variant: AppButtonVariant.secondary,
