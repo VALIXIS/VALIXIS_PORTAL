@@ -51,3 +51,11 @@ app.*.map.json
 *.zip
 *.tar.gz
 *.rar
+
+# WhatsApp web local session and cache
+.wwebjs_auth/
+.wwebjs_cache/
+whatsapp-service/.wwebjs_auth/
+whatsapp-service/.wwebjs_cache/
+whatsapp-service/node_modules/
+

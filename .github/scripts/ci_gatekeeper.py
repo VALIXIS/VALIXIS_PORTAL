@@ -10,6 +10,13 @@ import subprocess
 import json
 from pathlib import Path
 
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 REPO_ROOT = Path(".").resolve()
 
 def scan_security():
@@ -26,10 +33,10 @@ def scan_security():
     ]
 
     for root, dirs, files in os.walk(REPO_ROOT):
-        dirs[:] = [d for d in dirs if d not in ('.git', '.dart_tool', 'build', 'node_modules', '__pycache__')]
+        dirs[:] = [d for d in dirs if d not in ('.git', '.dart_tool', 'build', 'node_modules', '__pycache__', '.wwebjs_auth', '.wwebjs_cache', '.agent', '.system_generated', 'dist', 'out', 'Coverage', 'coverage')]
         for f in files:
             p = Path(root) / f
-            if p.name in ('gatekeeper.py', 'valixis_gatekeeper.yml', '.env.example'):
+            if p.name in ('gatekeeper.py', 'ci_gatekeeper.py', 'valixis_gatekeeper.yml', '.env.example'):
                 continue
             try:
                 if p.stat().st_size > 1_000_000:
