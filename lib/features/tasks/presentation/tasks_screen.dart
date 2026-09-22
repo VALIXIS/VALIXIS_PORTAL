@@ -5,7 +5,6 @@ import '../../../core/constants/app_spacing.dart';
 import '../../../shared/components/app_button.dart';
 import '../../../shared/components/app_shimmer.dart';
 import '../../../shared/components/empty_state.dart';
-import '../../../shared/layout/responsive_layout.dart';
 import '../../../shared/models/task.dart';
 import 'providers/tasks_provider.dart';
 import 'widgets/task_card.dart';
@@ -164,7 +163,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     );
                   }
 
-                  return _ResponsiveTaskGrid(tasks: displayedTasks);
+                  return _TasksListView(tasks: displayedTasks);
                 },
               ),
             ),
@@ -197,36 +196,20 @@ class _ErrorView extends StatelessWidget {
   }
 }
 
-class _ResponsiveTaskGrid extends StatelessWidget {
-  const _ResponsiveTaskGrid({required this.tasks});
+class _TasksListView extends StatelessWidget {
+  const _TasksListView({required this.tasks});
   final List<Task> tasks;
 
   @override
   Widget build(BuildContext context) {
-    return ResponsiveLayout(
-      mobile: (context) => ListView.separated(
-        physics: const BouncingScrollPhysics(),
-        itemCount: tasks.length,
-        separatorBuilder: (context, index) =>
-            const SizedBox(height: AppSpacing.md),
-        itemBuilder: (context, index) => AnimatedTaskItem(
-          index: index,
-          child: TaskCard(task: tasks[index]),
-        ),
-      ),
-      desktop: (context) => GridView.builder(
-        physics: const BouncingScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: AppSpacing.md,
-          mainAxisSpacing: AppSpacing.md,
-          mainAxisExtent: 160,
-        ),
-        itemCount: tasks.length,
-        itemBuilder: (context, index) => AnimatedTaskItem(
-          index: index,
-          child: TaskCard(task: tasks[index]),
-        ),
+    return ListView.separated(
+      physics: const BouncingScrollPhysics(),
+      itemCount: tasks.length,
+      separatorBuilder: (context, index) =>
+          const SizedBox(height: AppSpacing.md),
+      itemBuilder: (context, index) => AnimatedTaskItem(
+        index: index,
+        child: TaskCard(task: tasks[index]),
       ),
     );
   }

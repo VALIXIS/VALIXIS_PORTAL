@@ -78,18 +78,17 @@ class _TaskCardState extends State<TaskCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOutCubic,
-        transform: Matrix4.translationValues(0, _isHovered ? -3 : 0, 0),
+        transform: Matrix4.translationValues(0, _isHovered ? -2 : 0, 0),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
             onTap: () => context.go('/tasks/${task.id}'),
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
             child: GlassCard(
               showGlow: _isHovered,
               padding: const EdgeInsets.all(AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,23 +106,32 @@ class _TaskCardState extends State<TaskCard> {
                                 height: 1.3,
                                 letterSpacing: -0.2,
                               ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
                             ),
-                            const SizedBox(height: 4),
+                            const SizedBox(height: 6),
                             Row(
                               children: [
-                                const Icon(Icons.code_rounded, size: 13, color: AppColors.brandCyan),
-                                const SizedBox(width: 4),
+                                const Icon(Icons.code_rounded, size: 14, color: AppColors.brandCyan),
+                                const SizedBox(width: 5),
                                 Text(
                                   repo,
-                                  style: const TextStyle(color: AppColors.brandCyan, fontSize: 12, fontWeight: FontWeight.w600),
+                                  style: const TextStyle(
+                                    color: AppColors.brandCyan,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                                 if (branch != null && branch.isNotEmpty) ...[
                                   const Text(' • ', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
-                                  Text(
-                                    branch,
-                                    style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                                  Flexible(
+                                    child: Text(
+                                      branch,
+                                      style: const TextStyle(
+                                        color: AppColors.textMuted,
+                                        fontSize: 12,
+                                        fontFamily: 'monospace',
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ],
                               ],
@@ -131,24 +139,33 @@ class _TaskCardState extends State<TaskCard> {
                           ],
                         ),
                       ),
-                      const SizedBox(width: AppSpacing.sm),
-                      PriorityBadge(priority: task.priority),
+                      const SizedBox(width: AppSpacing.md),
+                      Wrap(
+                        spacing: 8,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          PriorityBadge(priority: task.priority),
+                          StatusBadge(status: task.status),
+                        ],
+                      ),
                     ],
                   ),
                   if (task.description != null && task.description!.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.md),
                     Text(
                       task.description!,
                       style: const TextStyle(
-                        color: AppColors.textMuted,
+                        color: AppColors.textSecondary,
                         fontSize: 13,
-                        height: 1.4,
+                        height: 1.5,
                       ),
-                      maxLines: 2,
+                      maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
                   const SizedBox(height: AppSpacing.md),
+                  const Divider(color: AppColors.glassBorder, height: 1),
+                  const SizedBox(height: AppSpacing.sm),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -163,7 +180,7 @@ class _TaskCardState extends State<TaskCard> {
                           Text(
                             DateFormatter.formatShortDate(task.deadline),
                             style: const TextStyle(
-                              color: AppColors.textSecondary,
+                              color: AppColors.textMuted,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -172,7 +189,25 @@ class _TaskCardState extends State<TaskCard> {
                           _buildUrgencyBadge(task.deadline),
                         ],
                       ),
-                      StatusBadge(status: task.status),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Open Workspace',
+                            style: TextStyle(
+                              color: _isHovered ? AppColors.brandCyan : AppColors.textMuted,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 4),
+                          Icon(
+                            Icons.arrow_forward_rounded,
+                            size: 14,
+                            color: _isHovered ? AppColors.brandCyan : AppColors.textMuted,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ],
