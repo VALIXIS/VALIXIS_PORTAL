@@ -22,16 +22,25 @@ class TasksScreen extends ConsumerStatefulWidget {
 class _TasksScreenState extends ConsumerState<TasksScreen> {
   String _searchQuery = '';
   TaskSortOption _sortOption = TaskSortOption.deadline;
+  TaskStatusFilter _statusFilter = TaskStatusFilter.active;
 
   List<Task> _filterAndSort(List<Task> rawTasks) {
     var filtered = rawTasks.where((t) {
-      // Submitted and approved tasks are hidden from active My Tasks list
-      if (t.status == TaskStatus.submitted || t.status == TaskStatus.approved) {
-        return false;
+      if (_statusFilter == TaskStatusFilter.active) {
+        if (t.status == TaskStatus.submitted || t.status == TaskStatus.approved) {
+          return false;
+        }
+      } else if (_statusFilter == TaskStatusFilter.submitted) {
+        if (t.status != TaskStatus.submitted) return false;
+      } else if (_statusFilter == TaskStatusFilter.approved) {
+        if (t.status != TaskStatus.approved) return false;
       }
+
       if (_searchQuery.isEmpty) return true;
       final q = _searchQuery.toLowerCase();
       return t.title.toLowerCase().contains(q) ||
+          (t.githubRepo?.toLowerCase().contains(q) ?? false) ||
+          (t.branchName?.toLowerCase().contains(q) ?? false) ||
           (t.description?.toLowerCase().contains(q) ?? false);
     }).toList();
 
@@ -116,8 +125,10 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
             TaskFilterBar(
               searchQuery: _searchQuery,
               selectedSort: _sortOption,
+              selectedStatus: _statusFilter,
               onSearchChanged: (q) => setState(() => _searchQuery = q),
               onSortChanged: (s) => setState(() => _sortOption = s),
+              onStatusChanged: (status) => setState(() => _statusFilter = status),
             ),
             const SizedBox(height: AppSpacing.lg),
             Expanded(

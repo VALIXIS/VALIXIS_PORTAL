@@ -7,38 +7,38 @@ abstract final class TaskMapper {
         ? json['tasks'] as Map<String, dynamic>
         : json;
 
-    final taskId = json['task_id'] as String? ??
-        taskData['id'] as String? ??
-        json['id'] as String? ??
+    final taskId = json['task_id']?.toString() ??
+        taskData['id']?.toString() ??
+        json['id']?.toString() ??
         '';
 
     return Task(
       id: taskId,
-      title: taskData['title'] as String? ?? 'Untitled Task',
-      description: taskData['description'] as String?,
-      objective: taskData['objective'] as String?,
+      title: taskData['title']?.toString() ?? 'Untitled Task',
+      description: taskData['description']?.toString(),
+      objective: taskData['objective']?.toString(),
       aiPrompt:
-          taskData['ai_prompt'] as String? ?? taskData['prompt'] as String?,
+          taskData['ai_prompt']?.toString() ?? taskData['prompt']?.toString(),
       branchName:
-          taskData['branch_name'] as String? ?? taskData['branch'] as String?,
-      expectedOutput: taskData['expected_output'] as String?,
-      githubRepo: taskData['github_repository'] as String? ??
-          taskData['github_repo'] as String? ??
-          taskData['repo_url'] as String?,
-      prUrl: json['pr_url'] as String? ??
-          taskData['pr_url'] as String? ??
-          json['pull_request_url'] as String?,
-      priority: TaskPriority.fromString(taskData['priority'] as String?),
+          taskData['branch_name']?.toString() ?? taskData['branch']?.toString(),
+      expectedOutput: taskData['expected_output']?.toString(),
+      githubRepo: taskData['github_repository']?.toString() ??
+          taskData['github_repo']?.toString() ??
+          taskData['repo_url']?.toString(),
+      prUrl: json['pr_url']?.toString() ??
+          taskData['pr_url']?.toString() ??
+          json['pull_request_url']?.toString(),
+      priority: TaskPriority.fromString(taskData['priority']?.toString()),
       status: TaskStatus.fromString(
-          json['status'] as String? ?? taskData['status'] as String?),
+          json['status']?.toString() ?? taskData['status']?.toString()),
       deadline: taskData['deadline'] != null
           ? DateTime.tryParse(taskData['deadline'].toString()) ??
               DateTime.now()
           : DateTime.now(),
-      assignedTo: json['assigned_to'] as String? ??
-          json['employee_name'] as String? ??
-          json['employee_id'] as String? ??
-          json['user_id'] as String? ??
+      assignedTo: json['assigned_to']?.toString() ??
+          json['employee_name']?.toString() ??
+          json['employee_id']?.toString() ??
+          json['user_id']?.toString() ??
           '',
       createdAt: taskData['created_at'] != null
           ? DateTime.tryParse(taskData['created_at'].toString())

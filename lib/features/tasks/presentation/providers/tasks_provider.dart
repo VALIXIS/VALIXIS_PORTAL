@@ -8,9 +8,9 @@ final tasksRepositoryProvider = Provider<TasksRepository>((ref) {
   return TasksRepository(ref.watch(supabaseClientProvider));
 });
 
-/// Riverpod provider fetching tasks assigned to the currently logged-in employee.
+/// Riverpod provider fetching tasks assigned to the currently logged-in employee or manager.
 final tasksProvider = FutureProvider<List<Task>>((ref) async {
   final user = ref.watch(authRepositoryProvider).currentUser;
   if (user == null) return [];
-  return ref.watch(tasksRepositoryProvider).getAssignedTasks(user.id);
+  return ref.watch(tasksRepositoryProvider).getAssignedTasks(user.id, user.email);
 });

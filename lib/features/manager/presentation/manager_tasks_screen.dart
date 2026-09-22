@@ -6,6 +6,7 @@ import '../../../core/network/realtime_sync_service.dart';
 import '../../../shared/components/app_button.dart';
 import '../../../shared/components/empty_state.dart';
 import '../../../shared/models/task.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
 import 'providers/manager_dashboard_provider.dart';
 import 'widgets/manager_shimmer.dart';
 import 'widgets/manager_task_card.dart';
@@ -29,6 +30,7 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
   String _selectedRepo = 'all';
   String _selectedSortField = 'deadline';
   bool _sortAscending = true;
+  bool _onlyAssignedToMe = false;
 
   @override
   void initState() {
@@ -47,7 +49,19 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
   }
 
   List<Task> _filterTasks(List<Task> rawTasks) {
+    final currentUser = ref.watch(authNotifierProvider).valueOrNull;
+    final userEmail = currentUser?.email?.toLowerCase().trim() ?? '';
+    final userId = currentUser?.id.toLowerCase().trim() ?? '';
+
     return rawTasks.where((task) {
+      if (_onlyAssignedToMe) {
+        final assignee = task.assignedTo.toLowerCase().trim();
+        final matches = (userEmail.isNotEmpty && assignee.contains(userEmail)) ||
+            (userId.isNotEmpty && assignee.contains(userId)) ||
+            (userEmail.isNotEmpty && assignee.contains(userEmail.split('@').first));
+        if (!matches) return false;
+      }
+
       if (_searchQuery.isNotEmpty) {
         final q = _searchQuery.toLowerCase();
         final matchTitle = task.title.toLowerCase().contains(q);
@@ -385,39 +399,65 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                       children: [
                         _FilterChip(
                           label: 'All (${allTasks.length})',
-                          isSelected: _selectedStatus == 'all',
-                          onTap: () => setState(() => _selectedStatus = 'all'),
+                          isSelected: !_onlyAssignedToMe && _selectedStatus == 'all',
+                          onTap: () => setState(() {
+                            _onlyAssignedToMe = false;
+                            _selectedStatus = 'all';
+                          }),
+                        ),
+                        _FilterChip(
+                          label: 'Assigned to Me',
+                          isSelected: _onlyAssignedToMe,
+                          onTap: () => setState(() => _onlyAssignedToMe = !_onlyAssignedToMe),
                         ),
                         _FilterChip(
                           label: 'Active',
-                          isSelected: _selectedStatus == 'active',
-                          onTap: () => setState(() => _selectedStatus = 'active'),
+                          isSelected: !_onlyAssignedToMe && _selectedStatus == 'active',
+                          onTap: () => setState(() {
+                            _onlyAssignedToMe = false;
+                            _selectedStatus = 'active';
+                          }),
                         ),
                         _FilterChip(
                           label: 'In Progress',
-                          isSelected: _selectedStatus == 'in_progress',
-                          onTap: () => setState(() => _selectedStatus = 'in_progress'),
+                          isSelected: !_onlyAssignedToMe && _selectedStatus == 'in_progress',
+                          onTap: () => setState(() {
+                            _onlyAssignedToMe = false;
+                            _selectedStatus = 'in_progress';
+                          }),
                         ),
                         _FilterChip(
                           label: 'Submitted',
-                          isSelected: _selectedStatus == 'submitted',
-                          onTap: () => setState(() => _selectedStatus = 'submitted'),
+                          isSelected: !_onlyAssignedToMe && _selectedStatus == 'submitted',
+                          onTap: () => setState(() {
+                            _onlyAssignedToMe = false;
+                            _selectedStatus = 'submitted';
+                          }),
                         ),
                         _FilterChip(
                           label: 'Assigned',
-                          isSelected: _selectedStatus == 'assigned',
-                          onTap: () => setState(() => _selectedStatus = 'assigned'),
+                          isSelected: !_onlyAssignedToMe && _selectedStatus == 'assigned',
+                          onTap: () => setState(() {
+                            _onlyAssignedToMe = false;
+                            _selectedStatus = 'assigned';
+                          }),
                         ),
                         _FilterChip(
                           label: 'Completed',
-                          isSelected: _selectedStatus == 'completed' || _selectedStatus == 'approved',
-                          onTap: () => setState(() => _selectedStatus = 'completed'),
+                          isSelected: !_onlyAssignedToMe && (_selectedStatus == 'completed' || _selectedStatus == 'approved'),
+                          onTap: () => setState(() {
+                            _onlyAssignedToMe = false;
+                            _selectedStatus = 'completed';
+                          }),
                         ),
                         _FilterChip(
                           label: 'Overdue',
-                          isSelected: _selectedStatus == 'overdue',
+                          isSelected: !_onlyAssignedToMe && _selectedStatus == 'overdue',
                           isDanger: true,
-                          onTap: () => setState(() => _selectedStatus = 'overdue'),
+                          onTap: () => setState(() {
+                            _onlyAssignedToMe = false;
+                            _selectedStatus = 'overdue';
+                          }),
                         ),
                       ],
                     ),

@@ -11,6 +11,8 @@ import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/role_provider.dart';
 import '../../features/manager/presentation/providers/manager_dashboard_provider.dart';
 import '../../features/notifications/presentation/widgets/notification_bell_button.dart';
+import '../../features/tasks/presentation/providers/tasks_provider.dart';
+import '../../shared/models/task.dart';
 import '../components/global_search_dialog.dart';
 import 'manager_profile_sheet.dart';
 import 'valixis_rail.dart';
@@ -44,6 +46,7 @@ class AppShell extends ConsumerWidget {
     final user = ref.watch(authNotifierProvider).valueOrNull;
     final syncState = ref.watch(realtimeSyncProvider);
     final metricsAsync = ref.watch(managerDashboardProvider);
+    final myTasksAsync = ref.watch(tasksProvider);
 
     if (roleAsync.isLoading) {
       return const Scaffold(
@@ -57,6 +60,12 @@ class AppShell extends ConsumerWidget {
     final userRole = roleAsync.valueOrNull ?? UserRole.employee;
     final isManager = userRole.isManager;
     final pendingCount = isManager ? (metricsAsync.valueOrNull?.submittedCount ?? 0) : 0;
+    final myActiveCount = myTasksAsync.valueOrNull
+            ?.where((t) =>
+                t.status != TaskStatus.submitted &&
+                t.status != TaskStatus.approved)
+            .length ??
+        0;
 
     final navItems = isManager
         ? [
@@ -66,9 +75,16 @@ class AppShell extends ConsumerWidget {
               icon: Icons.dashboard_outlined,
               selectedIcon: Icons.dashboard_rounded,
             ),
+            _ManagerNavItem(
+              route: AppRoutes.tasks,
+              label: 'My Tasks',
+              icon: Icons.assignment_ind_outlined,
+              selectedIcon: Icons.assignment_ind_rounded,
+              badgeCount: myActiveCount > 0 ? myActiveCount : null,
+            ),
             const _ManagerNavItem(
               route: AppRoutes.managerTasks,
-              label: 'Tasks',
+              label: 'All Tasks',
               icon: Icons.assignment_outlined,
               selectedIcon: Icons.assignment_rounded,
             ),
@@ -80,10 +96,10 @@ class AppShell extends ConsumerWidget {
               badgeCount: pendingCount > 0 ? pendingCount : null,
             ),
             const _ManagerNavItem(
-              route: AppRoutes.managerAuditLogs,
-              label: 'Audit Logs',
-              icon: Icons.fact_check_outlined,
-              selectedIcon: Icons.fact_check_rounded,
+              route: AppRoutes.profile,
+              label: 'Profile',
+              icon: Icons.person_outline_rounded,
+              selectedIcon: Icons.person_rounded,
             ),
           ]
         : [
@@ -93,11 +109,12 @@ class AppShell extends ConsumerWidget {
               icon: Icons.dashboard_outlined,
               selectedIcon: Icons.dashboard_rounded,
             ),
-            const _ManagerNavItem(
+            _ManagerNavItem(
               route: AppRoutes.tasks,
               label: 'My Tasks',
               icon: Icons.assignment_outlined,
               selectedIcon: Icons.assignment_rounded,
+              badgeCount: myActiveCount > 0 ? myActiveCount : null,
             ),
             const _ManagerNavItem(
               route: AppRoutes.profile,
@@ -133,9 +150,16 @@ class AppShell extends ConsumerWidget {
                 icon: Icons.grid_view_outlined,
                 selectedIcon: Icons.grid_view_rounded,
               ),
+              NavItem(
+                route: AppRoutes.tasks,
+                label: 'My Tasks',
+                icon: Icons.assignment_ind_outlined,
+                selectedIcon: Icons.assignment_ind_rounded,
+                badgeCount: myActiveCount > 0 ? myActiveCount : null,
+              ),
               const NavItem(
                 route: AppRoutes.managerTasks,
-                label: 'Tasks',
+                label: 'All Tasks',
                 icon: Icons.assignment_outlined,
                 selectedIcon: Icons.assignment_rounded,
               ),
@@ -172,11 +196,12 @@ class AppShell extends ConsumerWidget {
                 icon: Icons.grid_view_outlined,
                 selectedIcon: Icons.grid_view_rounded,
               ),
-              const NavItem(
+              NavItem(
                 route: AppRoutes.tasks,
                 label: 'My Tasks',
                 icon: Icons.assignment_outlined,
                 selectedIcon: Icons.assignment_rounded,
+                badgeCount: myActiveCount > 0 ? myActiveCount : null,
               ),
               const NavItem(
                 route: AppRoutes.profile,

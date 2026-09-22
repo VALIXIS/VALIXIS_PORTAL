@@ -8,6 +8,7 @@ import 'package:valixis_portal/features/manager/presentation/widgets/manager_aud
 import 'package:valixis_portal/features/manager/presentation/widgets/manager_hero_header.dart';
 import 'package:valixis_portal/features/manager/presentation/widgets/manager_quick_actions.dart';
 import 'package:valixis_portal/features/manager/presentation/widgets/manager_task_card.dart';
+import 'package:valixis_portal/features/tasks/presentation/widgets/task_filter_bar.dart';
 import 'package:valixis_portal/shared/models/task.dart';
 
 Widget _wrapWithTheme(Widget child) {
@@ -33,10 +34,11 @@ void main() {
       await tester.pumpWidget(_wrapWithTheme(const ManagerQuickActions()));
       await tester.pump(const Duration(milliseconds: 100));
 
-      expect(find.text('Tasks'), findsOneWidget);
+      expect(find.text('My Tasks'), findsOneWidget);
+      expect(find.text('All Tasks'), findsOneWidget);
       expect(find.text('Reviews & PRs'), findsOneWidget);
-      expect(find.text('Audit Logs'), findsOneWidget);
       expect(find.text('Team'), findsOneWidget);
+      expect(find.text('Audit Logs'), findsOneWidget);
 
       // Verify STRICTLY NO Create Task button exists
       expect(find.text('Create Task'), findsNothing);
@@ -127,6 +129,26 @@ void main() {
 
       expect(find.text('Manager Access Required'), findsOneWidget);
       expect(find.text('Sign Out'), findsOneWidget);
+    });
+
+    testWidgets('TaskFilterBar renders search field, status filters, and sort options', (tester) async {
+      await tester.pumpWidget(_wrapWithTheme(
+        TaskFilterBar(
+          searchQuery: '',
+          selectedSort: TaskSortOption.deadline,
+          selectedStatus: TaskStatusFilter.active,
+          onSearchChanged: (_) {},
+          onSortChanged: (_) {},
+          onStatusChanged: (_) {},
+        ),
+      ));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.text('Active'), findsOneWidget);
+      expect(find.text('Under Review'), findsOneWidget);
+      expect(find.text('Completed'), findsOneWidget);
+      expect(find.text('All'), findsOneWidget);
+      expect(find.text('Deadline'), findsOneWidget);
     });
   });
 }

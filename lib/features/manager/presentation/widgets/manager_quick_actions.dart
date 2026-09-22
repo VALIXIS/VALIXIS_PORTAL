@@ -29,7 +29,13 @@ class ManagerQuickActions extends StatelessWidget {
           runSpacing: AppSpacing.sm,
           children: [
             _ActionPill(
-              label: 'Tasks',
+              label: 'My Tasks',
+              icon: Icons.assignment_ind_rounded,
+              color: AppColors.brandCyan,
+              onTap: () => context.go(AppRoutes.tasks),
+            ),
+            _ActionPill(
+              label: 'All Tasks',
               icon: Icons.assignment_rounded,
               color: AppColors.brandCyan,
               onTap: () => context.go(AppRoutes.managerTasks),
@@ -41,16 +47,16 @@ class ManagerQuickActions extends StatelessWidget {
               onTap: () => context.go(AppRoutes.managerReviews),
             ),
             _ActionPill(
-              label: 'Audit Logs',
-              icon: Icons.fact_check_rounded,
-              color: AppColors.brandPurple,
-              onTap: () => context.go(AppRoutes.managerAuditLogs),
-            ),
-            _ActionPill(
               label: 'Team',
               icon: Icons.people_alt_rounded,
               color: AppColors.success,
               onTap: () => context.go(AppRoutes.managerEmployees),
+            ),
+            _ActionPill(
+              label: 'Audit Logs',
+              icon: Icons.fact_check_rounded,
+              color: AppColors.brandPurple,
+              onTap: () => context.go(AppRoutes.managerAuditLogs),
             ),
           ],
         ),

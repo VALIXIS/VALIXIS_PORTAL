@@ -33,7 +33,13 @@ class TaskDetailsScreen extends ConsumerWidget {
         title: const Text('Task Specification & Workspace'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
-          onPressed: () => context.go(AppRoutes.tasks),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.tasks);
+            }
+          },
         ),
       ),
       body: taskAsync.when(
@@ -56,7 +62,13 @@ class TaskDetailsScreen extends ConsumerWidget {
               title: 'Task Not Found',
               description: 'No task assignment was found with ID #$taskId',
               action: ElevatedButton(
-                onPressed: () => context.go(AppRoutes.tasks),
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go(AppRoutes.tasks);
+                  }
+                },
                 child: const Text('Back to Tasks'),
               ),
             );
