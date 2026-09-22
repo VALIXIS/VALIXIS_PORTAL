@@ -9,6 +9,7 @@ import '../../core/network/realtime_sync_service.dart';
 import '../../features/auth/domain/role_service.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/role_provider.dart';
+import '../../features/employee/presentation/providers/employee_provider.dart';
 import '../../features/manager/presentation/providers/manager_dashboard_provider.dart';
 import '../../features/notifications/presentation/widgets/notification_bell_button.dart';
 import '../../features/tasks/presentation/providers/tasks_provider.dart';
@@ -44,6 +45,8 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final roleAsync = ref.watch(roleProvider);
     final user = ref.watch(authNotifierProvider).valueOrNull;
+    final employeeAsync = ref.watch(employeeProvider);
+    final employee = employeeAsync.valueOrNull;
     final syncState = ref.watch(realtimeSyncProvider);
     final metricsAsync = ref.watch(managerDashboardProvider);
     final myTasksAsync = ref.watch(tasksProvider);
@@ -59,6 +62,34 @@ class AppShell extends ConsumerWidget {
 
     final userRole = roleAsync.valueOrNull ?? UserRole.employee;
     final isManager = userRole.isManager;
+
+    final nameFromMeta = (user?.userMetadata?['full_name'] as String?) ??
+        (user?.userMetadata?['name'] as String?) ??
+        (user?.userMetadata?['display_name'] as String?);
+
+    final String displayName;
+    if (employee != null && employee.fullName.trim().isNotEmpty) {
+      displayName = employee.fullName.trim();
+    } else if (nameFromMeta != null && nameFromMeta.trim().isNotEmpty) {
+      displayName = nameFromMeta.trim();
+    } else if (user?.email != null && user!.email!.isNotEmpty) {
+      final emailLower = user.email!.toLowerCase();
+      if (emailLower == 'official.valixis@gmail.com') {
+        displayName = 'Subhash';
+      } else if (emailLower.contains('jyothsna')) {
+        displayName = 'Jyothsna';
+      } else {
+        final prefix = user.email!.split('@').first;
+        displayName = prefix
+            .split(RegExp(r'[._-]'))
+            .where((s) => s.isNotEmpty)
+            .map((s) => s[0].toUpperCase() + s.substring(1))
+            .join(' ');
+      }
+    } else {
+      displayName = isManager ? 'Subhash' : 'Employee';
+    }
+
     final pendingCount = isManager ? (metricsAsync.valueOrNull?.submittedCount ?? 0) : 0;
     final myActiveCount = myTasksAsync.valueOrNull
             ?.where((t) =>
@@ -330,8 +361,7 @@ class AppShell extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  user?.email?.split('@').first ??
-                                      (isManager ? 'official.valixis' : 'employee'),
+                                  displayName,
                                   style: AppTypography.textTheme.bodySmall?.copyWith(
                                     color: AppColors.textPrimary,
                                     fontWeight: FontWeight.w600,

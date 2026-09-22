@@ -5,6 +5,7 @@ import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/role_provider.dart';
+import '../../features/employee/presentation/providers/employee_provider.dart';
 import '../../core/network/realtime_sync_service.dart';
 import '../components/app_button.dart';
 
@@ -26,13 +27,32 @@ class ManagerProfileSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authNotifierProvider).valueOrNull;
+    final employee = ref.watch(employeeProvider).valueOrNull;
     final roleAsync = ref.watch(roleProvider);
     final syncState = ref.watch(realtimeSyncProvider);
 
     final email = user?.email ?? 'manager@valixis.com';
-    final name = (user?.userMetadata?['full_name'] as String?) ??
+    final nameFromMeta = (user?.userMetadata?['full_name'] as String?) ??
         (user?.userMetadata?['name'] as String?) ??
-        email.split('@').first.toUpperCase();
+        (user?.userMetadata?['display_name'] as String?);
+
+    final String name;
+    if (employee != null && employee.fullName.trim().isNotEmpty) {
+      name = employee.fullName.trim();
+    } else if (nameFromMeta != null && nameFromMeta.trim().isNotEmpty) {
+      name = nameFromMeta.trim();
+    } else if (email.toLowerCase() == 'official.valixis@gmail.com') {
+      name = 'Subhash';
+    } else if (email.toLowerCase().contains('jyothsna')) {
+      name = 'Jyothsna';
+    } else {
+      final prefix = email.split('@').first;
+      name = prefix
+          .split(RegExp(r'[._-]'))
+          .where((s) => s.isNotEmpty)
+          .map((s) => s[0].toUpperCase() + s.substring(1))
+          .join(' ');
+    }
     final role = roleAsync.valueOrNull?.name.toUpperCase() ?? 'MANAGER';
 
     return SafeArea(
