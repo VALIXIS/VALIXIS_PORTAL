@@ -4,20 +4,19 @@ import '../../../../shared/models/task.dart';
 
 /// Multi-app sprint target mobile applications.
 enum SprintApp {
-  all('All Apps', null, AppColors.brandCyan, Icons.apps_rounded),
-  fitora('Fitora', '🏃', Color(0xFF10B981), Icons.directions_run_rounded),
-  planly('Planly', '📱', Color(0xFF8B5CF6), Icons.calendar_month_rounded),
-  aiPdfMaker('AI PDF Maker', '📄', Color(0xFFF59E0B), Icons.picture_as_pdf_rounded),
-  resumeBrain('Resume Brain', '🧠', Color(0xFF00E5FF), Icons.psychology_rounded);
+  all('All Apps', AppColors.brandCyan, Icons.apps_rounded),
+  fitora('Fitora', Color(0xFF10B981), Icons.directions_run_rounded),
+  planly('Planly', Color(0xFF8B5CF6), Icons.calendar_month_rounded),
+  aiPdfMaker('AI PDF Maker', Color(0xFFF59E0B), Icons.picture_as_pdf_rounded),
+  resumeBrain('Resume Brain', Color(0xFF00E5FF), Icons.psychology_rounded);
 
-  const SprintApp(this.label, this.emoji, this.color, this.icon);
+  const SprintApp(this.label, this.color, this.icon);
 
   final String label;
-  final String? emoji;
   final Color color;
   final IconData icon;
 
-  String get displayName => emoji != null ? '$emoji $label' : label;
+  String get displayName => label;
 
   /// Resolves the app from task repository, branch, title, or prompt content.
   static SprintApp fromTask(Task task) {
