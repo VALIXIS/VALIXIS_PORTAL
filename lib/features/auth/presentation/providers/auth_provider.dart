@@ -70,24 +70,47 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       if (response.user != null) {
         try {
           final supabase = _ref.read(supabaseClientProvider);
+          final userEmail = response.user!.email?.trim().toLowerCase() ?? email.trim().toLowerCase();
+          String actorName = 'User';
           String? empId;
-          try {
-            final empRes = await supabase
-                .from('employees')
-                .select('id')
-                .eq('auth_id', response.user!.id)
-                .maybeSingle();
-            if (empRes != null) {
-              empId = empRes['id']?.toString();
-            }
-          } catch (_) {}
 
+          if (userEmail == 'official.valixis@gmail.com') {
+            actorName = 'Subhash';
+          } else if (userEmail == 'jyothsna@valixis.com') {
+            actorName = 'Jyothsna';
+          } else {
+            try {
+              final empRes = await supabase
+                  .from('employees')
+                  .select('id, name, full_name, email')
+                  .eq('auth_id', response.user!.id)
+                  .maybeSingle();
+              if (empRes != null) {
+                empId = empRes['id']?.toString();
+                final nameStr = (empRes['name'] as String? ?? empRes['full_name'] as String? ?? '').trim();
+                if (nameStr.isNotEmpty) {
+                  actorName = nameStr;
+                } else {
+                  actorName = userEmail.split('@').first;
+                }
+              } else {
+                actorName = userEmail.isNotEmpty ? userEmail.split('@').first : 'User';
+              }
+            } catch (_) {
+              actorName = userEmail.isNotEmpty ? userEmail.split('@').first : 'User';
+            }
+          }
+
+          final nowUtc = DateTime.now().toUtc().toIso8601String();
           final res = await supabase.from('audit_logs').insert({
+            'actor': actorName,
             if (empId != null && empId.isNotEmpty) 'actor_id': empId,
             'action': 'Login',
             'category': 'Authentication',
             'status': 'Success',
             'ip_address': kIsWeb ? 'Web Client' : 'Mobile Client',
+            'timestamp': nowUtc,
+            'last_seen': nowUtc,
           }).select('id').single();
 
           final logId = res['id']?.toString();
@@ -111,22 +134,47 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       if (user != null) {
         try {
           final supabase = _ref.read(supabaseClientProvider);
+          final userEmail = user.email?.trim().toLowerCase() ?? '';
+          String actorName = 'User';
           String? empId;
-          try {
-            final empRes = await supabase
-                .from('employees')
-                .select('id')
-                .eq('auth_id', user.id)
-                .maybeSingle();
-            if (empRes != null) empId = empRes['id']?.toString();
-          } catch (_) {}
 
+          if (userEmail == 'official.valixis@gmail.com') {
+            actorName = 'Subhash';
+          } else if (userEmail == 'jyothsna@valixis.com') {
+            actorName = 'Jyothsna';
+          } else {
+            try {
+              final empRes = await supabase
+                  .from('employees')
+                  .select('id, name, full_name, email')
+                  .eq('auth_id', user.id)
+                  .maybeSingle();
+              if (empRes != null) {
+                empId = empRes['id']?.toString();
+                final nameStr = (empRes['name'] as String? ?? empRes['full_name'] as String? ?? '').trim();
+                if (nameStr.isNotEmpty) {
+                  actorName = nameStr;
+                } else {
+                  actorName = userEmail.split('@').first;
+                }
+              } else {
+                actorName = userEmail.isNotEmpty ? userEmail.split('@').first : 'User';
+              }
+            } catch (_) {
+              actorName = userEmail.isNotEmpty ? userEmail.split('@').first : 'User';
+            }
+          }
+
+          final nowUtc = DateTime.now().toUtc().toIso8601String();
           await supabase.from('audit_logs').insert({
+            'actor': actorName,
             if (empId != null && empId.isNotEmpty) 'actor_id': empId,
             'action': 'Logout',
             'category': 'Authentication',
             'status': 'Success',
             'ip_address': kIsWeb ? 'Web Client' : 'Mobile Client',
+            'timestamp': nowUtc,
+            'last_seen': nowUtc,
           });
         } catch (e) {
           debugPrint('[Audit Log] Failed to insert logout audit record: $e');

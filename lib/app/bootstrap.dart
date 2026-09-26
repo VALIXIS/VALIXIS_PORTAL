@@ -25,6 +25,11 @@ Future<void> bootstrap() async {
     anonKey: supabaseAnonKey,
   );
 
+  // Require explicit login on every portal session to ensure precise audit logs & timestamps
+  try {
+    await Supabase.instance.client.auth.signOut();
+  } catch (_) {}
+
   runApp(
     const ProviderScope(
       child: ValixisApp(),

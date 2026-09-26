@@ -4,12 +4,32 @@ import '../widgets/audit_logs_table.dart';
 
 final auditLogsProvider = FutureProvider<List<AuditLogItem>>((ref) async {
   final supabase = ref.watch(supabaseClientProvider);
-  final response = await supabase
-      .from('audit_logs')
-      .select('*')
-      .order('timestamp', ascending: false);
+  
+  final results = await Future.wait([
+    supabase
+        .from('audit_logs')
+        .select('*')
+        .order('timestamp', ascending: false),
+    supabase
+        .from('employees')
+        .select('id, auth_id, name, full_name, email')
+        .catchError((_) => []),
+  ]);
 
-  final list = response as List<dynamic>;
+  final list = results[0] as List<dynamic>;
+  final employeesList = (results[1] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
+
+  final empMap = <String, String>{};
+  for (final emp in employeesList) {
+    final id = emp['id']?.toString().trim();
+    final authId = emp['auth_id']?.toString().trim();
+    final name = (emp['name'] as String? ?? emp['full_name'] as String? ?? '').trim();
+    final email = (emp['email'] as String? ?? '').trim();
+    final displayName = name.isNotEmpty ? name : (email.isNotEmpty ? email : 'Employee');
+    if (id != null && id.isNotEmpty) empMap[id] = displayName;
+    if (authId != null && authId.isNotEmpty) empMap[authId] = displayName;
+  }
+
   final nowUtc = DateTime.now().toUtc();
 
   return list.map((item) {
@@ -47,8 +67,8 @@ final auditLogsProvider = FutureProvider<List<AuditLogItem>>((ref) async {
     if (rawAction.toLowerCase() == 'login') {
       if (lastSeenUtc != null) {
         final secondsSinceLastSeen = nowUtc.difference(lastSeenUtc).inSeconds;
-        if (secondsSinceLastSeen > 120) {
-          status = 'Session Ended (Tab Closed)';
+        if (secondsSinceLastSeen > 180) {
+          status = 'Session Ended';
         } else {
           status = 'Active Session';
         }
@@ -59,9 +79,19 @@ final auditLogsProvider = FutureProvider<List<AuditLogItem>>((ref) async {
       status = 'Logged Out';
     }
 
+    var actorName = item['actor']?.toString().trim() ?? '';
+    final actorId = item['actor_id']?.toString().trim() ?? '';
+    if (actorName.isEmpty || actorName.toLowerCase() == 'unknown user') {
+      if (actorId.isNotEmpty && empMap.containsKey(actorId)) {
+        actorName = empMap[actorId]!;
+      } else {
+        actorName = 'User';
+      }
+    }
+
     return AuditLogItem(
       id: item['id']?.toString() ?? '',
-      actor: item['actor']?.toString() ?? 'Unknown User',
+      actor: actorName,
       action: rawAction,
       category: item['category']?.toString() ?? 'Authentication',
       timestamp: timestampUtc.toLocal(),

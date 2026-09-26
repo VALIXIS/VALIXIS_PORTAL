@@ -16,7 +16,8 @@ class ManagerAuditLogCard extends StatelessWidget {
     final hour = dt.hour > 12 ? dt.hour - 12 : (dt.hour == 0 ? 12 : dt.hour);
     final amPm = dt.hour >= 12 ? 'PM' : 'AM';
     final minuteStr = dt.minute.toString().padLeft(2, '0');
-    return '${dt.day} $month ${dt.year} • ${hour.toString().padLeft(2, '0')}:$minuteStr $amPm';
+    final secondStr = dt.second.toString().padLeft(2, '0');
+    return '${dt.day} $month ${dt.year} • ${hour.toString().padLeft(2, '0')}:$minuteStr:$secondStr $amPm';
   }
 
   @override
