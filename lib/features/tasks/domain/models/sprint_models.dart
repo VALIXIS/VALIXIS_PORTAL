@@ -5,7 +5,7 @@ import '../../../../shared/models/task.dart';
 /// Multi-app sprint target mobile applications.
 enum SprintApp {
   all('All Apps', null, AppColors.brandCyan, Icons.apps_rounded),
-  fitora('Fitora', '🌿', Color(0xFF10B981), Icons.spa_rounded),
+  fitora('Fitora', '🏃', Color(0xFF10B981), Icons.directions_run_rounded),
   planly('Planly', '📱', Color(0xFF8B5CF6), Icons.calendar_month_rounded),
   aiPdfMaker('AI PDF Maker', '📄', Color(0xFFF59E0B), Icons.picture_as_pdf_rounded),
   resumeBrain('Resume Brain', '🧠', Color(0xFF00E5FF), Icons.psychology_rounded);
