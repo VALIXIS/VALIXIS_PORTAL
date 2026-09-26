@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../shared/components/app_button.dart';
 import '../../../shared/components/app_shimmer.dart';
 import '../../../shared/components/empty_state.dart';
 import '../../../shared/models/task.dart';
+import '../domain/models/sprint_models.dart';
 import 'providers/tasks_provider.dart';
 import 'widgets/task_card.dart';
 import 'widgets/task_filter_bar.dart';
 
-/// My Tasks screen displaying search, sort, shimmer, and staggered list animations.
+/// Interactive Tasks & Operations Board supporting Multi-App Sprints, Workload Isolation, and Day-by-Day tracking.
 class TasksScreen extends ConsumerStatefulWidget {
   const TasksScreen({super.key});
 
@@ -22,9 +25,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   String _searchQuery = '';
   TaskSortOption _sortOption = TaskSortOption.deadline;
   TaskStatusFilter _statusFilter = TaskStatusFilter.active;
+  SprintApp _selectedApp = SprintApp.all;
+  SprintMember _selectedMember = SprintMember.all;
+  SprintDay _selectedDay = SprintDay.all;
 
   List<Task> _filterAndSort(List<Task> rawTasks) {
     var filtered = rawTasks.where((t) {
+      // 1. Status Filter
       if (_statusFilter == TaskStatusFilter.active) {
         if (t.status == TaskStatus.submitted || t.status == TaskStatus.approved) {
           return false;
@@ -35,12 +42,31 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         if (t.status != TaskStatus.approved) return false;
       }
 
+      // 2. Multi-App Sprint Filter
+      if (_selectedApp != SprintApp.all) {
+        final app = SprintApp.fromTask(t);
+        if (app != _selectedApp) return false;
+      }
+
+      // 3. Employee Workload Filter
+      if (_selectedMember != SprintMember.all) {
+        if (!_selectedMember.matches(t.assignedTo)) return false;
+      }
+
+      // 4. Day-by-Day Sprint Selector
+      if (_selectedDay != SprintDay.all) {
+        final day = SprintDay.fromTask(t);
+        if (day != _selectedDay) return false;
+      }
+
+      // 5. Search Query
       if (_searchQuery.isEmpty) return true;
       final q = _searchQuery.toLowerCase();
       return t.title.toLowerCase().contains(q) ||
           (t.githubRepo?.toLowerCase().contains(q) ?? false) ||
           (t.branchName?.toLowerCase().contains(q) ?? false) ||
-          (t.description?.toLowerCase().contains(q) ?? false);
+          (t.description?.toLowerCase().contains(q) ?? false) ||
+          (t.aiPrompt?.toLowerCase().contains(q) ?? false);
     }).toList();
 
     filtered.sort((a, b) {
@@ -55,6 +81,16 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     return filtered;
   }
 
+  void _clearFilters() {
+    setState(() {
+      _searchQuery = '';
+      _selectedApp = SprintApp.all;
+      _selectedMember = SprintMember.all;
+      _selectedDay = SprintDay.all;
+      _statusFilter = TaskStatusFilter.all;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasksAsync = ref.watch(tasksProvider);
@@ -66,6 +102,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header Row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -73,7 +110,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
-                      'My Tasks',
+                      'Tasks & Operations Board',
                       style: TextStyle(
                         color: AppColors.textPrimary,
                         fontSize: 26,
@@ -83,7 +120,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      'Manage and track your active enterprise assignments',
+                      '2-Week Sprint across Fitora, Planly, AI PDF Maker & Resume Brain',
                       style: TextStyle(
                         color: AppColors.textMuted,
                         fontSize: 14,
@@ -91,45 +128,86 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     ),
                   ],
                 ),
-                tasksAsync.maybeWhen(
-                  data: (tasks) {
-                    final activeCount = tasks.where((t) => t.status != TaskStatus.submitted && t.status != TaskStatus.approved).length;
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.brandBlue.withAlpha(30),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(
-                          color: AppColors.brandBlue.withAlpha(60),
-                        ),
-                      ),
-                      child: Text(
-                        '$activeCount Active Tasks',
-                        style: const TextStyle(
-                          color: AppColors.brandCyan,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    );
-                  },
-                  orElse: () => const SizedBox.shrink(),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppButton(
+                      label: 'Sprint Calendar',
+                      prefixIcon: Icons.calendar_month_rounded,
+                      variant: AppButtonVariant.secondary,
+                      size: AppButtonSize.small,
+                      onPressed: () => context.go(AppRoutes.calendar),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    tasksAsync.maybeWhen(
+                      data: (tasks) {
+                        final activeCount = tasks
+                            .where((t) =>
+                                t.status != TaskStatus.submitted &&
+                                t.status != TaskStatus.approved)
+                            .length;
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 7,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.brandBlue.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: AppColors.brandBlue.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                width: 8,
+                                height: 8,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.brandCyan,
+                                  shape: BoxShape.circle,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '$activeCount Active Tasks',
+                                style: const TextStyle(
+                                  color: AppColors.brandCyan,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      orElse: () => const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
               ],
             ),
             const SizedBox(height: AppSpacing.xl),
+
+            // Comprehensive Multi-Dimensional Sprint Filter Bar
             TaskFilterBar(
               searchQuery: _searchQuery,
               selectedSort: _sortOption,
               selectedStatus: _statusFilter,
+              selectedApp: _selectedApp,
+              selectedMember: _selectedMember,
+              selectedDay: _selectedDay,
               onSearchChanged: (q) => setState(() => _searchQuery = q),
               onSortChanged: (s) => setState(() => _sortOption = s),
               onStatusChanged: (status) => setState(() => _statusFilter = status),
+              onAppChanged: (app) => setState(() => _selectedApp = app),
+              onMemberChanged: (member) => setState(() => _selectedMember = member),
+              onDayChanged: (day) => setState(() => _selectedDay = day),
             ),
             const SizedBox(height: AppSpacing.lg),
+
+            // Task List View
             Expanded(
               child: tasksAsync.when(
                 loading: () => const _TasksShimmerList(),
@@ -142,8 +220,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     return const EmptyState(
                       icon: Icons.assignment_turned_in_outlined,
                       title: 'No tasks assigned',
-                      description:
-                          'Your task queue is completely clear.',
+                      description: 'Your task queue is completely clear.',
                     );
                   }
 
@@ -152,13 +229,13 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                   if (displayedTasks.isEmpty) {
                     return EmptyState(
                       icon: Icons.search_off_rounded,
-                      title: 'No matching tasks',
+                      title: 'No matching sprint tasks',
                       description:
-                          'No tasks matched "$_searchQuery". Try refining your search.',
+                          'No assignments matched your active filters. Try refining your selection.',
                       action: AppButton(
-                        label: 'Clear Search',
+                        label: 'Reset Filters',
                         variant: AppButtonVariant.secondary,
-                        onPressed: () => setState(() => _searchQuery = ''),
+                        onPressed: _clearFilters,
                       ),
                     );
                   }
@@ -205,8 +282,7 @@ class _TasksListView extends StatelessWidget {
     return ListView.separated(
       physics: const BouncingScrollPhysics(),
       itemCount: tasks.length,
-      separatorBuilder: (context, index) =>
-          const SizedBox(height: AppSpacing.md),
+      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (context, index) => AnimatedTaskItem(
         index: index,
         child: TaskCard(task: tasks[index]),
@@ -224,13 +300,13 @@ class AnimatedTaskItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0.0, end: 1.0),
-      duration: Duration(milliseconds: 300 + (index * 60).clamp(0, 400)),
+      duration: Duration(milliseconds: 250 + (index * 40).clamp(0, 350)),
       curve: Curves.easeOutCubic,
       builder: (context, value, child) {
         return Opacity(
           opacity: value,
           child: Transform.translate(
-            offset: Offset(0, (1 - value) * 16),
+            offset: Offset(0, (1 - value) * 12),
             child: child,
           ),
         );
@@ -247,11 +323,10 @@ class _TasksShimmerList extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       itemCount: 4,
-      separatorBuilder: (context, index) =>
-          const SizedBox(height: AppSpacing.md),
+      separatorBuilder: (context, index) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (context, index) => const AppShimmer(
         width: double.infinity,
-        height: 140,
+        height: 150,
         borderRadius: 20,
       ),
     );

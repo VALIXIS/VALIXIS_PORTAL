@@ -108,10 +108,10 @@ class _ValixisRailState extends State<ValixisRail> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'VALIXIS',
-                            style: AppTypography.textTheme.titleMedium?.copyWith(
+                            'VALIXIS PORTAL',
+                            style: AppTypography.textTheme.titleSmall?.copyWith(
                               fontWeight: FontWeight.w900,
-                              letterSpacing: 1.5,
+                              letterSpacing: 1.2,
                               color: AppColors.textPrimary,
                             ),
                           ),

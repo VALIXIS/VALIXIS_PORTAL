@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import '../../../app/router/app_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
 import '../../../core/network/realtime_sync_service.dart';
@@ -7,6 +9,7 @@ import '../../../shared/components/app_button.dart';
 import '../../../shared/components/empty_state.dart';
 import '../../../shared/models/task.dart';
 import '../../auth/presentation/providers/auth_provider.dart';
+import '../../tasks/domain/models/sprint_models.dart';
 import 'providers/manager_dashboard_provider.dart';
 import 'widgets/manager_shimmer.dart';
 import 'widgets/manager_task_card.dart';
@@ -27,7 +30,9 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
   final _searchController = TextEditingController();
   String _searchQuery = '';
   late String _selectedStatus;
-  String _selectedRepo = 'all';
+  SprintApp _selectedApp = SprintApp.all;
+  SprintMember _selectedMember = SprintMember.all;
+  SprintDay _selectedDay = SprintDay.all;
   String _selectedSortField = 'deadline';
   bool _sortAscending = true;
   bool _onlyAssignedToMe = false;
@@ -90,9 +95,18 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
         }
       }
 
-      if (_selectedRepo != 'all') {
-        final repo = task.githubRepo ?? 'VALIXIS_PORTAL';
-        if (repo != _selectedRepo) return false;
+      if (_selectedApp != SprintApp.all) {
+        final app = SprintApp.fromTask(task);
+        if (app != _selectedApp) return false;
+      }
+
+      if (_selectedMember != SprintMember.all) {
+        if (!_selectedMember.matches(task.assignedTo)) return false;
+      }
+
+      if (_selectedDay != SprintDay.all) {
+        final day = SprintDay.fromTask(task);
+        if (day != _selectedDay) return false;
       }
 
       return true;
@@ -245,10 +259,6 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
           data: (metrics) {
             final allTasks = metrics.recentTasks;
             final filteredTasks = _filterTasks(allTasks);
-            final repos = allTasks
-                .map((t) => t.githubRepo ?? 'VALIXIS_PORTAL')
-                .toSet()
-                .toList();
 
             final isDesktop = MediaQuery.of(context).size.width >= 900;
 
@@ -292,69 +302,82 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                           ),
                         ],
                       ),
-                      // Sort toggle button
-                      PopupMenuButton<String>(
-                        icon: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
+                      // Header Actions: Sprint Calendar + Sort toggle button
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          AppButton(
+                            label: 'Sprint Calendar',
+                            prefixIcon: Icons.calendar_month_rounded,
+                            variant: AppButtonVariant.secondary,
+                            size: AppButtonSize.small,
+                            onPressed: () => context.go(AppRoutes.calendar),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          PopupMenuButton<String>(
+                            icon: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceElevated,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(color: AppColors.glassBorder),
+                              ),
+                              child: const Icon(Icons.sort_rounded, size: 18, color: AppColors.brandCyan),
+                            ),
                             color: AppColors.surfaceElevated,
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: AppColors.glassBorder),
-                          ),
-                          child: const Icon(Icons.sort_rounded, size: 18, color: AppColors.brandCyan),
-                        ),
-                        color: AppColors.surfaceElevated,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        onSelected: (val) {
-                          if (val == _selectedSortField) {
-                            setState(() => _sortAscending = !_sortAscending);
-                          } else {
-                            setState(() {
-                              _selectedSortField = val;
-                              _sortAscending = true;
-                            });
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: 'deadline',
-                            child: Row(
-                              children: [
-                                Icon(Icons.alarm_rounded, size: 16, color: _selectedSortField == 'deadline' ? AppColors.brandCyan : AppColors.textMuted),
-                                const SizedBox(width: 8),
-                                Text('Deadline ${_selectedSortField == 'deadline' ? (_sortAscending ? '(Soonest)' : '(Latest)') : ''}'),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'priority',
-                            child: Row(
-                              children: [
-                                Icon(Icons.flag_rounded, size: 16, color: _selectedSortField == 'priority' ? AppColors.brandCyan : AppColors.textMuted),
-                                const SizedBox(width: 8),
-                                Text('Priority ${_selectedSortField == 'priority' ? (_sortAscending ? '(Asc)' : '(Desc)') : ''}'),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'title',
-                            child: Row(
-                              children: [
-                                Icon(Icons.title_rounded, size: 16, color: _selectedSortField == 'title' ? AppColors.brandCyan : AppColors.textMuted),
-                                const SizedBox(width: 8),
-                                const Text('Task Title'),
-                              ],
-                            ),
-                          ),
-                          PopupMenuItem(
-                            value: 'assignment',
-                            child: Row(
-                              children: [
-                                Icon(Icons.person_rounded, size: 16, color: _selectedSortField == 'assignment' ? AppColors.brandCyan : AppColors.textMuted),
-                                const SizedBox(width: 8),
-                                const Text('Assigned Employee'),
-                              ],
-                            ),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            onSelected: (val) {
+                              if (val == _selectedSortField) {
+                                setState(() => _sortAscending = !_sortAscending);
+                              } else {
+                                setState(() {
+                                  _selectedSortField = val;
+                                  _sortAscending = true;
+                                });
+                              }
+                            },
+                            itemBuilder: (context) => [
+                              PopupMenuItem(
+                                value: 'deadline',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.alarm_rounded, size: 16, color: _selectedSortField == 'deadline' ? AppColors.brandCyan : AppColors.textMuted),
+                                    const SizedBox(width: 8),
+                                    Text('Deadline ${_selectedSortField == 'deadline' ? (_sortAscending ? '(Soonest)' : '(Latest)') : ''}'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'priority',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.flag_rounded, size: 16, color: _selectedSortField == 'priority' ? AppColors.brandCyan : AppColors.textMuted),
+                                    const SizedBox(width: 8),
+                                    Text('Priority ${_selectedSortField == 'priority' ? (_sortAscending ? '(Asc)' : '(Desc)') : ''}'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'title',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.title_rounded, size: 16, color: _selectedSortField == 'title' ? AppColors.brandCyan : AppColors.textMuted),
+                                    const SizedBox(width: 8),
+                                    const Text('Task Title'),
+                                  ],
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'assignment',
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.person_rounded, size: 16, color: _selectedSortField == 'assignment' ? AppColors.brandCyan : AppColors.textMuted),
+                                    const SizedBox(width: 8),
+                                    const Text('Assigned Employee'),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -462,27 +485,154 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                       ],
                     ),
                   ),
-                  if (repos.length > 1) ...[
-                    const SizedBox(height: AppSpacing.xs),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      child: Row(
-                        children: [
-                          _RepoChip(
-                            label: 'All Repositories',
-                            isSelected: _selectedRepo == 'all',
-                            onTap: () => setState(() => _selectedRepo = 'all'),
+                  // Sprint Apps Filter Row
+                  const SizedBox(height: AppSpacing.xs),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: SprintApp.values.map((app) {
+                        final isSelected = _selectedApp == app;
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 6),
+                          child: InkWell(
+                            onTap: () => setState(() => _selectedApp = app),
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? app.color.withAlpha(40)
+                                    : AppColors.surfaceElevated,
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: isSelected ? app.color : AppColors.glassBorder,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(app.icon, size: 13, color: isSelected ? app.color : AppColors.textSecondary),
+                                  const SizedBox(width: 5),
+                                  Text(
+                                    app.displayName,
+                                    style: TextStyle(
+                                      color: isSelected ? app.color : AppColors.textSecondary,
+                                      fontSize: 11,
+                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          ...repos.map((r) => _RepoChip(
-                                label: r,
-                                isSelected: _selectedRepo == r,
-                                onTap: () => setState(() => _selectedRepo = r),
-                              )),
-                        ],
-                      ),
+                        );
+                      }).toList(),
                     ),
-                  ],
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  // Sprint Member Workload & Day-by-Day Selector Row
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: [
+                        // Member Workload selector
+                        ...SprintMember.values.map((member) {
+                          final isSelected = _selectedMember == member;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 5),
+                            child: InkWell(
+                              onTap: () => setState(() => _selectedMember = member),
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? member.color.withAlpha(35) : AppColors.surfaceElevated,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isSelected ? member.color : AppColors.border,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (member != SprintMember.all) ...[
+                                      Container(
+                                        width: 16,
+                                        height: 16,
+                                        decoration: BoxDecoration(
+                                          color: member.color.withAlpha(50),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            member.initial,
+                                            style: TextStyle(
+                                              color: member.color,
+                                              fontSize: 9,
+                                              fontWeight: FontWeight.w800,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                    ],
+                                    Text(
+                                      member.name,
+                                      style: TextStyle(
+                                        color: isSelected ? member.color : AppColors.textSecondary,
+                                        fontSize: 11,
+                                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                        Container(
+                          width: 1,
+                          height: 18,
+                          color: AppColors.glassBorder,
+                          margin: const EdgeInsets.symmetric(horizontal: 6),
+                        ),
+                        // Day Selector
+                        ...SprintDay.values.map((day) {
+                          final isSelected = _selectedDay == day;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 4),
+                            child: InkWell(
+                              onTap: () => setState(() => _selectedDay = day),
+                              borderRadius: BorderRadius.circular(8),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.brandCyan.withAlpha(40)
+                                      : AppColors.surfaceElevated,
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: isSelected ? AppColors.brandCyan : AppColors.border,
+                                  ),
+                                ),
+                                child: Text(
+                                  day.label,
+                                  style: TextStyle(
+                                    color: isSelected ? AppColors.brandCyan : AppColors.textMuted,
+                                    fontSize: 10,
+                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: AppSpacing.md),
                   // Task List
                   if (filteredTasks.isEmpty)
@@ -582,57 +732,6 @@ class _FilterChip extends StatelessWidget {
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _RepoChip extends StatelessWidget {
-  const _RepoChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isSelected ? AppColors.brandBlue.withAlpha(30) : AppColors.surfaceCard,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: isSelected ? AppColors.brandBlue : AppColors.glassBorder,
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.folder_outlined, size: 11, color: isSelected ? AppColors.brandCyan : AppColors.textMuted),
-                const SizedBox(width: 4),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: isSelected ? AppColors.brandCyan : AppColors.textMuted,
-                    fontSize: 11,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  ),
-                ),
-              ],
             ),
           ),
         ),

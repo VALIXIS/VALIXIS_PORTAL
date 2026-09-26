@@ -54,6 +54,23 @@ valixis-gatekeeper wait-pr --timeout 180
 
 ---
 
+### Phase 4: Morning Briefing & 1-Click Conflict Resolver
+When the user opens Antigravity in the morning or asks:
+- "What happened last night?"
+- "Morning briefing"
+- "Resolve conflicts"
+
+1. Run the morning brief tool:
+   ```bash
+   valixis-gatekeeper morning-brief
+   ```
+2. Greet the user with a concise summary of auto-merged PRs and any conflicting branches.
+3. If conflicts exist:
+   - Ask the user: *"Should I resolve the merge conflict in branch `<branch>` now?"*
+   - When confirmed, checkout `<branch>`, run `git pull origin main`, resolve conflict markers (`<<<<<<<`), verify with `valixis-gatekeeper check --fast`, and push cleanly so the next midnight run merges it automatically!
+
+---
+
 ## Common Auto-Repair Playbook
 
 | Violation | Autonomous Fix Strategy |

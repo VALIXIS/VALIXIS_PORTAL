@@ -127,6 +127,12 @@ class AppShell extends ConsumerWidget {
               icon: Icons.assignment_outlined,
               selectedIcon: Icons.assignment_rounded,
             ),
+            const _ManagerNavItem(
+              route: AppRoutes.calendar,
+              label: 'Calendar',
+              icon: Icons.calendar_month_outlined,
+              selectedIcon: Icons.calendar_month_rounded,
+            ),
             _ManagerNavItem(
               route: AppRoutes.managerReviews,
               label: 'Reviews',
@@ -154,6 +160,12 @@ class AppShell extends ConsumerWidget {
               icon: Icons.assignment_outlined,
               selectedIcon: Icons.assignment_rounded,
               badgeCount: myActiveCount > 0 ? myActiveCount : null,
+            ),
+            const _ManagerNavItem(
+              route: AppRoutes.calendar,
+              label: 'Calendar',
+              icon: Icons.calendar_month_outlined,
+              selectedIcon: Icons.calendar_month_rounded,
             ),
             const _ManagerNavItem(
               route: AppRoutes.profile,
@@ -202,6 +214,12 @@ class AppShell extends ConsumerWidget {
                 icon: Icons.assignment_outlined,
                 selectedIcon: Icons.assignment_rounded,
               ),
+              const NavItem(
+                route: AppRoutes.calendar,
+                label: 'Calendar',
+                icon: Icons.calendar_month_outlined,
+                selectedIcon: Icons.calendar_month_rounded,
+              ),
               NavItem(
                 route: AppRoutes.managerReviews,
                 label: 'Reviews & PRs',
@@ -243,6 +261,12 @@ class AppShell extends ConsumerWidget {
                 badgeCount: myActiveCount > 0 ? myActiveCount : null,
               ),
               const NavItem(
+                route: AppRoutes.calendar,
+                label: 'Calendar',
+                icon: Icons.calendar_month_outlined,
+                selectedIcon: Icons.calendar_month_rounded,
+              ),
+              const NavItem(
                 route: AppRoutes.profile,
                 label: 'Profile',
                 icon: Icons.person_outline_rounded,
@@ -264,7 +288,7 @@ class AppShell extends ConsumerWidget {
       final activeSectionLabel = selectedRailIndex < railItems.length
           ? railItems[selectedRailIndex].label
           : (isManager ? 'OVERVIEW' : 'DASHBOARD');
-      final rootBreadcrumb = isManager ? 'CORE' : 'PORTAL';
+      final rootBreadcrumb = isManager ? 'VALIXIS PORTAL • MANAGER' : 'VALIXIS PORTAL • EMPLOYEE';
 
       return Scaffold(
         backgroundColor: AppColors.surfaceBase,
@@ -484,12 +508,31 @@ class AppShell extends ConsumerWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             const Text(
-              'VALIXIS',
+              'VALIXIS PORTAL',
               style: TextStyle(
                 color: AppColors.textPrimary,
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w900,
-                letterSpacing: 1.5,
+                letterSpacing: 1.0,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+              decoration: BoxDecoration(
+                color: (isManager ? AppColors.brandPurple : AppColors.brandBlue).withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: (isManager ? AppColors.brandPurple : AppColors.brandBlue).withValues(alpha: 0.4),
+                ),
+              ),
+              child: Text(
+                isManager ? 'MANAGER' : 'EMPLOYEE',
+                style: AppTypography.telemetryHeader(
+                  size: 7,
+                  color: isManager ? AppColors.brandPurple : AppColors.brandCyan,
+                  spacing: 0.5,
+                ),
               ),
             ),
           ],

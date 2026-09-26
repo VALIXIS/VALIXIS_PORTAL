@@ -6,6 +6,7 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/providers/auth_provider.dart';
 import '../../features/auth/presentation/providers/role_provider.dart';
 import '../../features/auth/presentation/unauthorized_screen.dart';
+import '../../features/calendar/presentation/sprint_calendar_screen.dart';
 import '../../features/dashboard/presentation/dashboard_screen.dart';
 import '../../features/manager/presentation/employee_management_screen.dart';
 import '../../features/manager/presentation/manager_audit_logs_screen.dart';
@@ -31,6 +32,7 @@ abstract final class AppRoutes {
   static const String managerEmployees = '/manager/employees';
   static const String taskDetails = '/tasks/:id';
   static const String profile = '/profile';
+  static const String calendar = '/calendar';
 
   // Compatibility aliases
   static const String dashboard = '/dashboard';
@@ -195,6 +197,14 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
                   child: TaskDetailsScreen(taskId: id),
                 );
               },
+            ),
+            GoRoute(
+              path: AppRoutes.calendar,
+              name: 'calendar',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const SprintCalendarScreen(),
+              ),
             ),
             GoRoute(
               path: AppRoutes.profile,
