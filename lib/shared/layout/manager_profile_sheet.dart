@@ -36,8 +36,15 @@ class ManagerProfileSheet extends ConsumerWidget {
         (user?.userMetadata?['name'] as String?) ??
         (user?.userMetadata?['display_name'] as String?);
 
+    final isMatchingEmployee = employee != null &&
+        (user == null ||
+            employee.id == user.id ||
+            (employee.email.isNotEmpty &&
+                user.email != null &&
+                employee.email.toLowerCase() == user.email!.toLowerCase()));
+
     final String name;
-    if (employee != null && employee.fullName.trim().isNotEmpty) {
+    if (isMatchingEmployee && employee.fullName.trim().isNotEmpty) {
       name = employee.fullName.trim();
     } else if (nameFromMeta != null && nameFromMeta.trim().isNotEmpty) {
       name = nameFromMeta.trim();

@@ -17,5 +17,5 @@ final roleProvider = FutureProvider<UserRole>((ref) async {
     return UserRole.employee;
   }
 
-  return ref.watch(roleServiceProvider).getUserRole(user.id);
+  return ref.watch(roleServiceProvider).getUserRole(user.id, user.email);
 });

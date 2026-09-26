@@ -20,5 +20,5 @@ final dashboardProvider = FutureProvider<DashboardData>((ref) async {
   if (user == null) {
     throw StateError('User must be logged in to view dashboard');
   }
-  return ref.watch(dashboardRepositoryProvider).getDashboardData(user.id);
+  return ref.watch(dashboardRepositoryProvider).getDashboardData(user.id, user.email);
 });

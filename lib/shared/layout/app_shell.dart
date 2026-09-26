@@ -67,8 +67,16 @@ class AppShell extends ConsumerWidget {
         (user?.userMetadata?['name'] as String?) ??
         (user?.userMetadata?['display_name'] as String?);
 
+    // Validate that employee matches the current authenticated user
+    final isMatchingEmployee = employee != null &&
+        (user == null ||
+            employee.id == user.id ||
+            (employee.email.isNotEmpty &&
+                user.email != null &&
+                employee.email.toLowerCase() == user.email!.toLowerCase()));
+
     final String displayName;
-    if (employee != null && employee.fullName.trim().isNotEmpty) {
+    if (isMatchingEmployee && employee.fullName.trim().isNotEmpty) {
       displayName = employee.fullName.trim();
     } else if (nameFromMeta != null && nameFromMeta.trim().isNotEmpty) {
       displayName = nameFromMeta.trim();
@@ -87,7 +95,7 @@ class AppShell extends ConsumerWidget {
             .join(' ');
       }
     } else {
-      displayName = isManager ? 'Subhash' : 'Employee';
+      displayName = isManager ? 'Manager' : 'Employee';
     }
 
     final pendingCount = isManager ? (metricsAsync.valueOrNull?.submittedCount ?? 0) : 0;

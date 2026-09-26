@@ -7,8 +7,11 @@ import '../../data/auth_repository.dart';
 import 'heartbeat_provider.dart';
 import 'role_provider.dart';
 import '../../../dashboard/presentation/providers/dashboard_provider.dart';
+import '../../../employee/presentation/providers/employee_provider.dart';
+import '../../../manager/presentation/providers/audit_logs_provider.dart';
 import '../../../manager/presentation/providers/employee_management_provider.dart';
 import '../../../manager/presentation/providers/manager_dashboard_provider.dart';
+import '../../../tasks/presentation/providers/tasks_provider.dart';
 
 /// Stream provider listening to raw Supabase auth state changes.
 final authStateStreamProvider = StreamProvider<AuthState>((ref) {
@@ -43,9 +46,12 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
 
   void _invalidateUserProviders() {
     _ref.invalidate(roleProvider);
+    _ref.invalidate(employeeProvider);
+    _ref.invalidate(tasksProvider);
     _ref.invalidate(managerDashboardProvider);
     _ref.invalidate(employeeManagementProvider);
     _ref.invalidate(dashboardProvider);
+    _ref.invalidate(auditLogsProvider);
   }
 
   /// Executes user sign in with email and password.

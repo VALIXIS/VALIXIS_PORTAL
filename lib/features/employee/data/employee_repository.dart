@@ -8,9 +8,11 @@ class EmployeeRepository {
 
   final SupabaseClient _client;
 
-  /// Fetches the profile of the specified employee by `auth_id == userId`.
-  Future<Employee> getEmployeeProfile(String userId) async {
+  /// Fetches the profile of the specified employee by `auth_id == userId`, `email`, or `id`.
+  Future<Employee> getEmployeeProfile(String userId, [String? userEmail]) async {
     final user = _client.auth.currentUser;
+    final emailToUse = userEmail ?? user?.email;
+
     try {
       var data = await _client
           .from('employees')
@@ -18,11 +20,19 @@ class EmployeeRepository {
           .eq('auth_id', userId)
           .maybeSingle();
 
-      if (data == null && user?.email != null) {
+      if (data == null && emailToUse != null && emailToUse.isNotEmpty) {
         data = await _client
             .from('employees')
             .select()
-            .eq('email', user!.email!)
+            .eq('email', emailToUse)
+            .maybeSingle();
+      }
+
+      if (data == null) {
+        data = await _client
+            .from('employees')
+            .select()
+            .eq('id', userId)
             .maybeSingle();
       }
 
@@ -30,7 +40,7 @@ class EmployeeRepository {
         return EmployeeMapper.fromJson(data);
       }
     } catch (_) {
-      // Fall back to auth user profile metadata if employees table is not populated yet
+      // Fall back to auth user profile metadata if employees table query fails
     }
 
     final nameFromMeta = user?.userMetadata?['full_name'] as String? ??
@@ -40,14 +50,14 @@ class EmployeeRepository {
     String fallbackName;
     if (nameFromMeta != null && nameFromMeta.trim().isNotEmpty) {
       fallbackName = nameFromMeta.trim();
-    } else if (user?.email != null && user!.email!.isNotEmpty) {
-      final emailLower = user.email!.toLowerCase();
+    } else if (emailToUse != null && emailToUse.isNotEmpty) {
+      final emailLower = emailToUse.toLowerCase();
       if (emailLower == 'official.valixis@gmail.com') {
         fallbackName = 'Subhash';
       } else if (emailLower.contains('jyothsna')) {
         fallbackName = 'Jyothsna';
       } else {
-        final prefix = user.email!.split('@').first;
+        final prefix = emailToUse.split('@').first;
         fallbackName = prefix
             .split(RegExp(r'[._-]'))
             .where((s) => s.isNotEmpty)
@@ -61,7 +71,7 @@ class EmployeeRepository {
     return Employee(
       id: userId,
       fullName: fallbackName,
-      email: user?.email ?? '',
+      email: emailToUse ?? '',
       role: 'Software Engineer',
     );
   }

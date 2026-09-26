@@ -32,10 +32,10 @@ class DashboardRepository {
   final SupabaseClient? client;
 
   /// Aggregates profile info, task counts, and recent tasks for [userId].
-  Future<DashboardData> getDashboardData(String userId) async {
+  Future<DashboardData> getDashboardData(String userId, [String? userEmail]) async {
     final results = await Future.wait([
-      _employeeRepo.getEmployeeProfile(userId),
-      _tasksRepo.getAssignedTasks(userId),
+      _employeeRepo.getEmployeeProfile(userId, userEmail),
+      _tasksRepo.getAssignedTasks(userId, userEmail),
     ]);
 
     final employee = results[0] as Employee;
