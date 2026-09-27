@@ -93,7 +93,6 @@ class _TaskCardState extends State<TaskCard> {
   Widget build(BuildContext context) {
     final task = widget.task;
     final sprintApp = SprintApp.fromTask(task);
-    final sprintDay = SprintDay.fromTask(task);
     final stage = SprintWorkflowStage.fromTask(task);
     final branch = task.branchName;
     final hasPr = task.prUrl != null && task.prUrl!.isNotEmpty;
@@ -145,25 +144,6 @@ class _TaskCardState extends State<TaskCard> {
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-
-                      // Sprint Day Pill
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: AppColors.surfaceElevated,
-                          borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Text(
-                          sprintDay.label,
-                          style: const TextStyle(
-                            color: AppColors.textSecondary,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
                         ),
                       ),
                       const Spacer(),
