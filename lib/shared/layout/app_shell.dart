@@ -354,43 +354,71 @@ class AppShell extends ConsumerWidget {
                         const NotificationBellButton(),
                         const SizedBox(width: AppSpacing.xs),
 
-                        // Effortless Business OS Switch Button
-                        InkWell(
-                          borderRadius: BorderRadius.circular(20),
-                          onTap: () async {
-                            const url = 'https://valixis-manager.vercel.app';
-                            final uri = Uri.parse(url);
-                            if (await canLaunchUrl(uri)) {
-                              await launchUrl(uri, mode: LaunchMode.externalApplication);
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: AppColors.brandBlue.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: AppColors.brandBlue.withValues(alpha: 0.4)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: const [
-                                Icon(Icons.business_center_rounded, size: 13, color: AppColors.brandBlue),
-                                SizedBox(width: 5),
-                                Text(
-                                  'Business OS',
-                                  style: TextStyle(
-                                    color: AppColors.brandBlue,
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
+                        // Effortless Business OS Switch Button (MANAGERS ONLY)
+                        if (isManager) ...[
+                          InkWell(
+                            borderRadius: BorderRadius.circular(20),
+                            onTap: () async {
+                              const url = 'https://valixis-manager.vercel.app';
+                              final uri = Uri.parse(url);
+                              try {
+                                if (await canLaunchUrl(uri)) {
+                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                  return;
+                                }
+                              } catch (_) {}
+
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    behavior: SnackBarBehavior.floating,
+                                    backgroundColor: AppColors.surfaceElevated,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                      side: const BorderSide(color: AppColors.brandBlue),
+                                    ),
+                                    content: Row(
+                                      children: const [
+                                        Icon(Icons.info_outline_rounded, color: AppColors.brandBlue, size: 18),
+                                        SizedBox(width: 8),
+                                        Text(
+                                          'VALIXIS Business OS will open here once deployed.',
+                                          style: TextStyle(color: AppColors.textPrimary),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                SizedBox(width: 4),
-                                Icon(Icons.open_in_new_rounded, size: 11, color: AppColors.brandBlue),
-                              ],
+                                );
+                              }
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: AppColors.brandBlue.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: AppColors.brandBlue.withValues(alpha: 0.4)),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: const [
+                                  Icon(Icons.business_center_rounded, size: 13, color: AppColors.brandBlue),
+                                  SizedBox(width: 5),
+                                  Text(
+                                    'Business OS',
+                                    style: TextStyle(
+                                      color: AppColors.brandBlue,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Icon(Icons.open_in_new_rounded, size: 11, color: AppColors.brandBlue),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
+                          const SizedBox(width: AppSpacing.xs),
+                        ],
 
                         // Manager / User Profile Node with Official Logo
                         InkWell(
