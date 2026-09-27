@@ -593,43 +593,6 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
                             ),
                           );
                         }),
-                        Container(
-                          width: 1,
-                          height: 18,
-                          color: AppColors.glassBorder,
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                        ),
-                        // Day Selector
-                        ...SprintDay.values.map((day) {
-                          final isSelected = _selectedDay == day;
-                          return Padding(
-                            padding: const EdgeInsets.only(right: 4),
-                            child: InkWell(
-                              onTap: () => setState(() => _selectedDay = day),
-                              borderRadius: BorderRadius.circular(8),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? AppColors.brandCyan.withAlpha(40)
-                                      : AppColors.surfaceElevated,
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: isSelected ? AppColors.brandCyan : AppColors.border,
-                                  ),
-                                ),
-                                child: Text(
-                                  day.label,
-                                  style: TextStyle(
-                                    color: isSelected ? AppColors.brandCyan : AppColors.textMuted,
-                                    fontSize: 10,
-                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        }),
                       ],
                     ),
                   ),

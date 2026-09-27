@@ -103,24 +103,9 @@ class TaskFilterBar extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
         ],
 
-        // Section 2: Employee Workload & Day-by-Day Timeline Scroll Bar
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (showMemberFilter && onMemberChanged != null) ...[
-              Expanded(
-                flex: isDesktop ? 4 : 5,
-                child: _buildMemberFilterRow(),
-              ),
-              const SizedBox(width: AppSpacing.md),
-            ],
-            if (onDayChanged != null)
-              Expanded(
-                flex: isDesktop ? 6 : 5,
-                child: _buildDayTimelineRow(),
-              ),
-          ],
-        ),
+        // Section 2: Employee Workload Filter
+        if (showMemberFilter && onMemberChanged != null)
+          _buildMemberFilterRow(),
       ],
     );
   }
@@ -252,47 +237,6 @@ class TaskFilterBar extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _buildDayTimelineRow() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        children: SprintDay.values.map((day) {
-          final isSelected = selectedDay == day;
-          return Padding(
-            padding: const EdgeInsets.only(right: 5),
-            child: InkWell(
-              onTap: () => onDayChanged?.call(day),
-              borderRadius: BorderRadius.circular(8),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 180),
-                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppColors.brandCyan.withValues(alpha: 0.18)
-                      : AppColors.surfaceElevated,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: isSelected ? AppColors.brandCyan : AppColors.border,
-                    width: isSelected ? 1.2 : 1,
-                  ),
-                ),
-                child: Text(
-                  day.label,
-                  style: TextStyle(
-                    color: isSelected ? AppColors.brandCyan : AppColors.textMuted,
-                    fontSize: 11,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                  ),
                 ),
               ),
             ),
