@@ -8,6 +8,7 @@ import '../../../shared/components/app_button.dart';
 import '../../../shared/components/app_shimmer.dart';
 import '../../../shared/components/empty_state.dart';
 import '../../../shared/models/task.dart';
+import '../../auth/presentation/providers/role_provider.dart';
 import '../domain/models/sprint_models.dart';
 import 'providers/tasks_provider.dart';
 import 'widgets/task_card.dart';
@@ -29,7 +30,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   SprintMember _selectedMember = SprintMember.all;
   SprintDay _selectedDay = SprintDay.all;
 
-  List<Task> _filterAndSort(List<Task> rawTasks) {
+  List<Task> _filterAndSort(List<Task> rawTasks, {required bool isManager}) {
     var filtered = rawTasks.where((t) {
       // 1. Status Filter
       if (_statusFilter == TaskStatusFilter.active) {
@@ -48,8 +49,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
         if (app != _selectedApp) return false;
       }
 
-      // 3. Employee Workload Filter
-      if (_selectedMember != SprintMember.all) {
+      // 3. Employee Workload Filter (Only applicable to managers)
+      if (isManager && _selectedMember != SprintMember.all) {
         if (!_selectedMember.matches(t.assignedTo)) return false;
       }
 
@@ -94,6 +95,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
   @override
   Widget build(BuildContext context) {
     final tasksAsync = ref.watch(tasksProvider);
+    final roleAsync = ref.watch(roleProvider);
+    final isManager = roleAsync.valueOrNull?.isManager ?? false;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -198,11 +201,14 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               selectedApp: _selectedApp,
               selectedMember: _selectedMember,
               selectedDay: _selectedDay,
+              showMemberFilter: isManager,
               onSearchChanged: (q) => setState(() => _searchQuery = q),
               onSortChanged: (s) => setState(() => _sortOption = s),
               onStatusChanged: (status) => setState(() => _statusFilter = status),
               onAppChanged: (app) => setState(() => _selectedApp = app),
-              onMemberChanged: (member) => setState(() => _selectedMember = member),
+              onMemberChanged: isManager
+                  ? (member) => setState(() => _selectedMember = member)
+                  : null,
               onDayChanged: (day) => setState(() => _selectedDay = day),
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -224,7 +230,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     );
                   }
 
-                  final displayedTasks = _filterAndSort(rawTasks);
+                  final displayedTasks =
+                      _filterAndSort(rawTasks, isManager: isManager);
 
                   if (displayedTasks.isEmpty) {
                     return EmptyState(
