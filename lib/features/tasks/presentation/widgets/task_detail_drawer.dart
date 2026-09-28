@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
@@ -8,6 +7,7 @@ import '../../../../core/utils/date_formatter.dart';
 import '../../../../shared/components/app_button.dart';
 import '../../../../shared/models/task.dart';
 import '../../domain/models/sprint_models.dart';
+import 'pr_submission_card.dart';
 import 'task_badge.dart';
 import 'task_prompt_helper.dart';
 
@@ -528,85 +528,8 @@ class TaskDetailDrawer extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xl),
 
-              // Pull Request Link Section
-              _buildSectionTitle('Pull Request & Integration', Icons.call_merge_rounded, AppColors.success),
-              const SizedBox(height: AppSpacing.sm),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceCard,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: (task.prUrl != null && task.prUrl!.isNotEmpty)
-                        ? AppColors.success.withValues(alpha: 0.4)
-                        : AppColors.border,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: (task.prUrl != null && task.prUrl!.isNotEmpty)
-                            ? AppColors.success.withValues(alpha: 0.15)
-                            : AppColors.surfaceElevated,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.commit_rounded,
-                        size: 20,
-                        color: (task.prUrl != null && task.prUrl!.isNotEmpty)
-                            ? AppColors.success
-                            : AppColors.textMuted,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            (task.prUrl != null && task.prUrl!.isNotEmpty)
-                                ? 'Pull Request Active'
-                                : 'No Pull Request Submitted Yet',
-                            style: TextStyle(
-                              color: (task.prUrl != null && task.prUrl!.isNotEmpty)
-                                  ? AppColors.textPrimary
-                                  : AppColors.textMuted,
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          if (task.prUrl != null && task.prUrl!.isNotEmpty) ...[
-                            const SizedBox(height: 2),
-                            Text(
-                              task.prUrl!,
-                              style: const TextStyle(
-                                color: AppColors.brandCyan,
-                                fontSize: 12,
-                                fontFamily: 'monospace',
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    if (task.prUrl != null && task.prUrl!.isNotEmpty)
-                      AppButton(
-                        label: 'Open PR',
-                        prefixIcon: Icons.open_in_new_rounded,
-                        variant: AppButtonVariant.primary,
-                        size: AppButtonSize.small,
-                        onPressed: () {
-                          final uri = Uri.tryParse(task.prUrl!);
-                          if (uri != null) launchUrl(uri);
-                        },
-                      ),
-                  ],
-                ),
-              ),
+              // Interactive Pull Request Submission & Auto-Detection Card
+              PrSubmissionCard(task: task),
               const SizedBox(height: AppSpacing.xl2),
             ],
           ),
