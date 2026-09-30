@@ -56,7 +56,9 @@ class RoleService {
 
     if (emailToUse != null && emailToUse.isNotEmpty) {
       final emailLower = emailToUse.toLowerCase();
-      if (emailLower == 'official.valixis@gmail.com' || emailLower.contains('jyothsna')) {
+      if (emailLower == 'official.valixis@gmail.com' ||
+          emailLower.contains('jyothsna') ||
+          emailLower.contains('joshna')) {
         return UserRole.manager;
       }
     }

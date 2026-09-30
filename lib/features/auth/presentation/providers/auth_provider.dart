@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/network/supabase_client_provider.dart';
+import '../../../../core/storage/session_storage.dart';
 import '../../data/auth_repository.dart';
 import 'heartbeat_provider.dart';
 import 'role_provider.dart';
@@ -68,6 +69,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       _invalidateUserProviders();
 
       if (response.user != null) {
+        SessionStorageService.setSessionActive();
         try {
           final supabase = _ref.read(supabaseClientProvider);
           final userEmail = response.user!.email?.trim().toLowerCase() ?? email.trim().toLowerCase();
@@ -182,6 +184,7 @@ class AuthNotifier extends StateNotifier<AsyncValue<User?>> {
       }
 
       _ref.read(heartbeatProvider).stop();
+      SessionStorageService.clearSessionActive();
       await _repository.signOut();
       _invalidateUserProviders();
       return null;
