@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../app/router/app_router.dart';
+import '../../business_os/app/router/route_paths.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
@@ -107,39 +107,40 @@ class AppShell extends ConsumerWidget {
             .length ??
         0;
 
-    final navItems = isManager
+    final location = GoRouterState.of(context).uri.path;
+    final isBusinessOs = location.startsWith('/business-os');
+
+    final navItems = (isManager && isBusinessOs)
         ? [
             const _ManagerNavItem(
-              route: AppRoutes.managerDashboard,
+              route: RoutePaths.dashboard,
               label: 'Overview',
               icon: Icons.dashboard_outlined,
               selectedIcon: Icons.dashboard_rounded,
             ),
-            _ManagerNavItem(
-              route: AppRoutes.tasks,
-              label: 'My Tasks',
-              icon: Icons.assignment_ind_outlined,
-              selectedIcon: Icons.assignment_ind_rounded,
-              badgeCount: myActiveCount > 0 ? myActiveCount : null,
+            const _ManagerNavItem(
+              route: RoutePaths.leads,
+              label: 'Leads',
+              icon: Icons.filter_alt_outlined,
+              selectedIcon: Icons.filter_alt_rounded,
             ),
             const _ManagerNavItem(
-              route: AppRoutes.managerTasks,
-              label: 'All Tasks',
-              icon: Icons.assignment_outlined,
-              selectedIcon: Icons.assignment_rounded,
+              route: RoutePaths.customers,
+              label: 'Customers',
+              icon: Icons.people_outline_rounded,
+              selectedIcon: Icons.people_rounded,
             ),
             const _ManagerNavItem(
-              route: AppRoutes.calendar,
-              label: 'Calendar',
-              icon: Icons.calendar_month_outlined,
-              selectedIcon: Icons.calendar_month_rounded,
+              route: RoutePaths.invoices,
+              label: 'Invoices',
+              icon: Icons.receipt_long_outlined,
+              selectedIcon: Icons.receipt_long_rounded,
             ),
-            _ManagerNavItem(
-              route: AppRoutes.managerReviews,
-              label: 'Reviews',
-              icon: Icons.rate_review_outlined,
-              selectedIcon: Icons.rate_review_rounded,
-              badgeCount: pendingCount > 0 ? pendingCount : null,
+            const _ManagerNavItem(
+              route: RoutePaths.team,
+              label: 'Team',
+              icon: Icons.badge_outlined,
+              selectedIcon: Icons.badge_rounded,
             ),
             const _ManagerNavItem(
               route: AppRoutes.profile,
@@ -148,40 +149,81 @@ class AppShell extends ConsumerWidget {
               selectedIcon: Icons.person_rounded,
             ),
           ]
-        : [
-            const _ManagerNavItem(
-              route: AppRoutes.dashboard,
-              label: 'Dashboard',
-              icon: Icons.dashboard_outlined,
-              selectedIcon: Icons.dashboard_rounded,
-            ),
-            _ManagerNavItem(
-              route: AppRoutes.tasks,
-              label: 'My Tasks',
-              icon: Icons.assignment_outlined,
-              selectedIcon: Icons.assignment_rounded,
-              badgeCount: myActiveCount > 0 ? myActiveCount : null,
-            ),
-            const _ManagerNavItem(
-              route: AppRoutes.calendar,
-              label: 'Calendar',
-              icon: Icons.calendar_month_outlined,
-              selectedIcon: Icons.calendar_month_rounded,
-            ),
-            const _ManagerNavItem(
-              route: AppRoutes.profile,
-              label: 'Profile',
-              icon: Icons.person_outline_rounded,
-              selectedIcon: Icons.person_rounded,
-            ),
-          ];
+        : isManager
+            ? [
+                const _ManagerNavItem(
+                  route: AppRoutes.managerDashboard,
+                  label: 'Overview',
+                  icon: Icons.dashboard_outlined,
+                  selectedIcon: Icons.dashboard_rounded,
+                ),
+                _ManagerNavItem(
+                  route: AppRoutes.tasks,
+                  label: 'My Tasks',
+                  icon: Icons.assignment_ind_outlined,
+                  selectedIcon: Icons.assignment_ind_rounded,
+                  badgeCount: myActiveCount > 0 ? myActiveCount : null,
+                ),
+                const _ManagerNavItem(
+                  route: AppRoutes.managerTasks,
+                  label: 'All Tasks',
+                  icon: Icons.assignment_outlined,
+                  selectedIcon: Icons.assignment_rounded,
+                ),
+                const _ManagerNavItem(
+                  route: AppRoutes.calendar,
+                  label: 'Calendar',
+                  icon: Icons.calendar_month_outlined,
+                  selectedIcon: Icons.calendar_month_rounded,
+                ),
+                _ManagerNavItem(
+                  route: AppRoutes.managerReviews,
+                  label: 'Reviews',
+                  icon: Icons.rate_review_outlined,
+                  selectedIcon: Icons.rate_review_rounded,
+                  badgeCount: pendingCount > 0 ? pendingCount : null,
+                ),
+                const _ManagerNavItem(
+                  route: AppRoutes.profile,
+                  label: 'Profile',
+                  icon: Icons.person_outline_rounded,
+                  selectedIcon: Icons.person_rounded,
+                ),
+              ]
+            : [
+                const _ManagerNavItem(
+                  route: AppRoutes.dashboard,
+                  label: 'Dashboard',
+                  icon: Icons.dashboard_outlined,
+                  selectedIcon: Icons.dashboard_rounded,
+                ),
+                _ManagerNavItem(
+                  route: AppRoutes.tasks,
+                  label: 'My Tasks',
+                  icon: Icons.assignment_outlined,
+                  selectedIcon: Icons.assignment_rounded,
+                  badgeCount: myActiveCount > 0 ? myActiveCount : null,
+                ),
+                const _ManagerNavItem(
+                  route: AppRoutes.calendar,
+                  label: 'Calendar',
+                  icon: Icons.calendar_month_outlined,
+                  selectedIcon: Icons.calendar_month_rounded,
+                ),
+                const _ManagerNavItem(
+                  route: AppRoutes.profile,
+                  label: 'Profile',
+                  icon: Icons.person_outline_rounded,
+                  selectedIcon: Icons.person_rounded,
+                ),
+              ];
 
-    final location = GoRouterState.of(context).uri.path;
     int selectedIndex = 0;
     for (int i = 0; i < navItems.length; i++) {
       if (location == navItems[i].route ||
           (navItems[i].route != AppRoutes.managerDashboard &&
               navItems[i].route != AppRoutes.dashboard &&
+              navItems[i].route != RoutePaths.dashboard &&
               location.startsWith(navItems[i].route))) {
         selectedIndex = i;
         break;
@@ -194,51 +236,43 @@ class AppShell extends ConsumerWidget {
     final isDesktop = MediaQuery.of(context).size.width >= 800;
 
     if (isDesktop) {
-      final railItems = isManager
+      final railItems = (isManager && isBusinessOs)
           ? [
               const NavItem(
-                route: AppRoutes.managerDashboard,
+                route: RoutePaths.dashboard,
                 label: 'Overview',
-                icon: Icons.grid_view_outlined,
-                selectedIcon: Icons.grid_view_rounded,
-              ),
-              NavItem(
-                route: AppRoutes.tasks,
-                label: 'My Tasks',
-                icon: Icons.assignment_ind_outlined,
-                selectedIcon: Icons.assignment_ind_rounded,
-                badgeCount: myActiveCount > 0 ? myActiveCount : null,
+                icon: Icons.dashboard_outlined,
+                selectedIcon: Icons.dashboard_rounded,
               ),
               const NavItem(
-                route: AppRoutes.managerTasks,
-                label: 'All Tasks',
-                icon: Icons.assignment_outlined,
-                selectedIcon: Icons.assignment_rounded,
+                route: RoutePaths.leads,
+                label: 'Leads & CRM',
+                icon: Icons.filter_alt_outlined,
+                selectedIcon: Icons.filter_alt_rounded,
               ),
               const NavItem(
-                route: AppRoutes.calendar,
-                label: 'Calendar',
-                icon: Icons.calendar_month_outlined,
-                selectedIcon: Icons.calendar_month_rounded,
-              ),
-              NavItem(
-                route: AppRoutes.managerReviews,
-                label: 'Reviews & PRs',
-                icon: Icons.rate_review_outlined,
-                selectedIcon: Icons.rate_review_rounded,
-                badgeCount: pendingCount > 0 ? pendingCount : null,
-              ),
-              const NavItem(
-                route: AppRoutes.managerEmployees,
-                label: 'Team',
+                route: RoutePaths.customers,
+                label: 'Customers',
                 icon: Icons.people_outline_rounded,
                 selectedIcon: Icons.people_rounded,
               ),
               const NavItem(
-                route: AppRoutes.managerAuditLogs,
-                label: 'Audit Logs',
-                icon: Icons.fact_check_outlined,
-                selectedIcon: Icons.fact_check_rounded,
+                route: RoutePaths.operations,
+                label: 'Operations',
+                icon: Icons.hub_outlined,
+                selectedIcon: Icons.hub_rounded,
+              ),
+              const NavItem(
+                route: RoutePaths.invoices,
+                label: 'Invoices',
+                icon: Icons.receipt_long_outlined,
+                selectedIcon: Icons.receipt_long_rounded,
+              ),
+              const NavItem(
+                route: RoutePaths.team,
+                label: 'Org Team',
+                icon: Icons.badge_outlined,
+                selectedIcon: Icons.badge_rounded,
               ),
               const NavItem(
                 route: AppRoutes.profile,
@@ -247,39 +281,93 @@ class AppShell extends ConsumerWidget {
                 selectedIcon: Icons.person_rounded,
               ),
             ]
-          : [
-              const NavItem(
-                route: AppRoutes.dashboard,
-                label: 'Dashboard',
-                icon: Icons.grid_view_outlined,
-                selectedIcon: Icons.grid_view_rounded,
-              ),
-              NavItem(
-                route: AppRoutes.tasks,
-                label: 'My Tasks',
-                icon: Icons.assignment_outlined,
-                selectedIcon: Icons.assignment_rounded,
-                badgeCount: myActiveCount > 0 ? myActiveCount : null,
-              ),
-              const NavItem(
-                route: AppRoutes.calendar,
-                label: 'Calendar',
-                icon: Icons.calendar_month_outlined,
-                selectedIcon: Icons.calendar_month_rounded,
-              ),
-              const NavItem(
-                route: AppRoutes.profile,
-                label: 'Profile',
-                icon: Icons.person_outline_rounded,
-                selectedIcon: Icons.person_rounded,
-              ),
-            ];
+          : isManager
+              ? [
+                  const NavItem(
+                    route: AppRoutes.managerDashboard,
+                    label: 'Overview',
+                    icon: Icons.grid_view_outlined,
+                    selectedIcon: Icons.grid_view_rounded,
+                  ),
+                  NavItem(
+                    route: AppRoutes.tasks,
+                    label: 'My Tasks',
+                    icon: Icons.assignment_ind_outlined,
+                    selectedIcon: Icons.assignment_ind_rounded,
+                    badgeCount: myActiveCount > 0 ? myActiveCount : null,
+                  ),
+                  const NavItem(
+                    route: AppRoutes.managerTasks,
+                    label: 'All Tasks',
+                    icon: Icons.assignment_outlined,
+                    selectedIcon: Icons.assignment_rounded,
+                  ),
+                  const NavItem(
+                    route: AppRoutes.calendar,
+                    label: 'Calendar',
+                    icon: Icons.calendar_month_outlined,
+                    selectedIcon: Icons.calendar_month_rounded,
+                  ),
+                  NavItem(
+                    route: AppRoutes.managerReviews,
+                    label: 'Reviews & PRs',
+                    icon: Icons.rate_review_outlined,
+                    selectedIcon: Icons.rate_review_rounded,
+                    badgeCount: pendingCount > 0 ? pendingCount : null,
+                  ),
+                  const NavItem(
+                    route: AppRoutes.managerEmployees,
+                    label: 'Team',
+                    icon: Icons.people_outline_rounded,
+                    selectedIcon: Icons.people_rounded,
+                  ),
+                  const NavItem(
+                    route: AppRoutes.managerAuditLogs,
+                    label: 'Audit Logs',
+                    icon: Icons.fact_check_outlined,
+                    selectedIcon: Icons.fact_check_rounded,
+                  ),
+                  const NavItem(
+                    route: AppRoutes.profile,
+                    label: 'Profile',
+                    icon: Icons.person_outline_rounded,
+                    selectedIcon: Icons.person_rounded,
+                  ),
+                ]
+              : [
+                  const NavItem(
+                    route: AppRoutes.dashboard,
+                    label: 'Dashboard',
+                    icon: Icons.grid_view_outlined,
+                    selectedIcon: Icons.grid_view_rounded,
+                  ),
+                  NavItem(
+                    route: AppRoutes.tasks,
+                    label: 'My Tasks',
+                    icon: Icons.assignment_outlined,
+                    selectedIcon: Icons.assignment_rounded,
+                    badgeCount: myActiveCount > 0 ? myActiveCount : null,
+                  ),
+                  const NavItem(
+                    route: AppRoutes.calendar,
+                    label: 'Calendar',
+                    icon: Icons.calendar_month_outlined,
+                    selectedIcon: Icons.calendar_month_rounded,
+                  ),
+                  const NavItem(
+                    route: AppRoutes.profile,
+                    label: 'Profile',
+                    icon: Icons.person_outline_rounded,
+                    selectedIcon: Icons.person_rounded,
+                  ),
+                ];
 
       int selectedRailIndex = 0;
       for (int i = 0; i < railItems.length; i++) {
         if (location == railItems[i].route ||
             (railItems[i].route != AppRoutes.managerDashboard &&
                 railItems[i].route != AppRoutes.dashboard &&
+                railItems[i].route != RoutePaths.dashboard &&
                 location.startsWith(railItems[i].route))) {
           selectedRailIndex = i;
           break;
@@ -288,8 +376,10 @@ class AppShell extends ConsumerWidget {
 
       final activeSectionLabel = selectedRailIndex < railItems.length
           ? railItems[selectedRailIndex].label
-          : (isManager ? 'OVERVIEW' : 'DASHBOARD');
-      final rootBreadcrumb = isManager ? 'VALIXIS PORTAL • MANAGER' : 'VALIXIS PORTAL • EMPLOYEE';
+          : (isBusinessOs ? 'OVERVIEW' : (isManager ? 'OVERVIEW' : 'DASHBOARD'));
+      final rootBreadcrumb = isBusinessOs
+          ? 'VALIXIS BUSINESS OS • EXECUTIVE'
+          : (isManager ? 'VALIXIS PORTAL • MANAGER' : 'VALIXIS PORTAL • EMPLOYEE');
 
       return Scaffold(
         backgroundColor: AppColors.surfaceBase,
@@ -346,79 +436,129 @@ class AppShell extends ConsumerWidget {
                         ),
                         const Spacer(),
 
+                        // ── Valixis Suite Segmented Mode Switcher (MANAGERS ONLY) ──
+                        if (isManager) ...[
+                          Container(
+                            height: 36,
+                            padding: const EdgeInsets.all(3),
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceElevated,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppColors.divider, width: 1),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                // ── ⚡ VALIXIS PORTAL ──
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(7),
+                                  onTap: () {
+                                    if (isBusinessOs) {
+                                      context.go(AppRoutes.managerDashboard);
+                                    }
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      gradient: !isBusinessOs ? AppColors.brandGradient : null,
+                                      borderRadius: BorderRadius.circular(7),
+                                      boxShadow: !isBusinessOs
+                                          ? [
+                                              BoxShadow(
+                                                color: AppColors.brandCyan.withValues(alpha: 0.35),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.bolt_rounded,
+                                          size: 14,
+                                          color: !isBusinessOs ? Colors.white : AppColors.textMuted,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'PORTAL',
+                                          style: TextStyle(
+                                            color: !isBusinessOs ? Colors.white : AppColors.textMuted,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                // ── 💼 BUSINESS OS ──
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(7),
+                                  onTap: () {
+                                    if (!isBusinessOs) {
+                                      context.go(RoutePaths.dashboard);
+                                    }
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      gradient: isBusinessOs
+                                          ? const LinearGradient(
+                                              colors: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
+                                            )
+                                          : null,
+                                      borderRadius: BorderRadius.circular(7),
+                                      boxShadow: isBusinessOs
+                                          ? [
+                                              BoxShadow(
+                                                color: const Color(0xFF8B5CF6).withValues(alpha: 0.4),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.business_center_rounded,
+                                          size: 14,
+                                          color: isBusinessOs ? Colors.white : AppColors.textMuted,
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          'BUSINESS OS',
+                                          style: TextStyle(
+                                            color: isBusinessOs ? Colors.white : AppColors.textMuted,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Spacer(),
+                        ],
+
                         // Live Sync Status Pill
                         _SyncStatusBadge(syncState: syncState),
                         const SizedBox(width: AppSpacing.md),
 
                         // Notification Bell
                         const NotificationBellButton(),
-                        const SizedBox(width: AppSpacing.xs),
-
-                        // Effortless Business OS Switch Button (MANAGERS ONLY)
-                        if (isManager) ...[
-                          InkWell(
-                            borderRadius: BorderRadius.circular(20),
-                            onTap: () async {
-                              const url = 'https://valixis-manager.vercel.app';
-                              final uri = Uri.parse(url);
-                              try {
-                                if (await canLaunchUrl(uri)) {
-                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
-                                  return;
-                                }
-                              } catch (_) {}
-
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    behavior: SnackBarBehavior.floating,
-                                    backgroundColor: AppColors.surfaceElevated,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      side: const BorderSide(color: AppColors.brandBlue),
-                                    ),
-                                    content: Row(
-                                      children: const [
-                                        Icon(Icons.info_outline_rounded, color: AppColors.brandBlue, size: 18),
-                                        SizedBox(width: 8),
-                                        Text(
-                                          'VALIXIS Business OS will open here once deployed.',
-                                          style: TextStyle(color: AppColors.textPrimary),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: AppColors.brandBlue.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: AppColors.brandBlue.withValues(alpha: 0.4)),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(Icons.business_center_rounded, size: 13, color: AppColors.brandBlue),
-                                  SizedBox(width: 5),
-                                  Text(
-                                    'Business OS',
-                                    style: TextStyle(
-                                      color: AppColors.brandBlue,
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  SizedBox(width: 4),
-                                  Icon(Icons.open_in_new_rounded, size: 11, color: AppColors.brandBlue),
-                                ],
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                        ],
+                        const SizedBox(width: AppSpacing.sm),
 
                         // Manager / User Profile Node with Official Logo
                         InkWell(
@@ -574,9 +714,9 @@ class AppShell extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
-            const Text(
-              'VALIXIS PORTAL',
-              style: TextStyle(
+            Text(
+              isBusinessOs ? 'VALIXIS BUSINESS OS' : 'VALIXIS PORTAL',
+              style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 13,
                 fontWeight: FontWeight.w900,
@@ -594,7 +734,7 @@ class AppShell extends ConsumerWidget {
                 ),
               ),
               child: Text(
-                isManager ? 'MANAGER' : 'EMPLOYEE',
+                isBusinessOs ? 'EXECUTIVE' : (isManager ? 'MANAGER' : 'EMPLOYEE'),
                 style: AppTypography.telemetryHeader(
                   size: 7,
                   color: isManager ? AppColors.brandPurple : AppColors.brandCyan,
@@ -607,6 +747,22 @@ class AppShell extends ConsumerWidget {
         actions: [
           _SyncStatusBadge(syncState: syncState),
           const SizedBox(width: AppSpacing.xs),
+          if (isManager)
+            IconButton(
+              icon: Icon(
+                isBusinessOs ? Icons.bolt_rounded : Icons.business_center_rounded,
+                color: isBusinessOs ? AppColors.brandCyan : const Color(0xFF8B5CF6),
+                size: 20,
+              ),
+              tooltip: isBusinessOs ? 'Switch to Portal' : 'Switch to Business OS',
+              onPressed: () {
+                if (isBusinessOs) {
+                  context.go(AppRoutes.managerDashboard);
+                } else {
+                  context.go(RoutePaths.dashboard);
+                }
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.search_rounded, color: AppColors.brandCyan, size: 20),
             tooltip: 'Search',

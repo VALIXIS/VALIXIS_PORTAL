@@ -19,6 +19,16 @@ import '../../features/tasks/presentation/task_details_screen.dart';
 import '../../features/tasks/presentation/tasks_screen.dart';
 import '../../shared/layout/app_shell.dart';
 
+// Business OS Integrated Modules
+import '../../business_os/app/router/route_paths.dart';
+import '../../business_os/features/customers/presentation/pages/customers_page.dart';
+import '../../business_os/features/dashboard/presentation/pages/dashboard_page.dart';
+import '../../business_os/features/invoices/presentation/pages/invoices_page.dart';
+import '../../business_os/features/invoices/presentation/screens/invoice_builder_screen.dart';
+import '../../business_os/features/leads/presentation/pages/leads_page.dart';
+import '../../business_os/features/operations/presentation/pages/operations_page.dart';
+import '../../business_os/features/team/presentation/pages/team_page.dart';
+
 abstract final class AppRoutes {
   static const String splash = '/';
   static const String login = '/login';
@@ -33,6 +43,18 @@ abstract final class AppRoutes {
   static const String taskDetails = '/tasks/:id';
   static const String profile = '/profile';
   static const String calendar = '/calendar';
+
+  // Business OS Routes (Manager only)
+  static const String businessOs = RoutePaths.root;
+  static const String businessOsDashboard = RoutePaths.dashboard;
+  static const String businessOsLeads = RoutePaths.leads;
+  static const String businessOsCustomers = RoutePaths.customers;
+  static const String businessOsOperations = RoutePaths.operations;
+  static const String businessOsProjects = RoutePaths.projects;
+  static const String businessOsTasks = RoutePaths.tasks;
+  static const String businessOsInvoices = RoutePaths.invoices;
+  static const String businessOsInvoiceBuilder = RoutePaths.invoiceBuilder;
+  static const String businessOsTeam = RoutePaths.team;
 
   // Compatibility aliases
   static const String dashboard = '/dashboard';
@@ -89,7 +111,7 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
           }
 
           // Employee role
-          if (matched.startsWith('/manager')) {
+          if (matched.startsWith('/manager') || matched.startsWith('/business-os')) {
             return AppRoutes.unauthorized;
           }
 
@@ -212,6 +234,91 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
               pageBuilder: (context, state) => _fadePage(
                 key: state.pageKey,
                 child: const ProfileScreen(),
+              ),
+            ),
+            // ── Business OS Integrated Routes (Manager Only) ───────────────
+            GoRoute(
+              path: AppRoutes.businessOs,
+              redirect: (_, _) => AppRoutes.businessOsDashboard,
+            ),
+            GoRoute(
+              path: AppRoutes.businessOsDashboard,
+              name: 'businessOsDashboard',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const DashboardPage(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.businessOsLeads,
+              name: 'businessOsLeads',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const LeadsPage(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.businessOsCustomers,
+              name: 'businessOsCustomers',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const CustomersPage(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.businessOsOperations,
+              name: 'businessOsOperations',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const OperationsPage(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.businessOsProjects,
+              name: 'businessOsProjects',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const OperationsPage(initialTab: OperationsTab.projects),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.businessOsTasks,
+              name: 'businessOsTasks',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const OperationsPage(initialTab: OperationsTab.tasks),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.businessOsInvoices,
+              name: 'businessOsInvoices',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const InvoicesPage(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.businessOsInvoiceBuilder,
+              name: 'businessOsInvoiceBuilder',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: InvoiceBuilderScreen(
+                  onBack: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go(AppRoutes.businessOsInvoices);
+                    }
+                  },
+                ),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.businessOsTeam,
+              name: 'businessOsTeam',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const TeamPage(),
               ),
             ),
           ],

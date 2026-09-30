@@ -4,22 +4,22 @@ import 'package:flutter/material.dart';
 class RoutePaths {
   RoutePaths._();
 
-  static const String root = '/';
+  static const String root = '/business-os';
   static const String login = '/login';
   static const String signup = '/signup';
   static const String authLoading = '/auth-loading';
   static const String onboarding = '/onboarding';
 
   // Feature routes
-  static const String dashboard = '/dashboard';
-  static const String leads = '/leads';
-  static const String customers = '/customers';
-  static const String operations = '/operations';
-  static const String projects = '/projects';
-  static const String tasks = '/tasks';
-  static const String invoices = '/invoices';
-  static const String invoiceBuilder = '/invoices/builder';
-  static const String team = '/team';
+  static const String dashboard = '/business-os/dashboard';
+  static const String leads = '/business-os/leads';
+  static const String customers = '/business-os/customers';
+  static const String operations = '/business-os/operations';
+  static const String projects = '/business-os/projects';
+  static const String tasks = '/business-os/tasks';
+  static const String invoices = '/business-os/invoices';
+  static const String invoiceBuilder = '/business-os/invoices/builder';
+  static const String team = '/business-os/team';
 }
 
 /// Navigation destination descriptor used centrally across ValixisRail,
