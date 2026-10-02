@@ -29,6 +29,20 @@ import '../../business_os/features/leads/presentation/pages/leads_page.dart';
 import '../../business_os/features/operations/presentation/pages/operations_page.dart';
 import '../../business_os/features/team/presentation/pages/team_page.dart';
 
+// Flow Integrated Modules
+import '../../flow/flow_route_paths.dart';
+import '../../flow/features/workflows/workflows_screen.dart';
+import '../../flow/features/logs/logs_screen.dart';
+import '../../flow/features/analytics/analytics_screen.dart';
+
+// Pulse Integrated Modules
+import '../../pulse/pulse_route_paths.dart';
+import '../../pulse/pulse_scope.dart';
+import '../../pulse/features/dashboard/screens/executive_pulse_dashboard.dart';
+import '../../pulse/features/forensic/screens/forensic_explorer_screen.dart';
+import '../../pulse/features/predictive/predictive_screen.dart';
+import '../../pulse/features/anomalies/anomaly_inspector_screen.dart';
+
 abstract final class AppRoutes {
   static const String splash = '/';
   static const String login = '/login';
@@ -55,6 +69,19 @@ abstract final class AppRoutes {
   static const String businessOsInvoices = RoutePaths.invoices;
   static const String businessOsInvoiceBuilder = RoutePaths.invoiceBuilder;
   static const String businessOsTeam = RoutePaths.team;
+
+  // Flow Routes (Manager only)
+  static const String flow = FlowRoutePaths.root;
+  static const String flowWorkflows = FlowRoutePaths.workflows;
+  static const String flowLogs = FlowRoutePaths.logs;
+  static const String flowAnalytics = FlowRoutePaths.analytics;
+
+  // Pulse Routes (Manager only)
+  static const String pulse = PulseRoutePaths.root;
+  static const String pulseDashboard = PulseRoutePaths.dashboard;
+  static const String pulseForensic = PulseRoutePaths.forensic;
+  static const String pulsePredictive = PulseRoutePaths.predictive;
+  static const String pulseAnomalies = PulseRoutePaths.anomalies;
 
   // Compatibility aliases
   static const String dashboard = '/dashboard';
@@ -110,8 +137,11 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
             return null;
           }
 
-          // Employee role
-          if (matched.startsWith('/manager') || matched.startsWith('/business-os')) {
+          // Employee role - STRICT GATEKEEPING: Employees cannot access or know of manager/executive suites
+          if (matched.startsWith('/manager') ||
+              matched.startsWith('/business-os') ||
+              matched.startsWith('/flow') ||
+              matched.startsWith('/pulse')) {
             return AppRoutes.unauthorized;
           }
 
@@ -319,6 +349,82 @@ GoRouter _buildRouter(Ref ref, Listenable refreshListenable) => GoRouter(
               pageBuilder: (context, state) => _fadePage(
                 key: state.pageKey,
                 child: const TeamPage(),
+              ),
+            ),
+
+            // ── Flow Routes (Manager only) ───────────────────────────
+            GoRoute(
+              path: AppRoutes.flow,
+              name: 'flowRoot',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const WorkflowsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.flowWorkflows,
+              name: 'flowWorkflows',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const WorkflowsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.flowLogs,
+              name: 'flowLogs',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const LogsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.flowAnalytics,
+              name: 'flowAnalytics',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const AnalyticsScreen(),
+              ),
+            ),
+
+            // ── Pulse Routes (Manager only) ──────────────────────────
+            GoRoute(
+              path: AppRoutes.pulse,
+              name: 'pulseRoot',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const PulseScope(child: ExecutivePulseDashboard()),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.pulseDashboard,
+              name: 'pulseDashboard',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const PulseScope(child: ExecutivePulseDashboard()),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.pulseForensic,
+              name: 'pulseForensic',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const PulseScope(child: ForensicExplorerScreen()),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.pulsePredictive,
+              name: 'pulsePredictive',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const PulseScope(child: PredictiveScreen()),
+              ),
+            ),
+            GoRoute(
+              path: AppRoutes.pulseAnomalies,
+              name: 'pulseAnomalies',
+              pageBuilder: (context, state) => _fadePage(
+                key: state.pageKey,
+                child: const PulseScope(child: AnomalyInspectorScreen()),
               ),
             ),
           ],

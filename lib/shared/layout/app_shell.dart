@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../app/router/app_router.dart';
 import '../../business_os/app/router/route_paths.dart';
+import '../../flow/flow_route_paths.dart';
+import '../../pulse/pulse_route_paths.dart';
 import '../../core/constants/app_colors.dart';
 import '../../core/constants/app_spacing.dart';
 import '../../core/constants/app_typography.dart';
@@ -109,6 +111,9 @@ class AppShell extends ConsumerWidget {
 
     final location = GoRouterState.of(context).uri.path;
     final isBusinessOs = location.startsWith('/business-os');
+    final isFlow = location.startsWith('/flow');
+    final isPulse = location.startsWith('/pulse');
+    final isPortal = !isBusinessOs && !isFlow && !isPulse;
 
     final navItems = (isManager && isBusinessOs)
         ? [
@@ -149,6 +154,66 @@ class AppShell extends ConsumerWidget {
               selectedIcon: Icons.person_rounded,
             ),
           ]
+        : (isManager && isFlow)
+            ? [
+                const _ManagerNavItem(
+                  route: FlowRoutePaths.workflows,
+                  label: 'Workflows',
+                  icon: Icons.account_tree_outlined,
+                  selectedIcon: Icons.account_tree_rounded,
+                ),
+                const _ManagerNavItem(
+                  route: FlowRoutePaths.logs,
+                  label: 'Logs',
+                  icon: Icons.terminal_outlined,
+                  selectedIcon: Icons.terminal_rounded,
+                ),
+                const _ManagerNavItem(
+                  route: FlowRoutePaths.analytics,
+                  label: 'Telemetry',
+                  icon: Icons.insights_outlined,
+                  selectedIcon: Icons.insights_rounded,
+                ),
+                const _ManagerNavItem(
+                  route: AppRoutes.profile,
+                  label: 'Profile',
+                  icon: Icons.person_outline_rounded,
+                  selectedIcon: Icons.person_rounded,
+                ),
+              ]
+        : (isManager && isPulse)
+            ? [
+                const _ManagerNavItem(
+                  route: PulseRoutePaths.dashboard,
+                  label: 'Dashboard',
+                  icon: Icons.monitor_heart_outlined,
+                  selectedIcon: Icons.monitor_heart_rounded,
+                ),
+                const _ManagerNavItem(
+                  route: PulseRoutePaths.forensic,
+                  label: 'Forensic',
+                  icon: Icons.biotech_outlined,
+                  selectedIcon: Icons.biotech_rounded,
+                ),
+                const _ManagerNavItem(
+                  route: PulseRoutePaths.predictive,
+                  label: 'Predictive',
+                  icon: Icons.psychology_outlined,
+                  selectedIcon: Icons.psychology_rounded,
+                ),
+                const _ManagerNavItem(
+                  route: PulseRoutePaths.anomalies,
+                  label: 'Anomalies',
+                  icon: Icons.warning_amber_rounded,
+                  selectedIcon: Icons.warning_rounded,
+                ),
+                const _ManagerNavItem(
+                  route: AppRoutes.profile,
+                  label: 'Profile',
+                  icon: Icons.person_outline_rounded,
+                  selectedIcon: Icons.person_rounded,
+                ),
+              ]
         : isManager
             ? [
                 const _ManagerNavItem(
@@ -281,6 +346,66 @@ class AppShell extends ConsumerWidget {
                 selectedIcon: Icons.person_rounded,
               ),
             ]
+          : (isManager && isFlow)
+              ? [
+                  const NavItem(
+                    route: FlowRoutePaths.workflows,
+                    label: 'Workflows',
+                    icon: Icons.account_tree_outlined,
+                    selectedIcon: Icons.account_tree_rounded,
+                  ),
+                  const NavItem(
+                    route: FlowRoutePaths.logs,
+                    label: 'Audit Logs',
+                    icon: Icons.terminal_outlined,
+                    selectedIcon: Icons.terminal_rounded,
+                  ),
+                  const NavItem(
+                    route: FlowRoutePaths.analytics,
+                    label: 'Analytics',
+                    icon: Icons.insights_outlined,
+                    selectedIcon: Icons.insights_rounded,
+                  ),
+                  const NavItem(
+                    route: AppRoutes.profile,
+                    label: 'Profile',
+                    icon: Icons.person_outline_rounded,
+                    selectedIcon: Icons.person_rounded,
+                  ),
+                ]
+          : (isManager && isPulse)
+              ? [
+                  const NavItem(
+                    route: PulseRoutePaths.dashboard,
+                    label: 'Dashboard',
+                    icon: Icons.monitor_heart_outlined,
+                    selectedIcon: Icons.monitor_heart_rounded,
+                  ),
+                  const NavItem(
+                    route: PulseRoutePaths.forensic,
+                    label: 'Forensic Pivot',
+                    icon: Icons.biotech_outlined,
+                    selectedIcon: Icons.biotech_rounded,
+                  ),
+                  const NavItem(
+                    route: PulseRoutePaths.predictive,
+                    label: 'Predictive AI',
+                    icon: Icons.psychology_outlined,
+                    selectedIcon: Icons.psychology_rounded,
+                  ),
+                  const NavItem(
+                    route: PulseRoutePaths.anomalies,
+                    label: 'Anomalies',
+                    icon: Icons.warning_amber_rounded,
+                    selectedIcon: Icons.warning_rounded,
+                  ),
+                  const NavItem(
+                    route: AppRoutes.profile,
+                    label: 'Profile',
+                    icon: Icons.person_outline_rounded,
+                    selectedIcon: Icons.person_rounded,
+                  ),
+                ]
           : isManager
               ? [
                   const NavItem(
@@ -368,6 +493,8 @@ class AppShell extends ConsumerWidget {
             (railItems[i].route != AppRoutes.managerDashboard &&
                 railItems[i].route != AppRoutes.dashboard &&
                 railItems[i].route != RoutePaths.dashboard &&
+                railItems[i].route != FlowRoutePaths.workflows &&
+                railItems[i].route != PulseRoutePaths.dashboard &&
                 location.startsWith(railItems[i].route))) {
           selectedRailIndex = i;
           break;
@@ -376,10 +503,18 @@ class AppShell extends ConsumerWidget {
 
       final activeSectionLabel = selectedRailIndex < railItems.length
           ? railItems[selectedRailIndex].label
-          : (isBusinessOs ? 'OVERVIEW' : (isManager ? 'OVERVIEW' : 'DASHBOARD'));
-      final rootBreadcrumb = isBusinessOs
-          ? 'VALIXIS BUSINESS OS • EXECUTIVE'
-          : (isManager ? 'VALIXIS PORTAL • MANAGER' : 'VALIXIS PORTAL • EMPLOYEE');
+          : (isPulse
+              ? 'DASHBOARD'
+              : isFlow
+                  ? 'WORKFLOWS'
+                  : (isBusinessOs ? 'OVERVIEW' : (isManager ? 'OVERVIEW' : 'DASHBOARD')));
+      final rootBreadcrumb = isPulse
+          ? 'VALIXIS PULSE • TELEMETRY'
+          : isFlow
+              ? 'VALIXIS FLOW • AUTOMATION'
+              : isBusinessOs
+                  ? 'VALIXIS BUSINESS OS • EXECUTIVE'
+                  : (isManager ? 'VALIXIS PORTAL • MANAGER' : 'VALIXIS PORTAL • EMPLOYEE');
 
       return Scaffold(
         backgroundColor: AppColors.surfaceBase,
@@ -453,17 +588,17 @@ class AppShell extends ConsumerWidget {
                                 InkWell(
                                   borderRadius: BorderRadius.circular(7),
                                   onTap: () {
-                                    if (isBusinessOs) {
+                                    if (!isPortal) {
                                       context.go(AppRoutes.managerDashboard);
                                     }
                                   },
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
-                                      gradient: !isBusinessOs ? AppColors.brandGradient : null,
+                                      gradient: isPortal ? AppColors.brandGradient : null,
                                       borderRadius: BorderRadius.circular(7),
-                                      boxShadow: !isBusinessOs
+                                      boxShadow: isPortal
                                           ? [
                                               BoxShadow(
                                                 color: AppColors.brandCyan.withValues(alpha: 0.35),
@@ -479,13 +614,13 @@ class AppShell extends ConsumerWidget {
                                         Icon(
                                           Icons.bolt_rounded,
                                           size: 14,
-                                          color: !isBusinessOs ? Colors.white : AppColors.textMuted,
+                                          color: isPortal ? Colors.white : AppColors.textMuted,
                                         ),
-                                        const SizedBox(width: 6),
+                                        const SizedBox(width: 5),
                                         Text(
                                           'PORTAL',
                                           style: TextStyle(
-                                            color: !isBusinessOs ? Colors.white : AppColors.textMuted,
+                                            color: isPortal ? Colors.white : AppColors.textMuted,
                                             fontSize: 11,
                                             fontWeight: FontWeight.w800,
                                             letterSpacing: 0.8,
@@ -495,7 +630,7 @@ class AppShell extends ConsumerWidget {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(width: 4),
+                                const SizedBox(width: 3),
                                 // ── 💼 BUSINESS OS ──
                                 InkWell(
                                   borderRadius: BorderRadius.circular(7),
@@ -506,7 +641,7 @@ class AppShell extends ConsumerWidget {
                                   },
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 200),
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                                     decoration: BoxDecoration(
                                       gradient: isBusinessOs
                                           ? const LinearGradient(
@@ -532,11 +667,113 @@ class AppShell extends ConsumerWidget {
                                           size: 14,
                                           color: isBusinessOs ? Colors.white : AppColors.textMuted,
                                         ),
-                                        const SizedBox(width: 6),
+                                        const SizedBox(width: 5),
                                         Text(
                                           'BUSINESS OS',
                                           style: TextStyle(
                                             color: isBusinessOs ? Colors.white : AppColors.textMuted,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 3),
+                                // ── 🔄 FLOW ──
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(7),
+                                  onTap: () {
+                                    if (!isFlow) {
+                                      context.go(FlowRoutePaths.workflows);
+                                    }
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      gradient: isFlow
+                                          ? const LinearGradient(
+                                              colors: [Color(0xFF6366F1), Color(0xFF06B6D4)],
+                                            )
+                                          : null,
+                                      borderRadius: BorderRadius.circular(7),
+                                      boxShadow: isFlow
+                                          ? [
+                                              BoxShadow(
+                                                color: const Color(0xFF6366F1).withValues(alpha: 0.4),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.account_tree_rounded,
+                                          size: 14,
+                                          color: isFlow ? Colors.white : AppColors.textMuted,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          'FLOW',
+                                          style: TextStyle(
+                                            color: isFlow ? Colors.white : AppColors.textMuted,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w800,
+                                            letterSpacing: 0.8,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 3),
+                                // ── 📈 PULSE ──
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(7),
+                                  onTap: () {
+                                    if (!isPulse) {
+                                      context.go(PulseRoutePaths.dashboard);
+                                    }
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      gradient: isPulse
+                                          ? const LinearGradient(
+                                              colors: [Color(0xFF10B981), Color(0xFF06B6D4)],
+                                            )
+                                          : null,
+                                      borderRadius: BorderRadius.circular(7),
+                                      boxShadow: isPulse
+                                          ? [
+                                              BoxShadow(
+                                                color: const Color(0xFF10B981).withValues(alpha: 0.4),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                          : null,
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          Icons.monitor_heart_rounded,
+                                          size: 14,
+                                          color: isPulse ? Colors.white : AppColors.textMuted,
+                                        ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          'PULSE',
+                                          style: TextStyle(
+                                            color: isPulse ? Colors.white : AppColors.textMuted,
                                             fontSize: 11,
                                             fontWeight: FontWeight.w800,
                                             letterSpacing: 0.8,
@@ -715,7 +952,13 @@ class AppShell extends ConsumerWidget {
             ),
             const SizedBox(width: AppSpacing.sm),
             Text(
-              isBusinessOs ? 'VALIXIS BUSINESS OS' : 'VALIXIS PORTAL',
+              isPulse
+                  ? 'VALIXIS PULSE'
+                  : isFlow
+                      ? 'VALIXIS FLOW'
+                      : isBusinessOs
+                          ? 'VALIXIS BUSINESS OS'
+                          : 'VALIXIS PORTAL',
               style: const TextStyle(
                 color: AppColors.textPrimary,
                 fontSize: 13,
@@ -734,7 +977,13 @@ class AppShell extends ConsumerWidget {
                 ),
               ),
               child: Text(
-                isBusinessOs ? 'EXECUTIVE' : (isManager ? 'MANAGER' : 'EMPLOYEE'),
+                isPulse
+                    ? 'TELEMETRY'
+                    : isFlow
+                        ? 'AUTOMATION'
+                        : isBusinessOs
+                            ? 'EXECUTIVE'
+                            : (isManager ? 'MANAGER' : 'EMPLOYEE'),
                 style: AppTypography.telemetryHeader(
                   size: 7,
                   color: isManager ? AppColors.brandPurple : AppColors.brandCyan,
@@ -748,20 +997,73 @@ class AppShell extends ConsumerWidget {
           _SyncStatusBadge(syncState: syncState),
           const SizedBox(width: AppSpacing.xs),
           if (isManager)
-            IconButton(
+            PopupMenuButton<String>(
               icon: Icon(
-                isBusinessOs ? Icons.bolt_rounded : Icons.business_center_rounded,
-                color: isBusinessOs ? AppColors.brandCyan : const Color(0xFF8B5CF6),
+                isPulse
+                    ? Icons.monitor_heart_rounded
+                    : isFlow
+                        ? Icons.account_tree_rounded
+                        : isBusinessOs
+                            ? Icons.business_center_rounded
+                            : Icons.bolt_rounded,
+                color: isPulse
+                    ? const Color(0xFF10B981)
+                    : isFlow
+                        ? const Color(0xFF6366F1)
+                        : isBusinessOs
+                            ? const Color(0xFF8B5CF6)
+                            : AppColors.brandCyan,
                 size: 20,
               ),
-              tooltip: isBusinessOs ? 'Switch to Portal' : 'Switch to Business OS',
-              onPressed: () {
-                if (isBusinessOs) {
-                  context.go(AppRoutes.managerDashboard);
-                } else {
-                  context.go(RoutePaths.dashboard);
-                }
-              },
+              tooltip: 'Valixis Executive Suite Switcher',
+              color: AppColors.surfaceElevated,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: AppColors.divider),
+              ),
+              onSelected: (route) => context.go(route),
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: AppRoutes.managerDashboard,
+                  child: Row(
+                    children: [
+                      Icon(Icons.bolt_rounded, color: AppColors.brandCyan, size: 16),
+                      SizedBox(width: 8),
+                      Text('VALIXIS PORTAL', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: RoutePaths.dashboard,
+                  child: Row(
+                    children: [
+                      Icon(Icons.business_center_rounded, color: Color(0xFF8B5CF6), size: 16),
+                      SizedBox(width: 8),
+                      Text('BUSINESS OS', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: FlowRoutePaths.workflows,
+                  child: Row(
+                    children: [
+                      Icon(Icons.account_tree_rounded, color: Color(0xFF6366F1), size: 16),
+                      SizedBox(width: 8),
+                      Text('FLOW AUTOMATION', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: PulseRoutePaths.dashboard,
+                  child: Row(
+                    children: [
+                      Icon(Icons.monitor_heart_rounded, color: Color(0xFF10B981), size: 16),
+                      SizedBox(width: 8),
+                      Text('PULSE TELEMETRY', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           IconButton(
             icon: const Icon(Icons.search_rounded, color: AppColors.brandCyan, size: 20),

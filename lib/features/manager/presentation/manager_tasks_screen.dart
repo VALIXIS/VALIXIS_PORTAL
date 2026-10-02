@@ -32,7 +32,7 @@ class _ManagerTasksScreenState extends ConsumerState<ManagerTasksScreen> {
   late String _selectedStatus;
   SprintApp _selectedApp = SprintApp.all;
   SprintMember _selectedMember = SprintMember.all;
-  SprintDay _selectedDay = SprintDay.all;
+  final SprintDay _selectedDay = SprintDay.all;
   String _selectedSortField = 'deadline';
   bool _sortAscending = true;
   bool _onlyAssignedToMe = false;

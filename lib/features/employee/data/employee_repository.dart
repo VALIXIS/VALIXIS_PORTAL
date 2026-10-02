@@ -28,13 +28,11 @@ class EmployeeRepository {
             .maybeSingle();
       }
 
-      if (data == null) {
-        data = await _client
-            .from('employees')
-            .select()
-            .eq('id', userId)
-            .maybeSingle();
-      }
+      data ??= await _client
+          .from('employees')
+          .select()
+          .eq('id', userId)
+          .maybeSingle();
 
       if (data != null) {
         return EmployeeMapper.fromJson(data);
