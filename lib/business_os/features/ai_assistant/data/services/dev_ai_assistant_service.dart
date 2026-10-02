@@ -60,46 +60,38 @@ class DevAiAssistantService implements AiAssistantService {
     if (p == 'Summarize pending invoices') {
       return '''### Pending Invoices Overview
 
-Here is the current business summary of pending and outstanding receivables for your organization:
+There are currently no outstanding overdue invoices requiring escalation. All accounts receivable are up to date.
 
-* **Total Pending Receivables**: \$24,500.00
-* **Overdue Invoices**: 2 invoices (INV-2026-002, INV-2026-005)
-* **Upcoming Due (Next 7 Days)**: \$10,000.00
+* **Total Pending Receivables**: \$0.00
+* **Overdue Invoices**: 0
 
-#### Recommended Actions:
-1. Send payment reminder to **Acme Corp** for invoice **INV-2026-002** (\$14,500.00).
-2. Confirm receipt of wire transfer for **Starlight Media** (INV-2026-005).''';
+Please create new invoices in the Invoices section to track billables.''';
     }
 
-    if (p == 'Draft follow-up email to Acme') {
-      return '''### Proposed Follow-Up Email: Acme Corp
+    if (p == 'Draft follow-up email to Acme' || p.toLowerCase().contains('draft follow-up')) {
+      return '''### Proposed Follow-Up Email
 
-**Subject**: Following up on VALIXIS Business OS Proposal & Next Steps
+**Subject**: Following up on our recent conversation & Next Steps
 
-Hi Acme Team,
+Hi Team,
 
 I hope this email finds you well.
 
-I wanted to touch base regarding our recent enterprise proposal for VALIXIS Business OS. We have updated the custom deployment scope and SLA metrics as discussed.
+I wanted to touch base regarding our recent discussion. We have prepared the requested documentation and deployment roadmap.
 
-Could we schedule a brief 15-minute sync this Thursday at 2:00 PM EST to address any remaining questions and review final sign-off?
+Could we schedule a brief 15-minute sync to address any questions and review next steps?
 
 Best regards,  
-*VALIXIS Business Executive Team*''';
+*VALIXIS Executive Team*''';
     }
 
     if (p == 'Analyze lead conversion rate') {
       return '''### CRM Lead Pipeline & Conversion Analysis
 
-Based on current organization CRM performance metrics:
+CRM pipeline analytics will calculate real-time conversion rates as inbound leads and opportunities are recorded.
 
-* **Active Pipeline Value**: \$185,000.00 across 14 active leads.
-* **Overall Lead Conversion Rate**: **24.5%** (exceeds industry benchmark of 18.2%).
-* **Average Sales Cycle**: 14.2 days from initial inquiry to closed-won deal.
-
-#### Key Strategic Insights:
-* **Top Performing Source**: Inbound enterprise inquiries convert at **42%**.
-* **Stage Bottleneck**: 3 leads currently awaiting security review in the Proposal stage.''';
+* **Active Pipeline Status**: Clean pipeline ready for intake.
+* **Stage Tracking**: Lead stages (New, Contacted, Qualified, Proposal, Won) are monitored live.''';
     }
 
     return '''### VALIXIS Business Assistant Analysis
@@ -110,7 +102,7 @@ Based on your organization context:
 * Operational metrics remain healthy across CRM, Invoicing, and Task Delivery.
 * All customer communications and financial records are synchronized in real-time.
 
-Please let me know if you would like me to generate a detailed report or draft specific communications!''';
+Please let me know if you would like me to generate a detailed report or assist with operations!''';
   }
 
   @override

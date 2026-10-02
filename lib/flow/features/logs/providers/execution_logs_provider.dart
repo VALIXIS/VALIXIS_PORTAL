@@ -46,7 +46,7 @@ class ExecutionLogsNotifier extends StateNotifier<ExecutionLogsState> {
   ExecutionLogsNotifier()
       : super(
           ExecutionLogsState(
-            logs: ExecutionLog.sampleLogs,
+            logs: const [],
             searchQuery: '',
             selectedStatusFilter: 'all',
           ),

@@ -8,54 +8,7 @@ class DevNotificationsRepository implements NotificationsRepository {
   final StreamController<NotificationItem> _realtimeController =
       StreamController<NotificationItem>.broadcast();
 
-  DevNotificationsRepository() {
-    _seedDevData();
-  }
-
-  void _seedDevData() {
-    final now = DateTime.now();
-    _items.addAll([
-      NotificationItem(
-        id: 'ntf_dev_001',
-        organizationId: 'org_dev_001',
-        userId: 'usr_dev_001',
-        title: 'New lead assigned',
-        message: 'Lead Acme Corp Enterprise Deal has been assigned to you.',
-        type: 'lead_assigned',
-        isRead: false,
-        link: '/leads',
-        entityType: 'lead',
-        entityId: 'lead_dev_001',
-        createdAt: now.subtract(const Duration(minutes: 12)),
-      ),
-      NotificationItem(
-        id: 'ntf_dev_002',
-        organizationId: 'org_dev_001',
-        userId: 'usr_dev_001',
-        title: 'Invoice paid',
-        message: 'Invoice INV-2026-004 (\$14,500.00) has been successfully paid.',
-        type: 'invoice_paid',
-        isRead: false,
-        link: '/invoices',
-        entityType: 'invoice',
-        entityId: 'inv_dev_004',
-        createdAt: now.subtract(const Duration(hours: 2)),
-      ),
-      NotificationItem(
-        id: 'ntf_dev_003',
-        organizationId: 'org_dev_001',
-        userId: 'usr_dev_001',
-        title: 'Task assigned',
-        message: 'Task "Review Q4 Security Audit & Compliance" assigned to you.',
-        type: 'task_assigned',
-        isRead: true,
-        link: '/tasks',
-        entityType: 'task',
-        entityId: 'task_dev_003',
-        createdAt: now.subtract(const Duration(hours: 24)),
-      ),
-    ]);
-  }
+  DevNotificationsRepository();
 
   @override
   Future<List<NotificationItem>> getNotifications(

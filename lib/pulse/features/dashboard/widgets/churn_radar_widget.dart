@@ -13,7 +13,7 @@ class ChurnRadarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<dynamic> accounts = churnData['at_risk_accounts'] ?? [];
     final double overallRisk =
-        (churnData['overall_churn_risk_pct'] as num?)?.toDouble() ?? 3.4;
+        (churnData['overall_churn_risk_pct'] as num?)?.toDouble() ?? 0.0;
 
     return Container(
       padding: const EdgeInsets.all(24),

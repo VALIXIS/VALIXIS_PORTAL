@@ -445,9 +445,9 @@ class _ExecutivePulseDashboardState extends State<ExecutivePulseDashboard> {
                                   index: 0,
                                   child: KpiMetricCard(
                                     title: 'ARR Velocity',
-                                    value: currentSnap?.arrUsd ?? 1250000.0,
+                                    value: currentSnap?.arrUsd ?? 0.0,
                                     prefix: '\$',
-                                    trendLabel: '+14.2%',
+                                    trendLabel: 'No Data',
                                     isPositiveTrend: true,
                                     icon: Icons.monetization_on,
                                     accentColor: PulseColors.electricCyan,
@@ -457,9 +457,9 @@ class _ExecutivePulseDashboardState extends State<ExecutivePulseDashboard> {
                                   index: 1,
                                   child: KpiMetricCard(
                                     title: 'Active Flow Automations',
-                                    value: (currentSnap?.activeUsers ?? 4850)
+                                    value: (currentSnap?.activeUsers ?? 0)
                                         .toDouble(),
-                                    trendLabel: '+8.4%',
+                                    trendLabel: 'No Data',
                                     isPositiveTrend: true,
                                     icon: Icons.alt_route,
                                     accentColor: PulseColors.emeraldGrowth,
@@ -469,10 +469,10 @@ class _ExecutivePulseDashboardState extends State<ExecutivePulseDashboard> {
                                   index: 2,
                                   child: KpiMetricCard(
                                     title: 'CRM Conversion Rate',
-                                    value: 28.4,
+                                    value: 0.0,
                                     suffix: '%',
                                     decimalPlaces: 1,
-                                    trendLabel: '+3.2%',
+                                    trendLabel: 'No Data',
                                     isPositiveTrend: true,
                                     icon: Icons.trending_up,
                                     accentColor: PulseColors.accentPurple,
@@ -482,7 +482,7 @@ class _ExecutivePulseDashboardState extends State<ExecutivePulseDashboard> {
                                   index: 3,
                                   child: KpiMetricCard(
                                     title: 'System Latency',
-                                    value: (currentSnap?.webhookLatencyP95 ?? 22)
+                                    value: (currentSnap?.webhookLatencyP95 ?? 0)
                                         .toDouble(),
                                     suffix: 'ms',
                                     trendLabel: 'p95 SLA',

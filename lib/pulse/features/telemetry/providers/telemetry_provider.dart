@@ -99,37 +99,8 @@ class TelemetryProvider extends ChangeNotifier {
   }
 
   void _initializeDemoData() {
-    final now = DateTime.now();
-    _snapshots = List.generate(25, (index) {
-      final ts = now.subtract(Duration(hours: index));
-      return MetricSnapshot(
-        id: 'snap_$index',
-        organizationId: _organizationId,
-        timestamp: ts,
-        arrUsd: 1250000.0 + (index * 2500.0) + (index % 3 == 0 ? 15000 : 0),
-        activeUsers: 4850 + (index * 12),
-        churnRiskScore: 3.4 + (index * 0.05),
-        webhookLatencyP95: 22 + (index % 5),
-        statusHealth:
-            index == 0 ? 'critical' : (index % 4 == 0 ? 'growth' : 'optimal'),
-      );
-    });
-
-    _anomalies = [
-      AnomalyAlert(
-        id: 'anom_101',
-        organizationId: _organizationId,
-        title: 'VALIXIS Flow Webhook Failure Rate Spike (18.4%)',
-        severity: 'critical',
-        source: 'VALIXIS Flow',
-        metric: 'webhook_failure_rate',
-        currentValue: 18.4,
-        thresholdValue: 5.0,
-        status: 'active',
-        createdAt: DateTime.now().subtract(const Duration(minutes: 12)),
-      ),
-    ];
-
+    _snapshots = [];
+    _anomalies = [];
     _fetchPredictiveData();
     _saveStateToLocalCache();
   }

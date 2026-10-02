@@ -44,125 +44,154 @@ class ThroughputChartCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Row(
-                  children: [
-                    _buildLegendItem('Successful', AppColors.electricCyan),
-                    const SizedBox(width: 12),
-                    _buildLegendItem('Failed', AppColors.coralRed),
-                  ],
-                ),
+                if (items.isNotEmpty)
+                  Row(
+                    children: [
+                      _buildLegendItem('Successful', AppColors.electricCyan),
+                      const SizedBox(width: 12),
+                      _buildLegendItem('Failed', AppColors.coralRed),
+                    ],
+                  ),
               ],
             ),
             const SizedBox(height: 24),
-            SizedBox(
-              height: 220,
-              child: BarChart(
-                BarChartData(
-                  alignment: BarChartAlignment.spaceAround,
-                  maxY: maxY > 0 ? maxY * 1.15 : 10,
-                  barTouchData: BarTouchData(
-                    enabled: true,
-                    touchTooltipData: BarTouchTooltipData(
-                      getTooltipColor: (_) => AppColors.obsidianSurface,
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        final item = items[groupIndex];
-                        return BarTooltipItem(
-                          '${item.date}\nTotal: ${item.count}\nPassed: ${item.successCount}',
-                          const TextStyle(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12,
-                          ),
-                        );
-                      },
+            if (items.isEmpty)
+              Container(
+                height: 220,
+                alignment: Alignment.center,
+                child: const Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.stacked_bar_chart, size: 36, color: AppColors.textMuted),
+                    SizedBox(height: 12),
+                    Text(
+                      'No execution telemetry recorded for this time range.',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 13,
+                      ),
                     ),
-                  ),
-                  titlesData: FlTitlesData(
-                    show: true,
-                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                    leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 36,
-                        getTitlesWidget: (value, meta) {
-                          if (value == 0) return const SizedBox.shrink();
-                          return Text(
-                            value.toInt().toString(),
-                            style: const TextStyle(
-                              color: AppColors.textMuted,
-                              fontSize: 10,
+                    SizedBox(height: 4),
+                    Text(
+                      'Throughput volume bars will render as triggers and webhooks fire.',
+                      style: TextStyle(
+                        color: AppColors.textMuted,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              SizedBox(
+                height: 220,
+                child: BarChart(
+                  BarChartData(
+                    alignment: BarChartAlignment.spaceAround,
+                    maxY: maxY > 0 ? maxY * 1.15 : 10,
+                    barTouchData: BarTouchData(
+                      enabled: true,
+                      touchTooltipData: BarTouchTooltipData(
+                        getTooltipColor: (_) => AppColors.obsidianSurface,
+                        getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                          final item = items[groupIndex];
+                          return BarTooltipItem(
+                            '${item.date}\nTotal: ${item.count}\nPassed: ${item.successCount}',
+                            const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
                             ),
                           );
                         },
                       ),
                     ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) {
-                          final idx = value.toInt();
-                          if (idx >= 0 && idx < items.length) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Text(
-                                items[idx].date,
-                                style: const TextStyle(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 11,
-                                ),
+                    titlesData: FlTitlesData(
+                      show: true,
+                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 36,
+                          getTitlesWidget: (value, meta) {
+                            if (value == 0) return const SizedBox.shrink();
+                            return Text(
+                              value.toInt().toString(),
+                              style: const TextStyle(
+                                color: AppColors.textMuted,
+                                fontSize: 10,
                               ),
                             );
-                          }
-                          return const SizedBox.shrink();
-                        },
+                          },
+                        ),
+                      ),
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) {
+                            final idx = value.toInt();
+                            if (idx >= 0 && idx < items.length) {
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Text(
+                                  items[idx].date,
+                                  style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  gridData: FlGridData(
-                    show: true,
-                    drawVerticalLine: false,
-                    horizontalInterval: maxY > 0 ? (maxY / 4) : 1,
-                    getDrawingHorizontalLine: (value) {
-                      return FlLine(
-                        color: AppColors.obsidianBorder.withValues(alpha: 0.5),
-                        strokeWidth: 1,
-                      );
-                    },
-                  ),
-                  borderData: FlBorderData(show: false),
-                  barGroups: items.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final item = entry.value;
-                    final failed = item.count - item.successCount;
+                    gridData: FlGridData(
+                      show: true,
+                      drawVerticalLine: false,
+                      horizontalInterval: maxY > 0 ? (maxY / 4) : 1,
+                      getDrawingHorizontalLine: (value) {
+                        return FlLine(
+                          color: AppColors.obsidianBorder.withValues(alpha: 0.5),
+                          strokeWidth: 1,
+                        );
+                      },
+                    ),
+                    borderData: FlBorderData(show: false),
+                    barGroups: items.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final item = entry.value;
+                      final failed = item.count - item.successCount;
 
-                    return BarChartGroupData(
-                      x: index,
-                      barRods: [
-                        BarChartRodData(
-                          toY: item.count.toDouble(),
-                          color: AppColors.electricCyan,
-                          width: 16,
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(4),
-                            topRight: Radius.circular(4),
+                      return BarChartGroupData(
+                        x: index,
+                        barRods: [
+                          BarChartRodData(
+                            toY: item.count.toDouble(),
+                            color: AppColors.electricCyan,
+                            width: 16,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(4),
+                              topRight: Radius.circular(4),
+                            ),
+                            rodStackItems: [
+                              BarChartRodStackItem(0, item.successCount.toDouble(), AppColors.electricCyan),
+                              if (failed > 0)
+                                BarChartRodStackItem(
+                                  item.successCount.toDouble(),
+                                  item.count.toDouble(),
+                                  AppColors.coralRed,
+                                ),
+                            ],
                           ),
-                          rodStackItems: [
-                            BarChartRodStackItem(0, item.successCount.toDouble(), AppColors.electricCyan),
-                            if (failed > 0)
-                              BarChartRodStackItem(
-                                item.successCount.toDouble(),
-                                item.count.toDouble(),
-                                AppColors.coralRed,
-                              ),
-                          ],
-                        ),
-                      ],
-                    );
-                  }).toList(),
+                        ],
+                      );
+                    }).toList(),
+                  ),
                 ),
               ),
-            ),
           ],
         ),
       ),

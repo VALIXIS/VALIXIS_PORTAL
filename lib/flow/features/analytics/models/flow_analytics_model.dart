@@ -60,25 +60,19 @@ class FlowAnalytics {
     );
   }
 
-  static FlowAnalytics mock() {
+    static FlowAnalytics empty() {
     return const FlowAnalytics(
-      totalRuns: 1428,
-      successfulRuns: 1406,
-      failedRuns: 22,
-      successRatePercent: 98.46,
-      avgOverallLatencyMs: 435.2,
-      avgWebhookLatencyMs: 42.5,
-      avgAiLatencyMs: 320.0,
-      avgActionLatencyMs: 72.7,
-      dailyVolume: [
-        DailyVolumeItem(date: 'Oct 06', count: 180, successCount: 178),
-        DailyVolumeItem(date: 'Oct 07', count: 210, successCount: 206),
-        DailyVolumeItem(date: 'Oct 08', count: 195, successCount: 192),
-        DailyVolumeItem(date: 'Oct 09', count: 240, successCount: 236),
-        DailyVolumeItem(date: 'Oct 10', count: 205, successCount: 202),
-        DailyVolumeItem(date: 'Oct 11', count: 228, successCount: 225),
-        DailyVolumeItem(date: 'Oct 12', count: 170, successCount: 167),
-      ],
+      totalRuns: 0,
+      successfulRuns: 0,
+      failedRuns: 0,
+      successRatePercent: 100.0,
+      avgOverallLatencyMs: 0.0,
+      avgWebhookLatencyMs: 0.0,
+      avgAiLatencyMs: 0.0,
+      avgActionLatencyMs: 0.0,
+      dailyVolume: [],
     );
   }
+
+  static FlowAnalytics mock() => empty();
 }

@@ -9,76 +9,7 @@ class DevTeamRepository implements TeamRepository {
   DevTeamRepository({List<TeamMember>? initialMembers})
     : _members = initialMembers ?? _defaultMembers();
 
-  static List<TeamMember> _defaultMembers() {
-    final now = DateTime.now();
-    return [
-      TeamMember(
-        id: 'mem_dev_001',
-        userId: 'usr_dev_001',
-        organizationId: 'org_dev_001',
-        name: 'Subhash',
-        email: 'subhash@valixis.io',
-        role: 'owner',
-        jobTitle: 'Principal Architect & Co-Founder',
-        isActive: true,
-        activeTaskCount: 3,
-        totalTaskCount: 14,
-        createdAt: now.subtract(const Duration(days: 90)),
-      ),
-      TeamMember(
-        id: 'mem_dev_002',
-        userId: 'usr_dev_002',
-        organizationId: 'org_dev_001',
-        name: 'Jyothsna',
-        email: 'jyothsna@valixis.io',
-        role: 'admin',
-        jobTitle: 'Lead Backend & Data Architect',
-        isActive: true,
-        activeTaskCount: 5,
-        totalTaskCount: 22,
-        createdAt: now.subtract(const Duration(days: 85)),
-      ),
-      TeamMember(
-        id: 'mem_dev_003',
-        userId: 'usr_dev_003',
-        organizationId: 'org_dev_001',
-        name: 'Devon Patel',
-        email: 'devon.p@valixis.io',
-        role: 'employee',
-        jobTitle: 'Senior Frontend Engineer',
-        isActive: true,
-        activeTaskCount: 8, // Overloaded threshold (>= 7)
-        totalTaskCount: 19,
-        createdAt: now.subtract(const Duration(days: 45)),
-      ),
-      TeamMember(
-        id: 'mem_dev_004',
-        userId: 'usr_dev_004',
-        organizationId: 'org_dev_001',
-        name: 'Elena Rostova',
-        email: 'elena.r@valixis.io',
-        role: 'employee',
-        jobTitle: 'Client Operations Specialist',
-        isActive: true,
-        activeTaskCount: 2, // Optimal threshold (< 4)
-        totalTaskCount: 11,
-        createdAt: now.subtract(const Duration(days: 30)),
-      ),
-      TeamMember(
-        id: 'mem_dev_005',
-        userId: 'usr_dev_005',
-        organizationId: 'org_dev_001',
-        name: 'Marcus Vance',
-        email: 'marcus.v@valixis.io',
-        role: 'employee',
-        jobTitle: 'Quality Assurance & CI Lead',
-        isActive: true,
-        activeTaskCount: 0, // Optimal threshold (< 4)
-        totalTaskCount: 7,
-        createdAt: now.subtract(const Duration(days: 15)),
-      ),
-    ];
-  }
+  static List<TeamMember> _defaultMembers() => const [];
 
   @override
   Future<List<TeamMember>> getMembers(String organizationId) async {

@@ -24,8 +24,7 @@ class _ForensicExplorerScreenState extends State<ForensicExplorerScreen> {
   }
 
   void _loadDataset() {
-    // Generate 5,000 synthetic high-throughput forensic records
-    _records = ForensicRecord.generateDataset(5000);
+    _records = [];
     setState(() {
       _isLoading = false;
     });

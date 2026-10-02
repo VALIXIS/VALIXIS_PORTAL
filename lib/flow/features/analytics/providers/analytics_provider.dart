@@ -33,7 +33,7 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
   AnalyticsNotifier()
       : super(
           AnalyticsState(
-            analytics: FlowAnalytics.mock(),
+            analytics: FlowAnalytics.empty(),
           ),
         );
 
@@ -42,7 +42,7 @@ class AnalyticsNotifier extends StateNotifier<AnalyticsState> {
     await Future<void>.delayed(const Duration(milliseconds: 250));
     state = state.copyWith(
       isLoading: false,
-      analytics: FlowAnalytics.mock(),
+      analytics: FlowAnalytics.empty(),
     );
   }
 }

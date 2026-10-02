@@ -75,7 +75,30 @@ class LogsScreen extends ConsumerWidget {
 
                 // Logs Table List
                 Expanded(
-                  child: ListView.separated(
+                  child: state.filteredLogs.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: const [
+                              Icon(Icons.receipt_long_outlined, size: 48, color: AppColors.textMuted),
+                              SizedBox(height: 16),
+                              Text(
+                                'No Execution Runs Found',
+                                style: TextStyle(
+                                  color: AppColors.textPrimary,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                'Trigger a workflow or fire an inbound webhook to view live execution traces.',
+                                style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                              ),
+                            ],
+                          ),
+                        )
+                      : ListView.separated(
                     itemCount: state.filteredLogs.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 6),
                     itemBuilder: (context, index) {

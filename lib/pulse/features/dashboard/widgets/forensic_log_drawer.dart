@@ -24,7 +24,7 @@ class _ForensicLogDrawerState extends State<ForensicLogDrawer> {
   @override
   void initState() {
     super.initState();
-    _forensicRecords = ForensicRecord.generateDataset(5000);
+    _forensicRecords = [];
   }
 
   @override
