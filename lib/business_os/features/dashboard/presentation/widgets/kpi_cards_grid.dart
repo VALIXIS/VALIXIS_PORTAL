@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../shared/widgets/glass_container.dart';
@@ -82,11 +83,14 @@ class KpiCardsGrid extends StatelessWidget {
 
         if (crossAxisCount == 1) {
           return Column(
-            children: cards
+            children: cards.asMap().entries
                 .map(
-                  (card) => Padding(
+                  (entry) => Padding(
                     padding: const EdgeInsets.only(bottom: 12),
-                    child: card,
+                    child: entry.value
+                        .animate()
+                        .fadeIn(delay: Duration(milliseconds: entry.key * 60), duration: 280.ms, curve: Curves.easeOutCubic)
+                        .slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
                   ),
                 )
                 .toList(),
@@ -99,11 +103,14 @@ class KpiCardsGrid extends StatelessWidget {
         return Wrap(
           spacing: 16,
           runSpacing: 16,
-          children: cards
+          children: cards.asMap().entries
               .map(
-                (card) => SizedBox(
+                (entry) => SizedBox(
                   width: itemWidth,
-                  child: card,
+                  child: entry.value
+                      .animate()
+                      .fadeIn(delay: Duration(milliseconds: entry.key * 60), duration: 280.ms, curve: Curves.easeOutCubic)
+                      .slideY(begin: 0.06, end: 0, curve: Curves.easeOutCubic),
                 ),
               )
               .toList(),
@@ -207,7 +214,7 @@ class KpiCardsGrid extends StatelessWidget {
   }
 }
 
-class _KpiCardItem extends StatelessWidget {
+class _KpiCardItem extends StatefulWidget {
   final String title;
   final String value;
   final String subtitle;
@@ -228,79 +235,111 @@ class _KpiCardItem extends StatelessWidget {
   });
 
   @override
+  State<_KpiCardItem> createState() => _KpiCardItemState();
+}
+
+class _KpiCardItemState extends State<_KpiCardItem> {
+  bool _isHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return GlassContainer(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return MouseRegion(
+      onEnter: (_) => setState(() => _isHovered = true),
+      onExit: (_) => setState(() => _isHovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.translationValues(0, _isHovered ? -3.0 : 0.0, 0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: _isHovered
+              ? [
+                  BoxShadow(
+                    color: widget.accentColor.withValues(alpha: 0.22),
+                    blurRadius: 18,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : null,
+        ),
+        child: GlassContainer(
+          padding: const EdgeInsets.all(20),
+          customBorder: _isHovered
+              ? Border.all(color: widget.accentColor.withValues(alpha: 0.5), width: 1.2)
+              : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: AppTypography.label.copyWith(
-                    color: AppColors.textSecondary,
-                    letterSpacing: 0.8,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      widget.title,
+                      style: AppTypography.label.copyWith(
+                        color: _isHovered ? AppColors.textPrimary : AppColors.textSecondary,
+                        letterSpacing: 0.8,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                  const SizedBox(width: 8),
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: widget.accentColor.withValues(alpha: _isHovered ? 0.24 : 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: widget.accentColor.withValues(alpha: _isHovered ? 0.6 : 0.25),
+                      ),
+                    ),
+                    child: Icon(widget.icon, size: 18, color: widget.accentColor),
+                  ),
+                ],
               ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: accentColor.withValues(alpha: 0.25),
-                  ),
+              const SizedBox(height: 12),
+              Text(
+                widget.value,
+                style: AppTypography.metric.copyWith(
+                  fontSize: 24,
+                  letterSpacing: -0.5,
                 ),
-                child: Icon(icon, size: 18, color: accentColor),
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: (widget.isPositive ? AppColors.success : AppColors.warning)
+                          .withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      widget.trend,
+                      style: AppTypography.caption.copyWith(
+                        color: widget.isPositive ? AppColors.success : AppColors.warning,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      widget.subtitle,
+                      style: AppTypography.caption.copyWith(
+                        color: AppColors.textMuted,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: AppTypography.metric.copyWith(
-              fontSize: 24,
-              letterSpacing: -0.5,
-            ),
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: (isPositive ? AppColors.success : AppColors.warning)
-                      .withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  trend,
-                  style: AppTypography.caption.copyWith(
-                    color: isPositive ? AppColors.success : AppColors.warning,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  subtitle,
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textMuted,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -194,15 +195,32 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
                 Row(
                   children: [
                     Container(
-                      width: 6,
-                      height: 6,
+                      width: 7,
+                      height: 7,
                       decoration: BoxDecoration(
                         color: state.isStreaming
-                            ? AppColors.secondary
+                            ? AppColors.primary
                             : AppColors.success,
                         shape: BoxShape.circle,
+                        boxShadow: state.isStreaming
+                            ? [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(alpha: 0.6),
+                                  blurRadius: 6,
+                                ),
+                              ]
+                            : null,
                       ),
-                    ),
+                    )
+                        .animate(
+                          target: state.isStreaming ? 1 : 0,
+                          onPlay: (c) => c.repeat(reverse: true),
+                        )
+                        .fade(
+                          begin: 0.3,
+                          end: 1.0,
+                          duration: const Duration(milliseconds: 400),
+                        ),
                     const SizedBox(width: 6),
                     Flexible(
                       child: Text(

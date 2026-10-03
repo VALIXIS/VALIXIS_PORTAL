@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../models/execution_log_model.dart';
@@ -217,7 +218,10 @@ class LogDetailDrawer extends ConsumerWidget {
           ),
         ],
       ),
-    );
+    )
+        .animate()
+        .fadeIn(duration: const Duration(milliseconds: 240), curve: Curves.easeOutCubic)
+        .slideX(begin: 0.12, end: 0, curve: Curves.easeOutCubic);
   }
 
   Widget _buildCodeSnippetHeader(String title, String rawText, BuildContext context) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import '../../../core/motion/staggered_card_animator.dart';
 import '../../../core/theme/pulse_theme.dart';
@@ -155,20 +156,51 @@ class _ExecutivePulseDashboardState extends State<ExecutivePulseDashboard> {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Container(
-                                      width: 36,
-                                      height: 36,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        gradient: LinearGradient(
-                                          colors: [
-                                            PulseColors.electricCyan,
-                                            PulseColors.accentPurple
-                                          ],
+                                    Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        Container(
+                                          width: 44,
+                                          height: 44,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: PulseColors.electricCyan.withValues(alpha: 0.25),
+                                          ),
+                                        )
+                                            .animate(onPlay: (c) => c.repeat())
+                                            .scale(
+                                              begin: const Offset(0.7, 0.7),
+                                              end: const Offset(1.6, 1.6),
+                                              duration: const Duration(milliseconds: 2200),
+                                              curve: Curves.easeOutQuad,
+                                            )
+                                            .fadeOut(
+                                              duration: const Duration(milliseconds: 2200),
+                                              curve: Curves.easeOutQuad,
+                                            ),
+                                        Container(
+                                          width: 36,
+                                          height: 36,
+                                          decoration: const BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            gradient: LinearGradient(
+                                              colors: [
+                                                PulseColors.electricCyan,
+                                                PulseColors.accentPurple
+                                              ],
+                                            ),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: PulseColors.electricCyan,
+                                                blurRadius: 10,
+                                                spreadRadius: 1,
+                                              ),
+                                            ],
+                                          ),
+                                          child: const Icon(Icons.bolt,
+                                              color: Colors.white, size: 22),
                                         ),
-                                      ),
-                                      child: const Icon(Icons.bolt,
-                                          color: Colors.white, size: 22),
+                                      ],
                                     ),
                                     const SizedBox(width: 12),
                                     Column(

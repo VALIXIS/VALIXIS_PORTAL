@@ -439,18 +439,26 @@ CustomTransitionPage<void> _fadePage({
     CustomTransitionPage<void>(
       key: key,
       child: child,
-      transitionDuration: const Duration(milliseconds: 300),
+      transitionDuration: const Duration(milliseconds: 260),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final tween = Tween<Offset>(
-          begin: const Offset(0.03, 0.0),
+        final slideTween = Tween<Offset>(
+          begin: const Offset(0.015, 0.0),
           end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeOutCubic));
+
+        final scaleTween = Tween<double>(
+          begin: 0.988,
+          end: 1.0,
         ).chain(CurveTween(curve: Curves.easeOutCubic));
 
         return FadeTransition(
           opacity: animation,
           child: SlideTransition(
-            position: animation.drive(tween),
-            child: child,
+            position: animation.drive(slideTween),
+            child: ScaleTransition(
+              scale: animation.drive(scaleTween),
+              child: child,
+            ),
           ),
         );
       },
