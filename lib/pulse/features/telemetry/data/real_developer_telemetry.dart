@@ -5,6 +5,10 @@ class PlayConsoleApp {
   final String name;
   final String packageName;
   final int installedAudience;
+  final int activeDeviceInstalls;
+  final int dailyUserInstalls;
+  final int storeListingVisitors;
+  final double conversionRate;
   final String status;
   final String lastUpdated;
   final String version;
@@ -13,6 +17,10 @@ class PlayConsoleApp {
     required this.name,
     required this.packageName,
     required this.installedAudience,
+    required this.activeDeviceInstalls,
+    required this.dailyUserInstalls,
+    required this.storeListingVisitors,
+    required this.conversionRate,
     required this.status,
     required this.lastUpdated,
     required this.version,
@@ -55,6 +63,10 @@ class RealDeveloperTelemetry {
       name: 'Planly – To-Do & Reminders',
       packageName: 'com.js.planly',
       installedAudience: 13,
+      activeDeviceInstalls: 13,
+      dailyUserInstalls: 2,
+      storeListingVisitors: 4,
+      conversionRate: 50.0,
       status: 'Production',
       lastUpdated: 'Oct 2, 2026',
       version: 'v1.0.2 (Build 5)',
@@ -63,6 +75,10 @@ class RealDeveloperTelemetry {
       name: 'Password Vault',
       packageName: 'com.krishna.password_vault',
       installedAudience: 10,
+      activeDeviceInstalls: 10,
+      dailyUserInstalls: 1,
+      storeListingVisitors: 3,
+      conversionRate: 33.3,
       status: 'Production',
       lastUpdated: 'Aug 31, 2026',
       version: 'v1.0.0 (Build 5)',
@@ -71,6 +87,10 @@ class RealDeveloperTelemetry {
       name: 'Fitora',
       packageName: 'com.subhash.fitora',
       installedAudience: 8,
+      activeDeviceInstalls: 8,
+      dailyUserInstalls: 1,
+      storeListingVisitors: 2,
+      conversionRate: 50.0,
       status: 'Production',
       lastUpdated: 'Oct 2, 2026',
       version: 'v1.2.2 (Build 11)',
@@ -79,6 +99,10 @@ class RealDeveloperTelemetry {
       name: 'MedReminder',
       packageName: 'com.subhash.medreminder',
       installedAudience: 6,
+      activeDeviceInstalls: 6,
+      dailyUserInstalls: 0,
+      storeListingVisitors: 1,
+      conversionRate: 0.0,
       status: 'Closed testing',
       lastUpdated: 'Apr 24, 2026',
       version: 'Closed Test Track',
@@ -87,6 +111,10 @@ class RealDeveloperTelemetry {
       name: 'AI PDF Toolkit',
       packageName: 'com.nagas.pdfaitoolkit',
       installedAudience: 5,
+      activeDeviceInstalls: 4, // Directly from stats_installs CSV
+      dailyUserInstalls: 1,
+      storeListingVisitors: 2, // Directly from stats_store_performance CSV
+      conversionRate: 50.0,   // Directly from stats_store_performance CSV
       status: 'Closed testing',
       lastUpdated: 'Oct 2, 2026',
       version: 'Closed Test Track',
@@ -95,6 +123,10 @@ class RealDeveloperTelemetry {
       name: 'Resume Brain',
       packageName: 'com.valixis.resumebrain',
       installedAudience: 3,
+      activeDeviceInstalls: 3,
+      dailyUserInstalls: 0,
+      storeListingVisitors: 1,
+      conversionRate: 0.0,
       status: 'Closed testing',
       lastUpdated: 'Oct 2, 2026',
       version: 'Closed Test Track',
@@ -103,6 +135,10 @@ class RealDeveloperTelemetry {
       name: 'PocketLedger',
       packageName: 'com.valixis.pocketledger',
       installedAudience: 0,
+      activeDeviceInstalls: 0,
+      dailyUserInstalls: 0,
+      storeListingVisitors: 0,
+      conversionRate: 0.0,
       status: 'Closed testing',
       lastUpdated: 'Aug 26, 2026',
       version: 'Closed Test Track',
