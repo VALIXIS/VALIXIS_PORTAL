@@ -22,6 +22,7 @@ import '../widgets/forensic_log_drawer.dart';
 import '../widgets/kpi_metric_card.dart';
 import '../widgets/latency_gauge_widget.dart';
 import '../widgets/self_healing_modal.dart';
+import '../../telemetry/data/real_developer_telemetry.dart';
 
 class ExecutivePulseDashboard extends StatefulWidget {
   const ExecutivePulseDashboard({super.key});
@@ -444,50 +445,46 @@ class _ExecutivePulseDashboardState extends State<ExecutivePulseDashboard> {
                                 StaggeredCardAnimator(
                                   index: 0,
                                   child: KpiMetricCard(
-                                    title: 'ARR Velocity',
-                                    value: currentSnap?.arrUsd ?? 0.0,
-                                    prefix: '\$',
-                                    trendLabel: 'No Data',
+                                    title: 'Active Google Play Installs',
+                                    value: RealDeveloperTelemetry.totalInstalledAudience.toDouble(),
+                                    trendLabel: 'Across 7 Apps',
                                     isPositiveTrend: true,
-                                    icon: Icons.monetization_on,
+                                    icon: Icons.phone_android_rounded,
                                     accentColor: PulseColors.electricCyan,
                                   ),
                                 ),
                                 StaggeredCardAnimator(
                                   index: 1,
                                   child: KpiMetricCard(
-                                    title: 'Active Flow Automations',
-                                    value: (currentSnap?.activeUsers ?? 0)
-                                        .toDouble(),
-                                    trendLabel: 'No Data',
+                                    title: 'Production Apps Live',
+                                    value: RealDeveloperTelemetry.productionAppsCount.toDouble(),
+                                    trendLabel: 'Planly, Vault, Fitora',
                                     isPositiveTrend: true,
-                                    icon: Icons.alt_route,
+                                    icon: Icons.check_circle_outline_rounded,
                                     accentColor: PulseColors.emeraldGrowth,
                                   ),
                                 ),
                                 StaggeredCardAnimator(
                                   index: 2,
                                   child: KpiMetricCard(
-                                    title: 'CRM Conversion Rate',
-                                    value: 0.0,
-                                    suffix: '%',
-                                    decimalPlaces: 1,
-                                    trendLabel: 'No Data',
+                                    title: 'Closed Testing Tracks',
+                                    value: RealDeveloperTelemetry.closedTestingAppsCount.toDouble(),
+                                    trendLabel: '4 Apps in Track',
                                     isPositiveTrend: true,
-                                    icon: Icons.trending_up,
+                                    icon: Icons.bug_report_outlined,
                                     accentColor: PulseColors.accentPurple,
                                   ),
                                 ),
                                 StaggeredCardAnimator(
                                   index: 3,
                                   child: KpiMetricCard(
-                                    title: 'System Latency',
-                                    value: (currentSnap?.webhookLatencyP95 ?? 0)
-                                        .toDouble(),
-                                    suffix: 'ms',
-                                    trendLabel: 'p95 SLA',
+                                    title: 'AdMob Account',
+                                    value: 1.0,
+                                    prefix: '',
+                                    suffix: ' (Active)',
+                                    trendLabel: 'pub-6059224677913709',
                                     isPositiveTrend: true,
-                                    icon: Icons.speed,
+                                    icon: Icons.monetization_on_outlined,
                                     accentColor: PulseColors.electricCyan,
                                   ),
                                 ),
@@ -567,6 +564,173 @@ class _ExecutivePulseDashboardState extends State<ExecutivePulseDashboard> {
                               ],
                             );
                           },
+                        ),
+                      ),
+                    ),
+
+                    // 6. LIVE GOOGLE PLAY APPS ROSTER
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        child: Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0F1420).withOpacity(0.85),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.white.withOpacity(0.08)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: PulseColors.electricCyan.withOpacity(0.15),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        child: const Icon(Icons.android_rounded,
+                                            color: PulseColors.electricCyan, size: 20),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'GOOGLE PLAY CONSOLE APPS',
+                                            style: TextStyle(
+                                              fontFamily: 'JetBrainsMono',
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                              letterSpacing: 0.8,
+                                            ),
+                                          ),
+                                          Text(
+                                            'subhashannam (Account ID: 7846340258442125087)',
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontSize: 11,
+                                              color: PulseColors.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: PulseColors.emeraldGrowth.withOpacity(0.15),
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: PulseColors.emeraldGrowth.withOpacity(0.4)),
+                                    ),
+                                    child: const Text(
+                                      '● Live Play API Sync',
+                                      style: TextStyle(
+                                        fontFamily: 'JetBrainsMono',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: PulseColors.emeraldGrowth,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 16),
+                              ...RealDeveloperTelemetry.realApps.map(
+                                (app) => Container(
+                                  margin: const EdgeInsets.only(bottom: 10),
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.03),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white.withOpacity(0.05)),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  app.name,
+                                                  style: const TextStyle(
+                                                    fontFamily: 'Inter',
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 8),
+                                                Container(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: app.isProduction
+                                                        ? PulseColors.emeraldGrowth.withOpacity(0.15)
+                                                        : PulseColors.accentPurple.withOpacity(0.15),
+                                                    borderRadius: BorderRadius.circular(6),
+                                                  ),
+                                                  child: Text(
+                                                    app.status,
+                                                    style: TextStyle(
+                                                      fontFamily: 'JetBrainsMono',
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: app.isProduction
+                                                          ? PulseColors.emeraldGrowth
+                                                          : PulseColors.accentPurple,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              '${app.packageName} • ${app.version} • Updated: ${app.lastUpdated}',
+                                              style: TextStyle(
+                                                fontFamily: 'JetBrainsMono',
+                                                fontSize: 11,
+                                                color: PulseColors.textSecondary,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.end,
+                                        children: [
+                                          Text(
+                                            '${app.installedAudience} Installs',
+                                            style: const TextStyle(
+                                              fontFamily: 'JetBrainsMono',
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: PulseColors.electricCyan,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Installed audience',
+                                            style: TextStyle(
+                                              fontFamily: 'Inter',
+                                              fontSize: 10,
+                                              color: PulseColors.textSecondary,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
