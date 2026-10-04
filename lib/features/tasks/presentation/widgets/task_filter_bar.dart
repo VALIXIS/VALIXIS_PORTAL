@@ -40,6 +40,7 @@ class TaskFilterBar extends StatelessWidget {
     this.onMemberChanged,
     this.onDayChanged,
     this.showMemberFilter = true,
+    this.isJyothsnaView = false,
   });
 
   final String searchQuery;
@@ -48,6 +49,7 @@ class TaskFilterBar extends StatelessWidget {
   final SprintApp selectedApp;
   final SprintMember selectedMember;
   final SprintDay selectedDay;
+  final bool isJyothsnaView;
 
   final ValueChanged<String> onSearchChanged;
   final ValueChanged<TaskSortOption> onSortChanged;
@@ -119,11 +121,15 @@ class TaskFilterBar extends StatelessWidget {
   }
 
   Widget _buildAppFilterChips() {
+    final availableApps = (isJyothsnaView || selectedMember == SprintMember.jyothsna)
+        ? [SprintApp.all, SprintApp.desk, SprintApp.pulse]
+        : SprintApp.values;
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
-        children: SprintApp.values.map((app) {
+        children: availableApps.map((app) {
           final isSelected = selectedApp == app;
           return Padding(
             padding: const EdgeInsets.only(right: 8),

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/models/task.dart';
 
-/// Multi-app sprint target mobile applications.
+/// Multi-app sprint & co-founder project suite.
 enum SprintApp {
-  all('All Apps', AppColors.brandCyan, Icons.apps_rounded),
+  all('All Projects', AppColors.brandCyan, Icons.apps_rounded),
+  desk('Desk', Color(0xFF8B5CF6), Icons.support_agent_rounded),
+  pulse('Pulse', Color(0xFF00E5FF), Icons.monitor_heart_rounded),
   fitora('Fitora', Color(0xFF10B981), Icons.directions_run_rounded),
   planly('Planly', Color(0xFF8B5CF6), Icons.calendar_month_rounded),
   aiPdfMaker('AI PDF Maker', Color(0xFFF59E0B), Icons.picture_as_pdf_rounded),
@@ -18,11 +20,17 @@ enum SprintApp {
 
   String get displayName => label;
 
-  /// Resolves the app from task repository, branch, title, or prompt content.
+  /// Resolves the app/project from task repository, branch, title, or prompt content.
   static SprintApp fromTask(Task task) {
     final search = '${task.githubRepo ?? ''} ${task.title} ${task.description ?? ''} ${task.branchName ?? ''} ${task.objective ?? ''}'
         .toLowerCase();
 
+    if (search.contains('desk') || search.contains('helpdesk') || search.contains('support')) {
+      return SprintApp.desk;
+    }
+    if (search.contains('pulse') || search.contains('telemetry') || search.contains('forensic')) {
+      return SprintApp.pulse;
+    }
     if (search.contains('fitora') || search.contains('fitness') || search.contains('workout') || search.contains('diet')) {
       return SprintApp.fitora;
     }
@@ -39,9 +47,10 @@ enum SprintApp {
   }
 }
 
-/// Sprint team members for 5-developer workload isolation.
+/// Sprint team members & co-founders for workload isolation.
 enum SprintMember {
   all('All Members', 'ALL', AppColors.brandCyan),
+  jyothsna('Jyothsna', 'J', Color(0xFF8B5CF6)),
   hasitha('Hasitha', 'H', Color(0xFFEC4899)),
   vignesh('Vignesh', 'V', Color(0xFF3B82F6)),
   krishna('Krishna', 'K', Color(0xFF10B981)),

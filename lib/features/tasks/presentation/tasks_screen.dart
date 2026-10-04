@@ -8,6 +8,7 @@ import '../../../shared/components/app_button.dart';
 import '../../../shared/components/app_shimmer.dart';
 import '../../../shared/components/empty_state.dart';
 import '../../../shared/models/task.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
 import '../../auth/presentation/providers/role_provider.dart';
 import '../domain/models/sprint_models.dart';
 import 'providers/tasks_provider.dart';
@@ -97,6 +98,9 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
     final tasksAsync = ref.watch(tasksProvider);
     final roleAsync = ref.watch(roleProvider);
     final isManager = roleAsync.valueOrNull?.isManager ?? false;
+    final userAsync = ref.watch(authNotifierProvider);
+    final currentUserEmail = userAsync.valueOrNull?.email?.toLowerCase() ?? '';
+    final isJyothsna = currentUserEmail.contains('jyothsna');
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -123,7 +127,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                     ),
                     SizedBox(height: 4),
                     Text(
-                      '2-Week Sprint across Fitora, Planly, AI PDF Maker & Resume Brain',
+                      'Enterprise & Sprint Operations Board',
                       style: TextStyle(
                         color: AppColors.textMuted,
                         fontSize: 14,
@@ -202,6 +206,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               selectedMember: _selectedMember,
               selectedDay: _selectedDay,
               showMemberFilter: isManager,
+              isJyothsnaView: isJyothsna,
               onSearchChanged: (q) => setState(() => _searchQuery = q),
               onSortChanged: (s) => setState(() => _sortOption = s),
               onStatusChanged: (status) => setState(() => _statusFilter = status),
