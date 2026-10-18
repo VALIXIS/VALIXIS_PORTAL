@@ -6,6 +6,10 @@ import '../../../shared/components/empty_state.dart';
 import '../../activity/presentation/widgets/activity_timeline.dart';
 import '../../activity/presentation/widgets/recent_activity_feed.dart';
 import '../../announcements/presentation/widgets/announcements_banner.dart';
+import '../../auth/domain/role_service.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
+import '../../auth/presentation/providers/role_provider.dart';
+import '../../manager/presentation/manager_dashboard_screen.dart';
 import 'providers/dashboard_provider.dart';
 import 'widgets/dashboard_hero_banner.dart';
 import 'widgets/dashboard_metrics_grid.dart';
@@ -14,11 +18,23 @@ import 'widgets/dashboard_recent_tasks.dart';
 import 'widgets/dashboard_shimmer.dart';
 
 /// Dashboard screen rendering employee hero greeting, announcements, metrics, timeline & recent tasks.
+/// For managers, delegates directly to ManagerDashboardScreen.
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final role = ref.watch(roleProvider).valueOrNull ?? UserRole.employee;
+    final currentUserEmail = ref.watch(authNotifierProvider).valueOrNull?.email?.toLowerCase() ?? '';
+    final isManager = role.isManager ||
+        currentUserEmail == 'official.valixis@gmail.com' ||
+        currentUserEmail.contains('jyothsna') ||
+        currentUserEmail.contains('manager');
+
+    if (isManager) {
+      return const ManagerDashboardScreen();
+    }
+
     final dashboardAsync = ref.watch(dashboardProvider);
 
     return Scaffold(

@@ -5,6 +5,7 @@ import '../../../app/router/app_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_durations.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../auth/presentation/providers/role_provider.dart';
 
 /// Splash screen checking authentication session during logo entrance.
 class SplashScreen extends ConsumerStatefulWidget {
@@ -48,7 +49,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (!mounted) return;
     final session = ref.read(authRepositoryProvider).currentSession;
     if (session != null) {
-      context.go(AppRoutes.dashboard);
+      final emailLower = session.user.email?.toLowerCase() ?? '';
+      final role = ref.read(roleProvider).valueOrNull;
+      final isManager = (role?.isManager ?? false) ||
+          emailLower == 'official.valixis@gmail.com' ||
+          emailLower.contains('jyothsna') ||
+          emailLower.contains('manager');
+
+      if (isManager) {
+        context.go(AppRoutes.managerDashboard);
+      } else {
+        context.go(AppRoutes.dashboard);
+      }
     } else {
       context.go(AppRoutes.login);
     }

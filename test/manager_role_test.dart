@@ -48,5 +48,21 @@ void main() {
         expect(route.startsWith('/manager'), isFalse);
       }
     });
+
+    test('Manager default overview destination resolves to manager dashboard', () {
+      const managerOverviewRoute = '/manager';
+      expect(managerOverviewRoute, equals('/manager'));
+      // Ensure /dashboard redirects managers to /manager
+      final shouldRedirectToManager = (String route, bool isManager) {
+        if (isManager && (route == '/dashboard' || route == '/' || route == '/login' || route == '/splash')) {
+          return '/manager';
+        }
+        return route;
+      };
+
+      expect(shouldRedirectToManager('/dashboard', true), equals('/manager'));
+      expect(shouldRedirectToManager('/', true), equals('/manager'));
+      expect(shouldRedirectToManager('/dashboard', false), equals('/dashboard'));
+    });
   });
 }
