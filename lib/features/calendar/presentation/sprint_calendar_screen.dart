@@ -10,6 +10,7 @@ import '../../../shared/components/empty_state.dart';
 import '../../../shared/components/glass_card.dart';
 import '../../../shared/models/task.dart';
 import '../../auth/domain/role_service.dart';
+import '../../auth/presentation/providers/auth_provider.dart';
 import '../../auth/presentation/providers/role_provider.dart';
 import '../../tasks/domain/models/sprint_models.dart';
 import '../../tasks/presentation/providers/tasks_provider.dart';
@@ -753,15 +754,38 @@ class _SprintCalendarScreenState extends ConsumerState<SprintCalendarScreen> {
   }
 
   Widget _buildAppFilterChips(Map<SprintApp, int> appCounts, List<Task> allTasks) {
+    final role = ref.watch(roleProvider).valueOrNull ?? UserRole.employee;
+    final isManager = role.isManager;
+    final userAsync = ref.watch(authNotifierProvider);
+    final currentUserEmail = userAsync.valueOrNull?.email?.toLowerCase() ?? '';
+    final isJyothsna = currentUserEmail.contains('jyothsna');
+
+    final List<SprintApp> availableApps;
+    if (isJyothsna) {
+      availableApps = const [SprintApp.all, SprintApp.desk, SprintApp.pulse];
+    } else if (!isManager) {
+      // In the employee version of the calendar, hide Desk and Pulse
+      availableApps = const [
+        SprintApp.all,
+        SprintApp.fitora,
+        SprintApp.planly,
+        SprintApp.aiPdfMaker,
+        SprintApp.resumeBrain,
+      ];
+    } else {
+      availableApps = SprintApp.values;
+    }
+
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
       child: Row(
-        children: SprintApp.values.map((app) {
+        children: availableApps.map((app) {
           final isSelected = _selectedApp == app;
           final count = app == SprintApp.all
               ? appCounts.values.fold(0, (a, b) => a + b)
               : (appCounts[app] ?? 0);
+          final chipName = (app == SprintApp.all && !isManager) ? 'All Apps' : app.displayName;
 
           return Padding(
             padding: const EdgeInsets.only(right: 8),
@@ -791,7 +815,7 @@ class _SprintCalendarScreenState extends ConsumerState<SprintCalendarScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      '${app.displayName} ($count)',
+                      '$chipName ($count)',
                       style: TextStyle(
                         color: isSelected ? app.color : AppColors.textSecondary,
                         fontSize: 12,

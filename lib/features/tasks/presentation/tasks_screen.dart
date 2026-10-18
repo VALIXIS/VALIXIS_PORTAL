@@ -115,8 +115,8 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text(
+                  children: [
+                    const Text(
                       'Tasks & Operations Board',
                       style: TextStyle(
                         color: AppColors.textPrimary,
@@ -125,10 +125,12 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
                         letterSpacing: -0.5,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'Enterprise & Sprint Operations Board',
-                      style: TextStyle(
+                      isManager
+                          ? 'Enterprise & Sprint Operations Board'
+                          : '2-Week Sprint across Fitora, Planly, AI PDF Maker & Resume Brain',
+                      style: const TextStyle(
                         color: AppColors.textMuted,
                         fontSize: 14,
                       ),
@@ -207,6 +209,7 @@ class _TasksScreenState extends ConsumerState<TasksScreen> {
               selectedDay: _selectedDay,
               showMemberFilter: isManager,
               isJyothsnaView: isJyothsna,
+              isManager: isManager,
               onSearchChanged: (q) => setState(() => _searchQuery = q),
               onSortChanged: (s) => setState(() => _sortOption = s),
               onStatusChanged: (status) => setState(() => _statusFilter = status),

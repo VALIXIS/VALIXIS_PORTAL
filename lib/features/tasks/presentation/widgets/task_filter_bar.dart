@@ -41,6 +41,7 @@ class TaskFilterBar extends StatelessWidget {
     this.onDayChanged,
     this.showMemberFilter = true,
     this.isJyothsnaView = false,
+    this.isManager = false,
   });
 
   final String searchQuery;
@@ -50,6 +51,7 @@ class TaskFilterBar extends StatelessWidget {
   final SprintMember selectedMember;
   final SprintDay selectedDay;
   final bool isJyothsnaView;
+  final bool isManager;
 
   final ValueChanged<String> onSearchChanged;
   final ValueChanged<TaskSortOption> onSortChanged;
@@ -121,9 +123,24 @@ class TaskFilterBar extends StatelessWidget {
   }
 
   Widget _buildAppFilterChips() {
-    final availableApps = (isJyothsnaView || selectedMember == SprintMember.jyothsna)
-        ? [SprintApp.all, SprintApp.desk, SprintApp.pulse]
-        : SprintApp.values;
+    final List<SprintApp> availableApps;
+    if (isJyothsnaView || selectedMember == SprintMember.jyothsna) {
+      availableApps = const [SprintApp.all, SprintApp.desk, SprintApp.pulse];
+    } else if (!isManager || (selectedMember != SprintMember.all && selectedMember != SprintMember.jyothsna)) {
+      // In the employee version of the portal, Desk and Pulse are hidden; only mobile sprint apps are displayed
+      availableApps = const [
+        SprintApp.all,
+        SprintApp.fitora,
+        SprintApp.planly,
+        SprintApp.aiPdfMaker,
+        SprintApp.resumeBrain,
+      ];
+    } else {
+      // Manager viewing All Members
+      availableApps = SprintApp.values;
+    }
+
+    final isEmployeeOnly = !isManager || (selectedMember != SprintMember.all && selectedMember != SprintMember.jyothsna);
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -131,6 +148,8 @@ class TaskFilterBar extends StatelessWidget {
       child: Row(
         children: availableApps.map((app) {
           final isSelected = selectedApp == app;
+          final chipLabel = (app == SprintApp.all && isEmployeeOnly) ? 'All Apps' : app.displayName;
+
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: InkWell(
@@ -168,7 +187,7 @@ class TaskFilterBar extends StatelessWidget {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      app.displayName,
+                      chipLabel,
                       style: TextStyle(
                         color: isSelected ? app.color : AppColors.textSecondary,
                         fontSize: 12,
