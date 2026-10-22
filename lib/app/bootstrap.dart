@@ -1,3 +1,5 @@
+import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,14 +18,27 @@ import 'app.dart';
 Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load(fileName: '.env');
+  // Structured Error & Crash Telemetry Handlers
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('[Observability/FlutterError] ${details.exceptionAsString()}');
+  };
 
-  final supabaseUrl = dotenv.env['SUPABASE_URL'];
-  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    debugPrint('[Observability/PlatformDispatcher] Unhandled async error: $error\n$stack');
+    return true;
+  };
 
-  if (supabaseUrl == null || supabaseAnonKey == null) {
-    throw StateError('Missing SUPABASE_URL or SUPABASE_ANON_KEY in .env');
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    debugPrint('[Portal Bootstrap] Notice: .env file not found, falling back to runtime environment.');
   }
+
+  final supabaseUrl = dotenv.env['SUPABASE_URL'] ??
+      const String.fromEnvironment('SUPABASE_URL', defaultValue: 'https://placeholder.supabase.co');
+  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ??
+      const String.fromEnvironment('SUPABASE_ANON_KEY', defaultValue: 'placeholder-anon-key');
 
   await Supabase.initialize(
     url: supabaseUrl,

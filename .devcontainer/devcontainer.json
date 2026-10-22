@@ -1,0 +1,17 @@
+{
+  "name": "VALIXIS Portal Flutter Dev Environment",
+  "image": "ghcr.io/cirruslabs/flutter:3.24.0",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "Dart-Code.flutter",
+        "Dart-Code.dart-code"
+      ],
+      "settings": {
+        "dart.flutterSdkPath": "/sdks/flutter"
+      }
+    }
+  },
+  "forwardPorts": [8080],
+  "postCreateCommand": "flutter pub get"
+}

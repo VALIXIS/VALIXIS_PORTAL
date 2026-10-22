@@ -159,13 +159,13 @@ class AuthStateNotifier extends ChangeNotifier {
     if (repo is DevAuthRepository) {
       await repo.signIn(
         email: hasOrganization ? 'admin@valixis.io' : 'newuser@valixis.io',
-        password: 'password123',
+        password: const String.fromEnvironment('DEMO_AUTH_PASSWORD', defaultValue: 'dev_mock_secret'),
       );
     } else {
       try {
         await _repository.signIn(
           email: 'admin@valixis.io',
-          password: 'password123',
+          password: const String.fromEnvironment('DEMO_AUTH_PASSWORD', defaultValue: 'dev_mock_secret'),
         );
       } catch (_) {
         _state = Authenticated(

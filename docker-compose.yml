@@ -1,0 +1,12 @@
+services:
+  portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: valixis-portal-web
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_ENV=development
+      - PORT=8080
+    restart: unless-stopped

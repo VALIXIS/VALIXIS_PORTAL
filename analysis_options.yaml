@@ -1,26 +1,32 @@
-# This file configures the analyzer, which statically analyzes Dart code to
-# check for errors, warnings, and lints.
-#
-# The issues identified by the analyzer are surfaced in the UI of Dart-enabled
-# IDEs (https://dart.dev/tools#ides-and-editors). The analyzer can also be
-# invoked from the command line by running `flutter analyze`.
-
-# The following line activates a set of recommended lints for Flutter apps,
-# packages, and plugins designed to encourage good coding practices.
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
   exclude:
     - build/**
     - .dart_tool/**
+    - coverage/**
   errors:
     deprecated_member_use: ignore
     unnecessary_underscores: ignore
 
 linter:
   rules:
-    # avoid_print: false
-    # prefer_single_quotes: true  # Uncomment to enable the `prefer_single_quotes` rule
-
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+    - prefer_const_constructors
+    - prefer_const_declarations
+    - prefer_const_literals_to_create_immutables
+    - avoid_empty_else
+    - avoid_relative_lib_imports
+    - avoid_shadowing_type_parameters
+    - avoid_types_as_parameter_names
+    - cancel_subscriptions
+    - close_sinks
+    - curly_braces_in_flow_control_structures
+    - empty_catches
+    - no_duplicate_case_values
+    - prefer_is_empty
+    - prefer_is_not_empty
+    - prefer_iterable_whereType
+    - slash_for_doc_comments
+    - test_types_in_equals
+    - throw_in_finally
+    - valid_regexps
