@@ -43,18 +43,31 @@ jobs:
           channel: 'stable'
           cache: true
 
-      # Step 4: Install project dependencies
+      # Step 4: Setup Environment File for Build
+      - name: Setup Environment File for Build
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.example .env
+          fi
+          if [ -n "${{ secrets.SUPABASE_URL }}" ]; then
+            echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          fi
+          if [ -n "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+            echo "SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}" >> .env
+          fi
+
+      # Step 5: Install project dependencies
       - name: Install Pub Dependencies
         run: flutter pub get
 
-      # Step 5: Build release web bundle
+      # Step 6: Build release web bundle
       - name: Build Flutter Web Release
         run: flutter build web --release
 
-      # Step 6: Install Vercel CLI
+      # Step 7: Install Vercel CLI
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
-      # Step 7: Deploy Flutter Web to Vercel Production
+      # Step 8: Deploy Flutter Web to Vercel Production
       - name: Deploy to Vercel Production
         run: vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes

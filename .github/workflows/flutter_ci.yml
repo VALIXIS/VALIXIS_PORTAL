@@ -53,6 +53,12 @@ jobs:
           restore-keys: |
             pub-cache-${{ runner.os }}-
 
+      - name: Setup Environment File for Build
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.example .env
+          fi
+
       - name: Install Pub Dependencies
         run: flutter pub get
 
@@ -90,6 +96,12 @@ jobs:
           key: pub-cache-${{ runner.os }}-${{ hashFiles('**/pubspec.lock') }}
           restore-keys: |
             pub-cache-${{ runner.os }}-
+
+      - name: Setup Environment File for Build
+        run: |
+          if [ ! -f .env ]; then
+            cp .env.example .env
+          fi
 
       - name: Install Pub Dependencies
         run: flutter pub get

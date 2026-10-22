@@ -1,5 +1,5 @@
 {
-  "buildCommand": null,
+  "buildCommand": "bash scripts/vercel_build.sh",
   "outputDirectory": "build/web",
   "cleanUrls": true,
   "rewrites": [
