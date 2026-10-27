@@ -184,7 +184,60 @@ class AiGitConfigFields extends StatelessWidget {
             ),
           ],
         ),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: 6,
+          runSpacing: 6,
+          children: [
+            _RepoQuickChip(label: 'ResumeBrain', repo: 'VALIXIS/ResumeBrain', controller: repoController),
+            _RepoQuickChip(label: 'AI_PDF', repo: 'VALIXIS/AI_PDF', controller: repoController),
+            _RepoQuickChip(label: 'Fitora', repo: 'VALIXIS/Fitora', controller: repoController),
+            _RepoQuickChip(label: 'Planly', repo: 'VALIXIS/planly_app', controller: repoController),
+            _RepoQuickChip(label: 'Pulse', repo: 'VALIXIS/Pulse', controller: repoController),
+            _RepoQuickChip(label: 'Desk', repo: 'VALIXIS/Desk', controller: repoController),
+          ],
+        ),
       ],
+    );
+  }
+}
+
+class _RepoQuickChip extends StatelessWidget {
+  const _RepoQuickChip({
+    required this.label,
+    required this.repo,
+    required this.controller,
+  });
+
+  final String label;
+  final String repo;
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final isSelected = controller.text.trim() == repo;
+    return InkWell(
+      onTap: () => controller.text = repo,
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceElevated,
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSelected ? AppColors.brandCyan : AppColors.border,
+            width: 1,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? AppColors.brandCyan : AppColors.textSecondary,
+          ),
+        ),
+      ),
     );
   }
 }

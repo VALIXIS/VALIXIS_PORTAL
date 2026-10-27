@@ -376,7 +376,7 @@ abstract final class ManagerTaskDialogs {
                                     controller: repoController,
                                     style: const TextStyle(color: AppColors.textPrimary, fontSize: 13),
                                     decoration: InputDecoration(
-                                      hintText: 'VALIXIS_PORTAL',
+                                      hintText: 'e.g. VALIXIS/ResumeBrain',
                                       filled: true,
                                       fillColor: AppColors.surfaceCard,
                                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: const BorderSide(color: AppColors.glassBorder)),

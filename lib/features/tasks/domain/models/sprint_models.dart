@@ -20,29 +20,192 @@ enum SprintApp {
 
   String get displayName => label;
 
-  /// Resolves the app/project from task repository, branch, title, or prompt content.
+  /// Resolves the app/project using a deterministic 5-tier precedence engine:
+  /// 1. GitHub Repository (Ground Truth Authority)
+  /// 2. Git Branch Name (Explicit Developer Scope)
+  /// 3. Task Title Codes & Prefixes (e.g. RSM-, FIT-, PLN-, PDF-, DSK-, PLS-)
+  /// 4. Disambiguated Context (Resume/ATS > PDF Export, strict keyword matching)
+  /// 5. Fallback: SprintApp.all
   static SprintApp fromTask(Task task) {
-    final search = '${task.githubRepo ?? ''} ${task.title} ${task.description ?? ''} ${task.branchName ?? ''} ${task.objective ?? ''}'
-        .toLowerCase();
+    // ── Tier 1: GitHub Repository (Absolute Ground Truth) ──
+    final repo = (task.githubRepo ?? '').toLowerCase().trim();
+    if (repo.isNotEmpty) {
+      if (repo.contains('resumebrain') ||
+          repo.contains('resume_brain') ||
+          repo.contains('resume-brain') ||
+          repo.contains('resume')) {
+        return SprintApp.resumeBrain;
+      }
+      if (repo.contains('ai_pdf') ||
+          repo.contains('ai-pdf') ||
+          repo.contains('aipdf') ||
+          repo.contains('pdf')) {
+        return SprintApp.aiPdfMaker;
+      }
+      if (repo.contains('fitora')) {
+        return SprintApp.fitora;
+      }
+      if (repo.contains('planly') || repo.contains('planly_app')) {
+        return SprintApp.planly;
+      }
+      if (repo.contains('pulse')) {
+        return SprintApp.pulse;
+      }
+      if (repo.contains('desk') || repo.contains('helpdesk')) {
+        return SprintApp.desk;
+      }
+    }
 
-    if (search.contains('desk') || search.contains('helpdesk') || search.contains('support')) {
-      return SprintApp.desk;
+    // ── Tier 2: Git Branch Name ──
+    final branch = (task.branchName ?? '').toLowerCase().trim();
+    if (branch.isNotEmpty) {
+      if (branch.contains('resume') ||
+          branch.contains('rsm-') ||
+          branch.contains('rsm_') ||
+          branch.contains('/rsm')) {
+        return SprintApp.resumeBrain;
+      }
+      if (branch.contains('ai_pdf') ||
+          branch.contains('ai-pdf') ||
+          branch.contains('aipdf') ||
+          branch.contains('-pdf-') ||
+          branch.contains('/pdf-') ||
+          branch.endsWith('-pdf') ||
+          branch.contains('pdf_')) {
+        return SprintApp.aiPdfMaker;
+      }
+      if (branch.contains('fitora') ||
+          branch.contains('fit-') ||
+          branch.contains('fit_') ||
+          branch.contains('/fit')) {
+        return SprintApp.fitora;
+      }
+      if (branch.contains('planly') ||
+          branch.contains('pln-') ||
+          branch.contains('pln_') ||
+          branch.contains('/pln')) {
+        return SprintApp.planly;
+      }
+      if (branch.contains('pulse') ||
+          branch.contains('pls-') ||
+          branch.contains('pls_') ||
+          branch.contains('/pls')) {
+        return SprintApp.pulse;
+      }
+      if (branch.contains('desk') ||
+          branch.contains('dsk-') ||
+          branch.contains('dsk_') ||
+          branch.contains('/dsk') ||
+          branch.contains('helpdesk')) {
+        return SprintApp.desk;
+      }
     }
-    if (search.contains('pulse') || search.contains('telemetry') || search.contains('forensic')) {
-      return SprintApp.pulse;
-    }
-    if (search.contains('fitora') || search.contains('fitness') || search.contains('workout') || search.contains('diet')) {
-      return SprintApp.fitora;
-    }
-    if (search.contains('planly') || search.contains('planner') || search.contains('routine') || search.contains('habit')) {
-      return SprintApp.planly;
-    }
-    if (search.contains('pdf') || search.contains('ai_pdf') || search.contains('document') || search.contains('scan')) {
-      return SprintApp.aiPdfMaker;
-    }
-    if (search.contains('resume') || search.contains('cv') || search.contains('career') || search.contains('interview')) {
+
+    // ── Tier 3: Task Code & Title Prefixes ──
+    final title = task.title.toLowerCase().trim();
+    if (title.contains('rsm-') ||
+        title.contains('rsm_') ||
+        title.contains('rsm ') ||
+        title.contains('resume brain') ||
+        title.contains('resumebrain') ||
+        title.startsWith('resume')) {
       return SprintApp.resumeBrain;
     }
+    if (title.contains('fit-') ||
+        title.contains('fit_') ||
+        title.contains('fit ') ||
+        title.contains('fitora')) {
+      return SprintApp.fitora;
+    }
+    if (title.contains('pln-') ||
+        title.contains('pln_') ||
+        title.contains('pln ') ||
+        title.contains('planly')) {
+      return SprintApp.planly;
+    }
+    if (title.contains('pls-') ||
+        title.contains('pls_') ||
+        title.contains('pulse')) {
+      return SprintApp.pulse;
+    }
+    if (title.contains('dsk-') ||
+        title.contains('dsk_') ||
+        title.contains('helpdesk') ||
+        title.contains('valixis desk')) {
+      return SprintApp.desk;
+    }
+    if (title.contains('pdf-') ||
+        title.contains('pdf_') ||
+        title.contains('ai pdf') ||
+        title.contains('aipdf') ||
+        title.contains('ai_pdf') ||
+        title.contains('pdf maker')) {
+      return SprintApp.aiPdfMaker;
+    }
+
+    // ── Tier 4: Disambiguated Context (Description, Objective, AI Prompt) ──
+    final body = '${task.title} ${task.description ?? ''} ${task.objective ?? ''} ${task.aiPrompt ?? ''}'
+        .toLowerCase();
+
+    // Check Resume terms first because resumes export to PDF and use ATS scoring
+    if (body.contains('resume') ||
+        body.contains('curriculum vitae') ||
+        body.contains('resumebrain') ||
+        body.contains('ats readability') ||
+        body.contains('ats score') ||
+        body.contains('ats format')) {
+      return SprintApp.resumeBrain;
+    }
+
+    // Check AI PDF Maker specific terms
+    if (body.contains('ai pdf') ||
+        body.contains('ai_pdf') ||
+        body.contains('pdf maker') ||
+        body.contains('pdf scanner') ||
+        body.contains('pdf editor') ||
+        body.contains('ocr scanner') ||
+        body.contains('pdf merge') ||
+        body.contains('pdf convert') ||
+        (body.contains('pdf') &&
+            !body.contains('resume') &&
+            !body.contains('fitora') &&
+            !body.contains('planly'))) {
+      return SprintApp.aiPdfMaker;
+    }
+
+    // Fitora fitness domain
+    if (body.contains('fitora') ||
+        body.contains('workout') ||
+        body.contains('calorie') ||
+        body.contains('fitness') ||
+        body.contains('exercise')) {
+      return SprintApp.fitora;
+    }
+
+    // Planly routine & habits
+    if (body.contains('planly') ||
+        body.contains('habit tracker') ||
+        body.contains('daily planner') ||
+        body.contains('routine planner')) {
+      return SprintApp.planly;
+    }
+
+    // Pulse telemetry
+    if (body.contains('pulse') ||
+        body.contains('telemetry') ||
+        body.contains('forensic pivot') ||
+        body.contains('anomaly detection')) {
+      return SprintApp.pulse;
+    }
+
+    // Desk helpdesk / support (prevent matching generic "support" verb)
+    if (body.contains('valixis desk') ||
+        body.contains('helpdesk') ||
+        body.contains('support ticket') ||
+        body.contains('customer support')) {
+      return SprintApp.desk;
+    }
+
     return SprintApp.all;
   }
 }
