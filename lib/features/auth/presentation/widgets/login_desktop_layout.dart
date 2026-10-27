@@ -15,6 +15,10 @@ class LoginDesktopLayout extends StatelessWidget {
     required this.isLoading,
     required this.onTogglePassword,
     required this.onSignIn,
+    this.passwordFocusNode,
+    this.rememberEmail = true,
+    this.onToggleRememberEmail,
+    this.onSelectEmployee,
   });
 
   final GlobalKey<FormState> formKey;
@@ -24,6 +28,10 @@ class LoginDesktopLayout extends StatelessWidget {
   final bool isLoading;
   final VoidCallback onTogglePassword;
   final VoidCallback onSignIn;
+  final FocusNode? passwordFocusNode;
+  final bool rememberEmail;
+  final ValueChanged<bool>? onToggleRememberEmail;
+  final ValueChanged<String>? onSelectEmployee;
 
   @override
   Widget build(BuildContext context) {
@@ -90,8 +98,12 @@ class LoginDesktopLayout extends StatelessWidget {
                   formKey: formKey,
                   emailController: emailController,
                   passwordController: passwordController,
+                  passwordFocusNode: passwordFocusNode,
                   obscurePassword: obscurePassword,
                   isLoading: isLoading,
+                  rememberEmail: rememberEmail,
+                  onToggleRememberEmail: onToggleRememberEmail,
+                  onSelectEmployee: onSelectEmployee,
                   onTogglePassword: onTogglePassword,
                   onSignIn: onSignIn,
                 ),
@@ -109,9 +121,9 @@ class _BrandTagline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return const Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: const [
+      children: [
         _FeaturePill(
           icon: Icons.bolt_rounded,
           title: 'Unified Operations Workspace',

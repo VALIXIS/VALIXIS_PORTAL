@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/constants/app_border_radius.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_spacing.dart';
+import '../../../core/storage/auth_storage.dart';
 import '../../../shared/layout/responsive_layout.dart';
 import 'providers/auth_provider.dart';
 import 'widgets/login_background_orbs.dart';
 import 'widgets/login_card.dart';
 import 'widgets/login_desktop_layout.dart';
 
-/// Login Screen wired to Supabase Auth via Riverpod.
+/// Login Screen wired to Supabase Auth via Riverpod with native browser autofill
+/// and persistent remembered employee credentials.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -22,20 +25,66 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
   bool _obscurePassword = true;
+  bool _rememberEmail = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _rememberEmail = AuthStorageService.getRememberMe();
+    final savedEmail = AuthStorageService.getRememberedEmail();
+    if (savedEmail != null && savedEmail.isNotEmpty) {
+      _emailController.text = savedEmail;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _passwordFocusNode.canRequestFocus) {
+          _passwordFocusNode.requestFocus();
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
+  }
+
+  void _onSelectEmployee(String email) {
+    setState(() {
+      _emailController.text = email;
+    });
+    if (email.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _passwordFocusNode.canRequestFocus) {
+          _passwordFocusNode.requestFocus();
+        }
+      });
+    }
   }
 
   Future<void> _onSignIn() async {
     if (_formKey.currentState?.validate() ?? false) {
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+
+      // Signal browser credential manager to capture credentials for 1-click Google autofill
+      TextInput.finishAutofillContext(shouldSave: true);
+
+      // Persist or clear remembered email based on user selection
+      if (_rememberEmail && email.isNotEmpty) {
+        AuthStorageService.setRememberedEmail(email);
+        AuthStorageService.setRememberMe(true);
+      } else {
+        AuthStorageService.clearRememberedEmail();
+        AuthStorageService.setRememberMe(false);
+      }
+
       await ref.read(authNotifierProvider.notifier).signIn(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
+            email: email,
+            password: password,
           );
     }
   }
@@ -104,8 +153,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         formKey: _formKey,
                         emailController: _emailController,
                         passwordController: _passwordController,
+                        passwordFocusNode: _passwordFocusNode,
                         obscurePassword: _obscurePassword,
                         isLoading: isLoading,
+                        rememberEmail: _rememberEmail,
+                        onToggleRememberEmail: (v) =>
+                            setState(() => _rememberEmail = v),
+                        onSelectEmployee: _onSelectEmployee,
                         onTogglePassword: () => setState(
                           () => _obscurePassword = !_obscurePassword,
                         ),
@@ -118,8 +172,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   formKey: _formKey,
                   emailController: _emailController,
                   passwordController: _passwordController,
+                  passwordFocusNode: _passwordFocusNode,
                   obscurePassword: _obscurePassword,
                   isLoading: isLoading,
+                  rememberEmail: _rememberEmail,
+                  onToggleRememberEmail: (v) =>
+                      setState(() => _rememberEmail = v),
+                  onSelectEmployee: _onSelectEmployee,
                   onTogglePassword: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
                   onSignIn: _onSignIn,
