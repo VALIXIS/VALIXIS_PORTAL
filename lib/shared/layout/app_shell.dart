@@ -55,10 +55,14 @@ class AppShell extends ConsumerWidget {
     final myTasksAsync = ref.watch(tasksProvider);
 
     if (roleAsync.isLoading) {
-      return const Scaffold(
-        backgroundColor: AppColors.surfaceBase,
-        body: Center(
-          child: CircularProgressIndicator(color: AppColors.brandCyan),
+      return Title(
+        title: 'VALIXIS Portal',
+        color: AppColors.brandCyan,
+        child: const Scaffold(
+          backgroundColor: AppColors.surfaceBase,
+          body: Center(
+            child: CircularProgressIndicator(color: AppColors.brandCyan),
+          ),
         ),
       );
     }
@@ -298,6 +302,8 @@ class AppShell extends ConsumerWidget {
     final isOffline = syncState.status == SyncConnectionState.disconnected ||
         syncState.status == SyncConnectionState.error;
 
+    final pageTitle = isManager ? 'VALIXIS Manager' : 'VALIXIS Portal';
+
     final isDesktop = MediaQuery.of(context).size.width >= 800;
 
     if (isDesktop) {
@@ -516,8 +522,11 @@ class AppShell extends ConsumerWidget {
                   ? 'VALIXIS BUSINESS OS • EXECUTIVE'
                   : (isManager ? 'VALIXIS PORTAL • MANAGER' : 'VALIXIS PORTAL • EMPLOYEE');
 
-      return Scaffold(
-        backgroundColor: AppColors.surfaceBase,
+      return Title(
+        title: pageTitle,
+        color: AppColors.brandCyan,
+        child: Scaffold(
+          backgroundColor: AppColors.surfaceBase,
         body: Row(
           children: [
             ValixisRail(
@@ -917,12 +926,16 @@ class AppShell extends ConsumerWidget {
             ),
           ],
         ),
+      ),
       );
     }
 
     // ── Mobile / Small Tablet View ─────────────────────────────────────────
-    return Scaffold(
-      backgroundColor: AppColors.surfaceBase,
+    return Title(
+      title: pageTitle,
+      color: AppColors.brandCyan,
+      child: Scaffold(
+        backgroundColor: AppColors.surfaceBase,
       appBar: AppBar(
         backgroundColor: AppColors.surfaceCard,
         elevation: 0,
@@ -1188,6 +1201,7 @@ class AppShell extends ConsumerWidget {
           }).toList(),
         ),
       ),
+    ),
     );
   }
 }

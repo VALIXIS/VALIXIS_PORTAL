@@ -116,9 +116,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       }
     });
 
-    return Scaffold(
-      backgroundColor: AppColors.surfaceBase,
-      body: DecoratedBox(
+    return Title(
+      title: 'VALIXIS Portal',
+      color: AppColors.brandCyan,
+      child: Scaffold(
+        backgroundColor: AppColors.surfaceBase,
+        body: DecoratedBox(
         decoration: const BoxDecoration(
           gradient: AppColors.backgroundGradient,
         ),
@@ -173,6 +176,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 }
