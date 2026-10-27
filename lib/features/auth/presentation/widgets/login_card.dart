@@ -6,57 +6,9 @@ import '../../../../shared/components/app_button.dart';
 import '../../../../shared/components/app_text_field.dart';
 import '../../../../shared/components/glass_card.dart';
 
-/// Team members available for 1-click email pre-fill.
-class _QuickEmployee {
-  const _QuickEmployee({
-    required this.name,
-    required this.email,
-    required this.initial,
-    required this.color,
-  });
-
-  final String name;
-  final String email;
-  final String initial;
-  final Color color;
-}
-
-const List<_QuickEmployee> _kQuickEmployees = [
-  _QuickEmployee(
-    name: 'Hasitha',
-    email: 'hasitha@valixis.com',
-    initial: 'H',
-    color: Color(0xFFEC4899),
-  ),
-  _QuickEmployee(
-    name: 'Krishna',
-    email: 'krishna@valixis.com',
-    initial: 'K',
-    color: Color(0xFF10B981),
-  ),
-  _QuickEmployee(
-    name: 'Vignesh',
-    email: 'vignesh@valixis.com',
-    initial: 'V',
-    color: Color(0xFF3B82F6),
-  ),
-  _QuickEmployee(
-    name: 'Adithya',
-    email: 'adithya@valixis.com',
-    initial: 'A',
-    color: Color(0xFF8B5CF6),
-  ),
-  _QuickEmployee(
-    name: 'Vaseem',
-    email: 'vaseem@valixis.com',
-    initial: 'V',
-    color: Color(0xFFF59E0B),
-  ),
-];
-
 /// Premium Glassmorphism Login Card containing form inputs and submit button.
-/// Includes native browser AutofillGroup, Google Password Manager context,
-/// and 1-click Quick Employee selectors.
+/// Includes native browser AutofillGroup, Google Password Manager integration,
+/// and persistent Remember Email functionality.
 class LoginCard extends StatelessWidget {
   const LoginCard({
     super.key,
@@ -70,7 +22,6 @@ class LoginCard extends StatelessWidget {
     this.passwordFocusNode,
     this.rememberEmail = true,
     this.onToggleRememberEmail,
-    this.onSelectEmployee,
   });
 
   final GlobalKey<FormState> formKey;
@@ -83,7 +34,6 @@ class LoginCard extends StatelessWidget {
   final FocusNode? passwordFocusNode;
   final bool rememberEmail;
   final ValueChanged<bool>? onToggleRememberEmail;
-  final ValueChanged<String>? onSelectEmployee;
 
   @override
   Widget build(BuildContext context) {
@@ -144,11 +94,7 @@ class LoginCard extends StatelessWidget {
                     height: 1.4,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // ── Quick Employee Sign-In Selector ──────────────────────
-                _buildQuickSelectSection(),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.xl2),
 
                 AppTextField(
                   controller: emailController,
@@ -272,103 +218,6 @@ class LoginCard extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildQuickSelectSection() {
-    final currentEmail = emailController.text.trim().toLowerCase();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'QUICK TEAM SIGN-IN',
-              style: TextStyle(
-                color: AppColors.textMuted,
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.8,
-              ),
-            ),
-            if (currentEmail.isNotEmpty && onSelectEmployee != null)
-              InkWell(
-                onTap: () => onSelectEmployee!(''),
-                child: const Text(
-                  'Clear',
-                  style: TextStyle(
-                    color: AppColors.brandCyan,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          child: Row(
-            children: _kQuickEmployees.map((emp) {
-              final isSelected = currentEmail == emp.email.toLowerCase();
-              return Padding(
-                padding: const EdgeInsets.only(right: 8),
-                child: InkWell(
-                  onTap: isLoading || onSelectEmployee == null
-                      ? null
-                      : () => onSelectEmployee!(emp.email),
-                  borderRadius: BorderRadius.circular(20),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? emp.color.withValues(alpha: 0.2)
-                          : AppColors.surfaceElevated,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isSelected
-                            ? emp.color
-                            : AppColors.border,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CircleAvatar(
-                          radius: 9,
-                          backgroundColor: emp.color,
-                          child: Text(
-                            emp.initial,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          emp.name,
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : AppColors.textSecondary,
-                            fontSize: 12,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ),
-      ],
     );
   }
 }

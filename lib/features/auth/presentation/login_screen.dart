@@ -52,19 +52,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
-  void _onSelectEmployee(String email) {
-    setState(() {
-      _emailController.text = email;
-    });
-    if (email.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _passwordFocusNode.canRequestFocus) {
-          _passwordFocusNode.requestFocus();
-        }
-      });
-    }
-  }
-
   Future<void> _onSignIn() async {
     if (_formKey.currentState?.validate() ?? false) {
       final email = _emailController.text.trim();
@@ -159,7 +146,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         rememberEmail: _rememberEmail,
                         onToggleRememberEmail: (v) =>
                             setState(() => _rememberEmail = v),
-                        onSelectEmployee: _onSelectEmployee,
                         onTogglePassword: () => setState(
                           () => _obscurePassword = !_obscurePassword,
                         ),
@@ -178,7 +164,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   rememberEmail: _rememberEmail,
                   onToggleRememberEmail: (v) =>
                       setState(() => _rememberEmail = v),
-                  onSelectEmployee: _onSelectEmployee,
                   onTogglePassword: () =>
                       setState(() => _obscurePassword = !_obscurePassword),
                   onSignIn: _onSignIn,

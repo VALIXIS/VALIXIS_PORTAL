@@ -18,7 +18,6 @@ class LoginDesktopLayout extends StatelessWidget {
     this.passwordFocusNode,
     this.rememberEmail = true,
     this.onToggleRememberEmail,
-    this.onSelectEmployee,
   });
 
   final GlobalKey<FormState> formKey;
@@ -31,7 +30,6 @@ class LoginDesktopLayout extends StatelessWidget {
   final FocusNode? passwordFocusNode;
   final bool rememberEmail;
   final ValueChanged<bool>? onToggleRememberEmail;
-  final ValueChanged<String>? onSelectEmployee;
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +101,6 @@ class LoginDesktopLayout extends StatelessWidget {
                   isLoading: isLoading,
                   rememberEmail: rememberEmail,
                   onToggleRememberEmail: onToggleRememberEmail,
-                  onSelectEmployee: onSelectEmployee,
                   onTogglePassword: onTogglePassword,
                   onSignIn: onSignIn,
                 ),
